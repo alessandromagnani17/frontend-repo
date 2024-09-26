@@ -43,60 +43,63 @@
 </template>
 
 <script>
-import { ref } from 'vue' // Importa il composable ref da Vue 3
-import { useRouter } from 'vue-router' // Importa il router per la navigazione
-import { Auth } from '@aws-amplify/auth'
+import { ref } from "vue"; // Importa il composable ref da Vue 3
+import { useRouter } from "vue-router"; // Importa il router per la navigazione
+import { Auth } from "@aws-amplify/auth";
 
 export default {
-  name: 'UserLogin',
+  name: "UserLogin",
   setup() {
     // Stato del form
     const form = ref({
-      username: '',
-      password: '',
+      username: "",
+      password: "",
       rememberMe: false,
-    })
+    });
 
     // Stato degli errori
     const errors = ref({
-      username: '',
-      password: '',
-    })
+      username: "",
+      password: "",
+    });
 
-    const router = useRouter() // Inizializza il router
+    const router = useRouter(); // Inizializza il router
 
     // Funzione per validare il form
     const validateForm = () => {
       errors.value = {
-        username: form.value.username ? '' : 'Username is required',
-        password: form.value.password ? '' : 'Password is required',
-      }
-      return Object.values(errors.value).every((error) => !error)
-    }
+        username: form.value.username ? "" : "Username is required",
+        password: form.value.password ? "" : "Password is required",
+      };
+      return Object.values(errors.value).every((error) => !error);
+    };
 
     // Funzione per gestire il submit del form
     const onSubmit = async () => {
-      if (!validateForm()) return
+      if (!validateForm()) return;
 
       try {
         // Effettua il login con AWS Cognito usando Auth.signIn
-        const user = await Auth.signIn(form.value.username, form.value.password)
-        alert('Login successful! Welcome ' + user.username)
+        const user = await Auth.signIn(
+          form.value.username,
+          form.value.password,
+        );
+        alert("Login successful! Welcome " + user.username);
 
         // Naviga alla pagina di benvenuto
         router.push({
-          name: 'Welcome',
+          name: "Welcome",
           query: { username: form.value.username },
-        })
+        });
       } catch (error) {
-        console.error('Login error:', error)
-        alert(`Login error: ${error.message || error}`)
+        console.error("Login error:", error);
+        alert(`Login error: ${error.message || error}`);
       }
-    }
+    };
 
-    return { form, onSubmit, errors }
+    return { form, onSubmit, errors };
   },
-}
+};
 </script>
 
 <style scoped>
@@ -145,7 +148,9 @@ h2 {
   margin-top: 20px;
   background-color: #007bff;
   border: none;
-  transition: background-color 0.3s, transform 0.3s;
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
 }
 
 .btn:hover {

@@ -16,18 +16,18 @@
 </template>
 
 <script>
-import { ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref } from "vue";
+import { useRoute } from "vue-router";
 
 export default {
-  name: 'WelcomePage',
+  name: "WelcomePage",
   setup() {
-    const route = useRoute()
-    const username = ref(route.query.username)
+    const route = useRoute();
+    const username = ref(route.query.username);
 
-    return { username }
+    return { username };
   },
-}
+};
 </script>
 
 <style scoped>
@@ -71,7 +71,9 @@ p {
 
 .btn-group .btn {
   margin: 10px;
-  transition: background-color 0.3s, transform 0.3s;
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
 }
 
 .btn-primary {

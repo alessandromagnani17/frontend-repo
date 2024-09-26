@@ -97,31 +97,31 @@
 
 <script>
 export default {
-  name: 'App',
+  name: "App",
   data() {
     return {
       dropdownOpen: false, // Stato per il menu a tendina
       navbarOpen: false, // Stato per la navbar
-    }
+    };
   },
   methods: {
     toggleNavbar() {
-      this.navbarOpen = !this.navbarOpen // Cambia lo stato della navbar
+      this.navbarOpen = !this.navbarOpen; // Cambia lo stato della navbar
     },
     toggleDropdown() {
-      this.dropdownOpen = !this.dropdownOpen // Cambia lo stato del menu a tendina
+      this.dropdownOpen = !this.dropdownOpen; // Cambia lo stato del menu a tendina
     },
     logout() {
-      alert('Logged out!')
+      alert("Logged out!");
       // Implementa qui la logica di logout
     },
   },
-}
+};
 </script>
 
 <style>
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f0f2f5;
   margin: 0;
   padding: 0;

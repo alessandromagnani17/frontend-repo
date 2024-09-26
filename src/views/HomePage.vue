@@ -25,11 +25,11 @@
 
 <script>
 export default {
-  name: 'HomePage',
+  name: "HomePage",
   mounted() {
-    console.log('AWS Amplify Cognito is configured. No API calls are made.')
+    console.log("AWS Amplify Cognito is configured. No API calls are made.");
   },
-}
+};
 </script>
 
 <style scoped>
@@ -65,7 +65,9 @@ p {
 
 .btn-group .btn {
   margin: 10px;
-  transition: background-color 0.3s, transform 0.3s;
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
 }
 
 .btn-primary {
