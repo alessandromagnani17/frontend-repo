@@ -65,9 +65,7 @@ p {
 
 .btn-group .btn {
   margin: 10px;
-  transition:
-    background-color 0.3s,
-    transform 0.3s;
+  transition: background-color 0.3s, transform 0.3s;
 }
 
 .btn-primary {

@@ -84,7 +84,7 @@ export default {
 
         console.log("Sign up response:", signUpResponse); // Visualizza la risposta della registrazione
         alert(
-          "Registration successful! Please check your email for verification.",
+          "Registration successful! Please check your email for verification."
         );
         this.errors = {}; // Resetta gli errori dopo il successo
       } catch (error) {
@@ -159,9 +159,7 @@ h2 {
   margin-top: 20px;
   background-color: #007bff;
   border: none;
-  transition:
-    background-color 0.3s,
-    transform 0.3s;
+  transition: background-color 0.3s, transform 0.3s;
 }
 
 .btn:hover {

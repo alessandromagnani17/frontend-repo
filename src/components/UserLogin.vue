@@ -82,7 +82,7 @@ export default {
         // Effettua il login con AWS Cognito usando Auth.signIn
         const user = await Auth.signIn(
           form.value.username,
-          form.value.password,
+          form.value.password
         );
         alert("Login successful! Welcome " + user.username);
 
@@ -148,9 +148,7 @@ h2 {
   margin-top: 20px;
   background-color: #007bff;
   border: none;
-  transition:
-    background-color 0.3s,
-    transform 0.3s;
+  transition: background-color 0.3s, transform 0.3s;
 }
 
 .btn:hover {
