@@ -30,18 +30,75 @@
         <!-- Password -->
         <div class="mb-3">
           <label for="password" class="form-label">Password</label>
-          <input
-            id="password"
-            v-model="form.password"
-            type="password"
-            class="form-control"
-            required
-          />
+          <div class="input-group">
+            <input
+              id="password"
+              v-model="form.password"
+              :type="showPassword ? 'text' : 'password'"
+              class="form-control password-input"
+              required
+              @paste.prevent
+            />
+            <button
+              type="button"
+              class="btn eye-button"
+              @click="toggleShowPassword"
+            >
+              <img
+                :src="
+                  showPassword
+                    ? require('@/assets/eye-off.svg')
+                    : require('@/assets/eye-on.svg')
+                "
+                alt="Toggle Password Visibility"
+                class="eye-icon"
+              />
+            </button>
+          </div>
+          <div v-if="passwordError" class="invalid-feedback d-block">
+            {{ passwordError }}
+          </div>
         </div>
 
-        <!-- Nome -->
+        <!-- Confirm Password -->
         <div class="mb-3">
-          <label for="nome" class="form-label">Nome</label>
+          <label for="confirmPassword" class="form-label"
+            >Confirm Password</label
+          >
+          <div class="input-group">
+            <input
+              id="confirmPassword"
+              v-model="form.confirmPassword"
+              :type="showConfirmPassword ? 'text' : 'password'"
+              class="form-control password-input"
+              :class="{ 'is-invalid': showPasswordError }"
+              required
+              @paste.prevent
+            />
+            <button
+              type="button"
+              class="btn eye-button"
+              @click="toggleShowConfirmPassword"
+            >
+              <img
+                :src="
+                  showConfirmPassword
+                    ? require('@/assets/eye-off.svg')
+                    : require('@/assets/eye-on.svg')
+                "
+                alt="Toggle Password Visibility"
+                class="eye-icon"
+              />
+            </button>
+          </div>
+          <div v-if="showPasswordError" class="text-danger mt-1">
+            Passwords do not match.
+          </div>
+        </div>
+
+        <!-- First Name -->
+        <div class="mb-3">
+          <label for="nome" class="form-label">First Name</label>
           <input
             id="nome"
             v-model="form.nome"
@@ -51,9 +108,9 @@
           />
         </div>
 
-        <!-- Cognome -->
+        <!-- Last Name -->
         <div class="mb-3">
-          <label for="cognome" class="form-label">Cognome</label>
+          <label for="cognome" class="form-label">Last Name</label>
           <input
             id="cognome"
             v-model="form.cognome"
@@ -63,9 +120,9 @@
           />
         </div>
 
-        <!-- Data di nascita -->
+        <!-- Birth Date -->
         <div class="mb-3">
-          <label for="data" class="form-label">Data di nascita</label>
+          <label for="data" class="form-label">Birth Date</label>
           <input
             id="data"
             v-model="form.data"
@@ -75,9 +132,9 @@
           />
         </div>
 
-        <!-- Numero di telefono -->
+        <!-- Phone Number -->
         <div class="mb-3">
-          <label for="telefono" class="form-label">Numero di telefono</label>
+          <label for="telefono" class="form-label">Phone Number</label>
           <input
             id="telefono"
             v-model="form.telefono"
@@ -163,23 +220,49 @@ export default {
         username: "",
         email: "",
         password: "",
+        confirmPassword: "",
         nome: "",
         cognome: "",
         data: "",
         telefono: "",
-        gender: "", // Aggiungi il campo gender
-        address: "", // Aggiungi il campo address
-        cap_code: "", // Aggiungi il campo CAP code
-        tax_code: "", // Aggiungi il campo Tax code
+        gender: "",
+        address: "",
+        cap_code: "", // Campo aggiunto per il CAP
+        tax_code: "", // Campo aggiunto per il Tax Code
       },
       errors: {},
       loading: false,
+      showPassword: false,
+      showConfirmPassword: false,
+      passwordError: "",
+      showPasswordError: false, // Aggiunta della variabile per mostrare errore di conferma
     };
   },
   methods: {
+    toggleShowPassword() {
+      this.showPassword = !this.showPassword;
+    },
+    toggleShowConfirmPassword() {
+      this.showConfirmPassword = !this.showConfirmPassword;
+    },
     async onSubmit() {
       this.loading = true;
       this.errors = {};
+      this.passwordError = "";
+      this.showPasswordError = false; // Resetta l'errore
+
+      // Controllo delle password
+      if (this.form.password !== this.form.confirmPassword) {
+        this.showPasswordError = true; // Mostra errore
+      } else {
+        this.showPasswordError = false; // Nascondi errore
+      }
+
+      // Se le password non corrispondono, interrompi l'invio
+      if (this.showPasswordError) {
+        this.loading = false;
+        return;
+      }
 
       try {
         const {
@@ -192,11 +275,10 @@ export default {
           telefono,
           gender,
           address,
-          cap_code,
-          tax_code,
+          cap_code, // Aggiunto cap_code
+          tax_code, // Aggiunto tax_code
         } = this.form;
 
-        // Logga i dati inviati per la registrazione
         console.log("Dati registrazione:", {
           username,
           email,
@@ -207,8 +289,8 @@ export default {
           telefono,
           gender,
           address,
-          cap_code,
-          tax_code,
+          cap_code, // Aggiunto cap_code
+          tax_code, // Aggiunto tax_code
         });
 
         const response = await axios.post("http://127.0.0.1:5000/register", {
@@ -219,10 +301,10 @@ export default {
           cognome,
           data,
           telefono,
-          gender, // Passa il gender
-          address, // Passa l'address
-          cap_code, // Passa il CAP code
-          tax_code, // Passa il Tax code
+          gender,
+          address,
+          cap_code, // Includere cap_code nella richiesta
+          tax_code, // Includere tax_code nella richiesta
         });
 
         alert(
@@ -231,7 +313,6 @@ export default {
         console.log(response.data);
       } catch (error) {
         console.error("Error signing up:", error);
-
         if (error.response) {
           console.error("Response data:", error.response.data);
           this.errors.general =
@@ -239,7 +320,6 @@ export default {
         } else {
           this.errors.general = error.message;
         }
-
         alert("Error signing up: " + this.errors.general);
       } finally {
         this.loading = false;
@@ -281,13 +361,60 @@ h2 {
 
 .btn {
   margin-top: 20px;
-  background-color: #007bff;
-  border: none;
+  background-color: transparent; /* Imposta lo sfondo del pulsante come trasparente */
+  border: none; /* Rimuovi il bordo del pulsante */
   transition: background-color 0.3s, transform 0.3s;
 }
 
-.btn:hover {
-  background-color: #0056b3;
-  transform: scale(1.05);
+/* Eye icon styling */
+.input-group {
+  display: flex; /* Rendi il gruppo di input un contenitore flessibile */
+  align-items: center; /* Allinea gli elementi verticalmente */
+}
+
+.eye-icon {
+  width: 24px; /* Regola la dimensione come necessario */
+  height: 24px; /* Regola la dimensione come necessario */
+}
+
+.password-input {
+  height: calc(2.25rem + 2px); /* Mantieni l'altezza con altri campi di input */
+  border-top-right-radius: 0; /* Rimuovi il bordo arrotondato a destra per connettere con il pulsante */
+  border-bottom-right-radius: 0; /* Rimuovi il bordo arrotondato a destra per connettere con il pulsante */
+}
+
+.eye-button {
+  height: calc(
+    2.25rem + 2px
+  ); /* Allinea l'altezza del pulsante con il campo di input */
+  width: 40px; /* Regola la larghezza del pulsante */
+  border-top-left-radius: 0; /* Rimuovi il bordo arrotondato a sinistra per connettere con l'input */
+  border-bottom-left-radius: 0; /* Rimuovi il bordo arrotondato a sinistra per connettere con l'input */
+  display: flex; /* Rendi il pulsante un contenitore flessibile */
+  align-items: center; /* Allinea l'icona verticalmente al centro */
+  justify-content: center; /* Centra l'icona orizzontalmente */
+  padding: 0; /* Rimuovi il padding predefinito */
+  margin-top: 0px; /* Sposta il pulsante verso l'alto */
+}
+
+.eye-button:hover {
+  background-color: rgba(
+    211,
+    211,
+    211,
+    0.5
+  ); /* Colore grigio al passaggio del mouse */
+  transform: scale(
+    1.05
+  ); /* Aggiungi un effetto di ingrandimento se desiderato */
+}
+
+.btn-primary {
+  background-color: #007bff; /* Colore del pulsante principale */
+  color: white; /* Colore del testo del pulsante */
+}
+
+.btn-primary:hover {
+  background-color: #0056b3; /* Colore al passaggio del mouse per il pulsante principale */
 }
 </style>
