@@ -3,19 +3,31 @@
     <div class="container mt-5">
       <h2 class="mb-4">Create Your Account</h2>
       <form @submit.prevent="onSubmit">
+        <!-- Username -->
         <div class="mb-3">
-          <label for="username" class="form-label">Username (Email)</label>
+          <label for="username" class="form-label">Username</label>
           <input
             id="username"
             v-model="form.username"
+            type="text"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input
+            id="email"
+            v-model="form.email"
             type="email"
             class="form-control"
             required
           />
-          <div v-if="errors.general" class="invalid-feedback">
-            {{ errors.general }}
-          </div>
         </div>
+
+        <!-- Password -->
         <div class="mb-3">
           <label for="password" class="form-label">Password</label>
           <input
@@ -25,14 +37,89 @@
             class="form-control"
             required
           />
-          <div v-if="errors.general" class="invalid-feedback">
-            {{ errors.general }}
-          </div>
         </div>
+
+        <!-- Nome -->
+        <div class="mb-3">
+          <label for="nome" class="form-label">Nome</label>
+          <input
+            id="nome"
+            v-model="form.nome"
+            type="text"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <!-- Cognome -->
+        <div class="mb-3">
+          <label for="cognome" class="form-label">Cognome</label>
+          <input
+            id="cognome"
+            v-model="form.cognome"
+            type="text"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <!-- Data di nascita -->
+        <div class="mb-3">
+          <label for="data" class="form-label">Data di nascita</label>
+          <input
+            id="data"
+            v-model="form.data"
+            type="date"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <!-- Numero di telefono -->
+        <div class="mb-3">
+          <label for="telefono" class="form-label">Numero di telefono</label>
+          <input
+            id="telefono"
+            v-model="form.telefono"
+            type="tel"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <!-- Gender -->
+        <div class="mb-3">
+          <label for="gender" class="form-label">Gender</label>
+          <select
+            id="gender"
+            v-model="form.gender"
+            class="form-control"
+            required
+          >
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </div>
+
+        <!-- Address -->
+        <div class="mb-3">
+          <label for="address" class="form-label">Address</label>
+          <input
+            id="address"
+            v-model="form.address"
+            type="text"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <!-- Submit button -->
         <button type="submit" class="btn btn-primary" :disabled="loading">
           <span v-if="loading">Registering...</span>
           <span v-else>Register</span>
         </button>
+
+        <!-- Error message -->
         <div v-if="errors.general" class="invalid-feedback mt-3">
           {{ errors.general }}
         </div>
@@ -42,36 +129,68 @@
 </template>
 
 <script>
-import axios from "axios"; // Importa axios per le chiamate API
+import axios from "axios";
 
 export default {
-  name: "RegisterComponent", // Assicurati di avere il nome corretto
+  name: "RegisterComponent",
   data() {
     return {
       form: {
-        username: "", // Usa 'username' per l'email
+        username: "",
+        email: "",
         password: "",
+        nome: "",
+        cognome: "",
+        data: "",
+        telefono: "",
+        gender: "", // Aggiungi il campo gender
+        address: "", // Aggiungi il campo address
       },
       errors: {},
-      loading: false, // Aggiunto per il caricamento
+      loading: false,
     };
   },
   methods: {
-    // Metodo per gestire la registrazione dell'utente
     async onSubmit() {
-      // Cambiato qui
-      console.log("Register button pressed");
-      this.loading = true; // Avvia il caricamento
-      this.errors = {}; // Resetta gli errori
+      this.loading = true;
+      this.errors = {};
 
       try {
-        const { username, password } = this.form;
-        console.log("Form Data:", this.form); // Visualizza i dati del form
-
-        // Effettua la registrazione usando axios
-        const response = await axios.post("http://127.0.0.1:5000/register", {
-          email: username, // Usa 'username' come email
+        const {
+          username,
+          email,
           password,
+          nome,
+          cognome,
+          data,
+          telefono,
+          gender,
+          address,
+        } = this.form;
+
+        // Logga i dati inviati per la registrazione
+        console.log("Dati registrazione:", {
+          username,
+          email,
+          password,
+          nome,
+          cognome,
+          data,
+          telefono,
+          gender,
+          address,
+        });
+
+        const response = await axios.post("http://127.0.0.1:5000/register", {
+          username,
+          email,
+          password,
+          nome,
+          cognome,
+          data,
+          telefono,
+          gender, // Passa il gender
+          address, // Passa l'address
         });
 
         alert(
@@ -80,20 +199,18 @@ export default {
         console.log(response.data);
       } catch (error) {
         console.error("Error signing up:", error);
-        alert("Error signing up: " + error.message); // Mostra un alert per l'errore
 
-        // Gestione degli errori
-        if (error.response && error.response.data) {
+        if (error.response) {
+          console.error("Response data:", error.response.data);
           this.errors.general =
-            error.response.data.error || "Registration failed"; // Modificato qui
-          alert(this.errors.general); // Mostra un alert per l'errore generale
+            error.response.data.error || "Registration failed";
         } else {
-          this.errors.general = error.message; // Imposta l'errore generale
-          alert("Error: " + error.message); // Mostra un alert per l'errore generale
+          this.errors.general = error.message;
         }
+
+        alert("Error signing up: " + this.errors.general);
       } finally {
-        this.loading = false; // Fine del caricamento
-        console.log("Loading finished"); // Debug
+        this.loading = false;
       }
     },
   },
