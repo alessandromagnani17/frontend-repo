@@ -89,6 +89,7 @@
         </aside>
         <main class="col-md-9">
           <router-view></router-view>
+          <!-- Visualizza il componente corretto in base alla rotta -->
         </main>
       </div>
     </div>
