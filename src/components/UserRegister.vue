@@ -12,8 +12,8 @@
             class="form-control"
             required
           />
-          <div v-if="errors.username" class="invalid-feedback">
-            {{ errors.username }}
+          <div v-if="errors.general" class="invalid-feedback">
+            {{ errors.general }}
           </div>
         </div>
         <div class="mb-3">
@@ -25,8 +25,8 @@
             class="form-control"
             required
           />
-          <div v-if="errors.password" class="invalid-feedback">
-            {{ errors.password }}
+          <div v-if="errors.general" class="invalid-feedback">
+            {{ errors.general }}
           </div>
         </div>
         <button type="submit" class="btn btn-primary" :disabled="loading">
@@ -37,26 +37,19 @@
           {{ errors.general }}
         </div>
       </form>
-      <button
-        class="btn btn-secondary mt-3"
-        :disabled="loading"
-        @click="signInWithProvider"
-      >
-        <span v-if="loading">Loading...</span>
-        <span v-else>Login with OAuth</span>
-      </button>
     </div>
   </div>
 </template>
 
 <script>
-import { Auth } from "aws-amplify"; // Assicurati che Auth sia correttamente importato
+import axios from "axios"; // Importa axios per le chiamate API
 
 export default {
+  name: "RegisterComponent", // Assicurati di avere il nome corretto
   data() {
     return {
       form: {
-        username: "",
+        username: "", // Usa 'username' per l'email
         password: "",
       },
       errors: {},
@@ -66,35 +59,34 @@ export default {
   methods: {
     // Metodo per gestire la registrazione dell'utente
     async onSubmit() {
+      // Cambiato qui
+      console.log("Register button pressed");
       this.loading = true; // Avvia il caricamento
-      console.log("onSubmit called"); // Debug
+      this.errors = {}; // Resetta gli errori
 
       try {
         const { username, password } = this.form;
         console.log("Form Data:", this.form); // Visualizza i dati del form
 
-        // Esegui la registrazione con AWS Cognito usando Auth.signUp
-        const signUpResponse = await Auth.signUp({
-          username,
+        // Effettua la registrazione usando axios
+        const response = await axios.post("http://127.0.0.1:5000/register", {
+          email: username, // Usa 'username' come email
           password,
-          attributes: {
-            email: username, // Corretto l'attributo email
-          },
         });
 
-        console.log("Sign up response:", signUpResponse); // Visualizza la risposta della registrazione
         alert(
           "Registration successful! Please check your email for verification."
         );
-        this.errors = {}; // Resetta gli errori dopo il successo
+        console.log(response.data);
       } catch (error) {
         console.error("Error signing up:", error);
         alert("Error signing up: " + error.message); // Mostra un alert per l'errore
 
-        // Gestione degli errori di Cognito
-        if (error.code === "UsernameExistsException") {
-          this.errors.username = "Username already exists.";
-          alert("Username already exists."); // Mostra un alert per l'errore specifico
+        // Gestione degli errori
+        if (error.response && error.response.data) {
+          this.errors.general =
+            error.response.data.error || "Registration failed"; // Modificato qui
+          alert(this.errors.general); // Mostra un alert per l'errore generale
         } else {
           this.errors.general = error.message; // Imposta l'errore generale
           alert("Error: " + error.message); // Mostra un alert per l'errore generale
@@ -102,23 +94,6 @@ export default {
       } finally {
         this.loading = false; // Fine del caricamento
         console.log("Loading finished"); // Debug
-      }
-    },
-    // Metodo per l'accesso con provider OAuth
-    async signInWithProvider() {
-      this.loading = true; // Inizia il caricamento
-      console.log("signInWithProvider called"); // Debug
-
-      try {
-        console.log("Calling Auth.federatedSignIn()"); // Debug
-        await Auth.federatedSignIn(); // Avvia il processo di accesso federato
-      } catch (error) {
-        console.error("Error during federated sign in:", error);
-        this.errors.general = "Error during OAuth login."; // Errore generale
-        alert("Error during OAuth login: " + error.message); // Mostra un alert per l'errore
-      } finally {
-        this.loading = false; // Fine del caricamento
-        console.log("Loading finished for federated sign in"); // Debug
       }
     },
   },
