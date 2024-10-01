@@ -113,6 +113,30 @@
           />
         </div>
 
+        <!-- CAP Code -->
+        <div class="mb-3">
+          <label for="cap_code" class="form-label">CAP Code</label>
+          <input
+            id="cap_code"
+            v-model="form.cap_code"
+            type="text"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <!-- Tax Code -->
+        <div class="mb-3">
+          <label for="tax_code" class="form-label">Tax Code</label>
+          <input
+            id="tax_code"
+            v-model="form.tax_code"
+            type="text"
+            class="form-control"
+            required
+          />
+        </div>
+
         <!-- Submit button -->
         <button type="submit" class="btn btn-primary" :disabled="loading">
           <span v-if="loading">Registering...</span>
@@ -145,6 +169,8 @@ export default {
         telefono: "",
         gender: "", // Aggiungi il campo gender
         address: "", // Aggiungi il campo address
+        cap_code: "", // Aggiungi il campo CAP code
+        tax_code: "", // Aggiungi il campo Tax code
       },
       errors: {},
       loading: false,
@@ -166,6 +192,8 @@ export default {
           telefono,
           gender,
           address,
+          cap_code,
+          tax_code,
         } = this.form;
 
         // Logga i dati inviati per la registrazione
@@ -179,6 +207,8 @@ export default {
           telefono,
           gender,
           address,
+          cap_code,
+          tax_code,
         });
 
         const response = await axios.post("http://127.0.0.1:5000/register", {
@@ -191,6 +221,8 @@ export default {
           telefono,
           gender, // Passa il gender
           address, // Passa l'address
+          cap_code, // Passa il CAP code
+          tax_code, // Passa il Tax code
         });
 
         alert(
