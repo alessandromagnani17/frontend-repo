@@ -12,6 +12,7 @@
         class="img-fluid mb-4"
       />
       <div class="btn-group mt-4">
+        <!-- Puoi mantenere i link o rimuoverli in base alle tue preferenze -->
         <router-link to="/register" class="btn btn-primary btn-lg mx-2">
           Register
         </router-link>
@@ -27,13 +28,14 @@
 export default {
   name: "HomePage",
   mounted() {
-    console.log("AWS Amplify Cognito is configured. No API calls are made.");
+    console.log(
+      "HomePage mounted - AWS Amplify Cognito is configured. No API calls are made."
+    );
   },
 };
 </script>
 
 <style scoped>
-/* Stili rimasti invariati */
 .home {
   background: linear-gradient(135deg, #ffffff, #e9ecef);
   height: 100vh;
