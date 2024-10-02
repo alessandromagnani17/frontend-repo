@@ -324,7 +324,7 @@ export default {
   max-width: 600px;
   padding: 40px;
   border-radius: 15px;
-  background: #ffffff; /* Sfondo del contenitore bianco */
+  background: #ffffff;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
   margin-top: 100px;
   height: auto;
@@ -341,7 +341,7 @@ export default {
   background: transparent;
   border: none;
   cursor: pointer;
-  margin-left: -10px; /* Spostato l'icona di indietro a sinistra */
+  margin-left: -10px;
 }
 
 .back-icon {
@@ -350,24 +350,24 @@ export default {
 }
 
 .step-title {
-  font-size: 10px; /* Testo più piccolo */
+  font-size: 10px;
   margin-bottom: 10px;
 }
 
 h2 {
-  font-size: 18px; /* Testo più piccolo */
+  font-size: 18px;
   margin-bottom: 30px;
 }
 
 .form-label {
-  font-size: 12px; /* Aumentato da 10px a 12px per etichette più grandi */
+  font-size: 12px;
 }
 
 .form-control {
   background: #f2f2f2;
   border: 1px solid #ccc;
   border-radius: 5px;
-  font-size: 12px; /* Testo più piccolo */
+  font-size: 12px;
 }
 
 .input-group {
@@ -376,40 +376,40 @@ h2 {
 
 .eye-button {
   background: transparent;
-  border: none;
+  border: 1px solid #ccc;
   cursor: pointer;
-  padding: 0; /* Rimuove il padding */
+  padding: 0;
   display: flex;
   align-items: center;
-  width: 40px; /* Pulsanti eye più larghi orizzontalmente */
+  width: 46px;
 }
 
 .eye-icon {
-  width: 24px; /* Dimensioni ridotte per le icone eye-on/off */
-  height: 24px; /* Dimensioni ridotte per le icone eye-on/off */
-  margin: auto; /* Centra le icone */
+  width: 18px;
+  height: 18px;
+  margin: auto;
 }
 
 .info-icon {
   margin-left: 5px;
-  display: inline-block; /* Allinea l'icona */
+  display: inline-block;
 }
 
 .info-image {
-  width: 15px; /* Dimensioni dell'icona informativa più piccole */
-  height: 15px; /* Dimensioni dell'icona informativa più piccole */
-  vertical-align: middle; /* Allinea verticalmente */
+  width: 15px;
+  height: 15px;
+  vertical-align: middle;
 }
 
 .btn-next {
-  width: 100%; /* Pulsanti Avanti molto più larghi */
+  width: 100%;
   margin-top: 20px;
-  padding: 10px; /* Altezza del pulsante Avanti più corta */
+  padding: 10px;
   cursor: pointer;
 }
 
 .btn-next:hover {
-  background-color: #c0c0c0; /* Colore di sfondo grigio al passaggio del mouse */
+  background-color: #c0c0c0;
 }
 
 .loading-overlay {
@@ -434,9 +434,9 @@ h2 {
 }
 
 .prohibition-icon {
-  width: 16px; /* Dimensioni per l'icona di divieto */
-  height: 16px; /* Dimensioni per l'icona di divieto */
-  vertical-align: middle; /* Centra verticalmente */
-  display: inline-block; /* Assicura che l'icona sia mostrata correttamente */
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  display: inline-block;
 }
 </style>
