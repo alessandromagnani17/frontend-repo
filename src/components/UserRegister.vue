@@ -318,6 +318,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 0px 0px rgba(0, 0, 0, 0);
 }
 
 .container {
