@@ -74,6 +74,7 @@
               type="text"
               class="form-control"
               required
+              placeholder="Via/Vicolo ..."
             />
           </div>
 
@@ -87,6 +88,7 @@
               required
               minlength="5"
               maxlength="5"
+              placeholder="XXXXX"
               @input="validateInput"
             />
           </div>
@@ -105,13 +107,18 @@
           </div>
 
           <div class="mb-3">
-            <label for="telefono" class="form-label">Numero di Telefono</label>
+            <label for="phone_number" class="form-label"
+              >Numero di telefono</label
+            >
             <input
-              id="telefono"
-              v-model="form.telefono"
+              id="phone_number"
+              v-model="form.phone_number"
               type="tel"
               class="form-control"
               required
+              pattern="^\+\d{2} \d{10}$"
+              placeholder="+XX XXXXXXXXXX"
+              @input="validatePhoneNumber"
             />
           </div>
         </div>
@@ -317,6 +324,11 @@ export default {
     },
   },
   methods: {
+    validatePhoneNumber() {
+      this.form.phone_number = this.form.phone_number
+        .replace(/[^+\d]/g, "")
+        .replace(/^(\+\d{2})(\d)/, "$1 $2"); // Aggiunge uno spazio dopo il prefisso
+    },
     validateInput(event) {
       const value = event.target.value;
       // Rimuovi caratteri non numerici
