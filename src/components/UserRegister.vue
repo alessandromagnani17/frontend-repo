@@ -241,7 +241,11 @@
 
         <!-- Submit button (Step 3) -->
         <div v-if="currentStep === 3">
-          <button type="submit" class="btn btn-primary" :disabled="loading">
+          <button
+            type="submit"
+            class="btn btn-primary btn-next"
+            :disabled="loading || !isStepValid(currentStep)"
+          >
             <span v-if="loading">Registrazione...</span>
             <span v-else>Registrati</span>
           </button>
@@ -275,6 +279,7 @@ export default {
       showConfirmPassword: false,
       showPasswordError: false,
       isHover: false,
+      showDisabledIcon: false,
       errors: {},
       form: {
         nome: "",
@@ -285,6 +290,7 @@ export default {
         cap_code: "",
         tax_code: "",
         telefono: "",
+        username: "",
         email: "",
         password: "",
         confirmPassword: "",
@@ -294,7 +300,7 @@ export default {
   computed: {
     // Computed property per la validazione della password
     isPasswordValid() {
-      const password = this.form.password;
+      const password = this.form.password || "";
       const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
       return regex.test(password);
     },
@@ -303,118 +309,113 @@ export default {
     goToNextStep() {
       if (this.isStepValid(this.currentStep)) {
         if (this.currentStep === 3) {
-          this.onSubmit(); // Chiama la funzione di registrazione
+          this.onSubmit();
         } else {
-          this.loading = true; // Inizio caricamento
-          setTimeout(() => {
-            this.currentStep++;
-            this.loading = false; // Fine caricamento
-          }, 1000); // Simulazione di 1 secondo di caricamento
+          this.currentStep++;
         }
       }
     },
-
     goToPreviousStep() {
-      if (this.currentStep > 1) {
-        this.currentStep--;
+      this.currentStep--;
+    },
+    toggleShowPassword() {
+      this.showPassword = !this.showPassword;
+    },
+    toggleShowConfirmPassword() {
+      this.showConfirmPassword = !this.showConfirmPassword;
+    },
+    async onSubmit() {
+      if (this.isStepValid(3)) {
+        this.loading = true;
+        this.errors = {};
+        try {
+          const {
+            username,
+            email,
+            password,
+            nome,
+            cognome,
+            data,
+            telefono,
+            gender,
+            address,
+            cap_code,
+            tax_code,
+          } = this.form;
+
+          console.log("Dati registrazione:", {
+            username,
+            email,
+            password,
+            nome,
+            cognome,
+            data,
+            telefono,
+            gender,
+            address,
+            cap_code,
+            tax_code,
+          });
+
+          // Modifica l'URL per il backend che stai usando
+          const response = await axios.post("http://127.0.0.1:5000/register", {
+            username,
+            email,
+            password,
+            nome,
+            cognome,
+            data,
+            telefono,
+            gender,
+            address,
+            cap_code,
+            tax_code,
+          });
+
+          alert(
+            "Registrazione avvenuta con successo! Controlla la tua email per la verifica."
+          );
+          console.log(response.data);
+          this.$router.push("/success"); // Naviga alla pagina di successo
+        } catch (error) {
+          console.error("Errore nella registrazione:", error);
+          if (error.response) {
+            console.error("Dati risposta:", error.response.data);
+            this.errors.general =
+              error.response.data.error || "Registrazione fallita";
+          } else {
+            this.errors.general = error.message;
+          }
+          alert("Errore nella registrazione: " + this.errors.general);
+        } finally {
+          this.loading = false;
+        }
       }
     },
-
     isStepValid(step) {
       if (step === 1) {
         return (
-          this.form.nome.length > 0 &&
-          this.form.cognome.length > 0 &&
-          this.form.gender.length > 0 &&
-          this.form.data.length > 0
+          this.form.nome &&
+          this.form.cognome &&
+          this.form.gender &&
+          this.form.data
         );
       } else if (step === 2) {
         return (
-          this.form.address.length > 0 &&
-          this.form.cap_code.length > 0 &&
-          this.form.tax_code.length > 0 &&
-          this.form.telefono.length > 0
+          this.form.address &&
+          this.form.cap_code &&
+          this.form.tax_code &&
+          this.form.telefono
         );
       } else if (step === 3) {
         return (
-          this.form.username.length > 0 &&
-          this.form.email.length > 0 &&
+          this.form.username &&
+          this.form.email &&
           this.isPasswordValid &&
           this.form.password === this.form.confirmPassword
         );
       }
       return false;
-    },
-
-    toggleShowPassword() {
-      this.showPassword = !this.showPassword;
-    },
-
-    toggleShowConfirmPassword() {
-      this.showConfirmPassword = !this.showConfirmPassword;
-    },
-
-    async onSubmit() {
-      this.loading = true;
-      this.errors = {};
-      try {
-        const {
-          username,
-          email,
-          password,
-          nome,
-          cognome,
-          data,
-          telefono,
-          gender,
-          address,
-          cap_code,
-          tax_code,
-        } = this.form;
-        // Logga i dati inviati per la registrazione
-        console.log("Dati registrazione:", {
-          username,
-          email,
-          password,
-          nome,
-          cognome,
-          data,
-          telefono,
-          gender,
-          address,
-          cap_code,
-          tax_code,
-        });
-        const response = await axios.post("http://127.0.0.1:5000/register", {
-          username,
-          email,
-          password,
-          nome,
-          cognome,
-          data,
-          telefono,
-          gender, // Passa il gender
-          address, // Passa l'address
-          cap_code, // Passa il CAP code
-          tax_code, // Passa il Tax code
-        });
-        alert(
-          "Registration successful! Please check your email for verification."
-        );
-        console.log(response.data);
-      } catch (error) {
-        console.error("Error signing up:", error);
-        if (error.response) {
-          console.error("Response data:", error.response.data);
-          this.errors.general =
-            error.response.data.error || "Registration failed";
-        } else {
-          this.errors.general = error.message;
-        }
-        alert("Error signing up: " + this.errors.general);
-      } finally {
-        this.loading = false;
-      }
     },
   },
 };
