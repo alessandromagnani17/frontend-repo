@@ -15,6 +15,7 @@
       <h2 class="mb-4">Crea un Account</h2>
 
       <form @submit.prevent="onSubmit">
+        <!-- Step 1: Dati Anagrafici -->
         <div v-if="currentStep === 1">
           <div class="mb-3">
             <label for="nome" class="form-label">Nome</label>
@@ -63,6 +64,7 @@
           </div>
         </div>
 
+        <!-- Step 2: Dati di Contatto -->
         <div v-if="currentStep === 2">
           <div class="mb-3">
             <label for="address" class="form-label">Indirizzo</label>
@@ -109,7 +111,19 @@
           </div>
         </div>
 
+        <!-- Step 3: Credenziali -->
         <div v-if="currentStep === 3">
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input
+              id="username"
+              v-model="form.username"
+              type="text"
+              class="form-control"
+              required
+            />
+          </div>
+
           <div class="mb-3">
             <label for="email" class="form-label">Email</label>
             <input
@@ -126,7 +140,7 @@
               >Password
               <span
                 class="info-icon"
-                title="Requisiti per la password: min 8 caratteri, almeno una maiuscola, una minuscola e un numero."
+                title="Requisiti per la password: min 8 caratteri, almeno una maiuscola, una minuscola, un numero e un carattere speciale."
               >
                 <img
                   src="@/assets/info-icon.svg"
@@ -141,6 +155,7 @@
                 v-model="form.password"
                 :type="showPassword ? 'text' : 'password'"
                 class="form-control password-input"
+                :class="{ 'is-invalid': !isPasswordValid }"
                 required
                 @paste.prevent
               />
@@ -160,8 +175,9 @@
                 />
               </button>
             </div>
-            <div v-if="showPasswordError" class="text-danger mt-1">
-              Le password non corrispondono.
+            <div v-if="!isPasswordValid" class="text-danger mt-1">
+              La password deve contenere almeno: un numero, una lettera
+              maiuscola, una lettera minuscola, e un carattere speciale.
             </div>
           </div>
 
@@ -198,30 +214,47 @@
           </div>
         </div>
 
-        <button
-          type="button"
-          class="btn btn-primary btn-next"
-          :disabled="!isStepValid(currentStep)"
-          @click="goToNextStep"
-          @mouseover="isHover = true"
-          @mouseleave="isHover = false"
-          @mouseenter="showDisabledIcon = !isStepValid(currentStep)"
-        >
-          Avanti
-          <span
-            v-if="!isStepValid(currentStep) && isHover"
-            class="disabled-icon"
+        <!-- Bottone di avanzamento o submit -->
+        <div v-if="currentStep < 3">
+          <button
+            type="button"
+            class="btn btn-primary btn-next"
+            :disabled="!isStepValid(currentStep)"
+            @click="goToNextStep"
+            @mouseover="isHover = true"
+            @mouseleave="isHover = false"
+            @mouseenter="showDisabledIcon = !isStepValid(currentStep)"
           >
-            <img
-              src="@/assets/prohibition-icon.svg"
-              alt="Non disponibile"
-              class="prohibition-icon"
-            />
-          </span>
-        </button>
+            Avanti
+            <span
+              v-if="!isStepValid(currentStep) && isHover"
+              class="disabled-icon"
+            >
+              <img
+                src="@/assets/prohibition-icon.svg"
+                alt="Non disponibile"
+                class="prohibition-icon"
+              />
+            </span>
+          </button>
+        </div>
+
+        <!-- Submit button (Step 3) -->
+        <div v-if="currentStep === 3">
+          <button type="submit" class="btn btn-primary" :disabled="loading">
+            <span v-if="loading">Registrazione...</span>
+            <span v-else>Registrati</span>
+          </button>
+
+          <!-- Error message -->
+          <div v-if="errors.general" class="invalid-feedback mt-3">
+            {{ errors.general }}
+          </div>
+        </div>
       </form>
     </div>
 
+    <!-- Loading overlay -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-icon">
         <img src="@/assets/loading-icon.svg" alt="Loading..." />
@@ -231,6 +264,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
@@ -240,6 +275,7 @@ export default {
       showConfirmPassword: false,
       showPasswordError: false,
       isHover: false,
+      errors: {},
       form: {
         nome: "",
         cognome: "",
@@ -255,57 +291,130 @@ export default {
       },
     };
   },
+  computed: {
+    // Computed property per la validazione della password
+    isPasswordValid() {
+      const password = this.form.password;
+      const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+      return regex.test(password);
+    },
+  },
   methods: {
     goToNextStep() {
       if (this.isStepValid(this.currentStep)) {
-        this.loading = true; // Inizio caricamento
-        setTimeout(() => {
-          this.currentStep++;
-          this.loading = false; // Fine caricamento
-        }, 1000); // Simulazione di 1 secondo di caricamento
+        if (this.currentStep === 3) {
+          this.onSubmit(); // Chiama la funzione di registrazione
+        } else {
+          this.loading = true; // Inizio caricamento
+          setTimeout(() => {
+            this.currentStep++;
+            this.loading = false; // Fine caricamento
+          }, 1000); // Simulazione di 1 secondo di caricamento
+        }
       }
     },
+
     goToPreviousStep() {
       if (this.currentStep > 1) {
         this.currentStep--;
       }
     },
+
     isStepValid(step) {
-      switch (step) {
-        case 1: {
-          return (
-            this.form.nome &&
-            this.form.cognome &&
-            this.form.gender &&
-            this.form.data
-          );
-        }
-        case 2: {
-          return (
-            this.form.address &&
-            this.form.cap_code &&
-            this.form.tax_code &&
-            this.form.telefono
-          );
-        }
-        case 3: {
-          const passwordsMatch =
-            this.form.password === this.form.confirmPassword;
-          this.showPasswordError = !passwordsMatch;
-          return this.form.email && this.form.password && passwordsMatch;
-        }
-        default:
-          return false;
+      if (step === 1) {
+        return (
+          this.form.nome.length > 0 &&
+          this.form.cognome.length > 0 &&
+          this.form.gender.length > 0 &&
+          this.form.data.length > 0
+        );
+      } else if (step === 2) {
+        return (
+          this.form.address.length > 0 &&
+          this.form.cap_code.length > 0 &&
+          this.form.tax_code.length > 0 &&
+          this.form.telefono.length > 0
+        );
+      } else if (step === 3) {
+        return (
+          this.form.username.length > 0 &&
+          this.form.email.length > 0 &&
+          this.isPasswordValid &&
+          this.form.password === this.form.confirmPassword
+        );
       }
+      return false;
     },
+
     toggleShowPassword() {
       this.showPassword = !this.showPassword;
     },
+
     toggleShowConfirmPassword() {
       this.showConfirmPassword = !this.showConfirmPassword;
     },
-    onSubmit() {
-      console.log(this.form);
+
+    async onSubmit() {
+      this.loading = true;
+      this.errors = {};
+      try {
+        const {
+          username,
+          email,
+          password,
+          nome,
+          cognome,
+          data,
+          telefono,
+          gender,
+          address,
+          cap_code,
+          tax_code,
+        } = this.form;
+        // Logga i dati inviati per la registrazione
+        console.log("Dati registrazione:", {
+          username,
+          email,
+          password,
+          nome,
+          cognome,
+          data,
+          telefono,
+          gender,
+          address,
+          cap_code,
+          tax_code,
+        });
+        const response = await axios.post("http://127.0.0.1:5000/register", {
+          username,
+          email,
+          password,
+          nome,
+          cognome,
+          data,
+          telefono,
+          gender, // Passa il gender
+          address, // Passa l'address
+          cap_code, // Passa il CAP code
+          tax_code, // Passa il Tax code
+        });
+        alert(
+          "Registration successful! Please check your email for verification."
+        );
+        console.log(response.data);
+      } catch (error) {
+        console.error("Error signing up:", error);
+        if (error.response) {
+          console.error("Response data:", error.response.data);
+          this.errors.general =
+            error.response.data.error || "Registration failed";
+        } else {
+          this.errors.general = error.message;
+        }
+        alert("Error signing up: " + this.errors.general);
+      } finally {
+        this.loading = false;
+      }
     },
   },
 };
