@@ -1,4 +1,3 @@
-
 <template>
   <div class="register">
     <div class="container mt-5">
@@ -141,7 +140,7 @@
               >Password
               <span
                 class="info-icon"
-                title="Requisiti per la password: min 8 caratteri, almeno una maiuscola, una minuscola, un numero e un carattere speciale."
+                title="Requisiti per la password: min 8 caratteri, almeno una maiuscola, una minuscola un numero e un carattere speciale."
               >
                 <img
                   src="@/assets/info-icon.svg"
@@ -184,7 +183,7 @@
               class="text-danger mt-1"
             >
               La password deve contenere almeno: un numero, una lettera
-              maiuscola, una lettera minuscola, e un carattere speciale.
+              maiuscola, una lettera minuscola e un carattere speciale.
             </div>
           </div>
 
@@ -492,6 +491,10 @@ h2 {
   position: relative;
 }
 
+.text-danger {
+  font-size: 0.8rem; /* Font più piccolo (puoi modificarlo a piacere) */
+}
+
 .eye-button {
   background: transparent;
   border: 1px solid #ccc;
@@ -511,6 +514,7 @@ h2 {
 .info-icon {
   margin-left: 5px;
   display: inline-block;
+  font-size: 12px;
 }
 
 .info-image {
