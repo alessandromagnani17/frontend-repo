@@ -51,7 +51,6 @@
               <option value="Female">Femmina</option>
             </select>
           </div>
-
           <div class="mb-3">
             <label for="data" class="form-label">Data di Nascita</label>
             <input
@@ -59,8 +58,16 @@
               v-model="form.data"
               type="date"
               class="form-control"
+              :class="{ 'is-invalid': !isValidDate(form.data) && form.data }"
               required
             />
+            <div
+              v-if="form.data && !isValidDate(form.data)"
+              class="text-danger mt-1"
+            >
+              Data non valida. Inserisci una data corretta (Giorni: 1-31, Mesi:
+              1-12, Anno: 1920-2005).
+            </div>
           </div>
         </div>
 
@@ -312,6 +319,21 @@ export default {
     },
   },
   methods: {
+    isValidDate(date) {
+      if (!date) return false;
+
+      const [year, month, day] = date.split("-");
+      const yearNum = parseInt(year, 10);
+      const monthNum = parseInt(month, 10);
+      const dayNum = parseInt(day, 10);
+
+      // Controllo su anno, mese e giorno
+      if (yearNum < 1920 || yearNum > 2005) return false;
+      if (monthNum < 1 || monthNum > 12) return false;
+      if (dayNum < 1 || dayNum > 31) return false;
+
+      return true;
+    },
     goToNextStep() {
       if (this.isStepValid(this.currentStep)) {
         if (this.currentStep === 3) {
@@ -560,5 +582,9 @@ h2 {
   height: 16px;
   vertical-align: middle;
   display: inline-block;
+}
+
+.is-invalid {
+  border-color: red;
 }
 </style>
