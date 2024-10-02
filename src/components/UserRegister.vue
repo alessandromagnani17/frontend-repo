@@ -1,3 +1,4 @@
+
 <template>
   <div class="register">
     <div class="container mt-5">
@@ -155,8 +156,11 @@
                 v-model="form.password"
                 :type="showPassword ? 'text' : 'password'"
                 class="form-control password-input"
-                :class="{ 'is-invalid': !isPasswordValid }"
+                :class="{
+                  'is-invalid': !isPasswordValid && passwordInputTouched,
+                }"
                 required
+                @input="passwordInputTouched = true"
                 @paste.prevent
               />
               <button
@@ -175,7 +179,10 @@
                 />
               </button>
             </div>
-            <div v-if="!isPasswordValid" class="text-danger mt-1">
+            <div
+              v-if="passwordInputTouched && !isPasswordValid"
+              class="text-danger mt-1"
+            >
               La password deve contenere almeno: un numero, una lettera
               maiuscola, una lettera minuscola, e un carattere speciale.
             </div>
