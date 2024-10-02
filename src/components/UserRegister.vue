@@ -85,6 +85,9 @@
               type="text"
               class="form-control"
               required
+              minlength="5"
+              maxlength="5"
+              @input="validateInput"
             />
           </div>
 
@@ -96,6 +99,8 @@
               type="text"
               class="form-control"
               required
+              minlength="16"
+              maxlength="16"
             />
           </div>
 
@@ -312,6 +317,11 @@ export default {
     },
   },
   methods: {
+    validateInput(event) {
+      const value = event.target.value;
+      // Rimuovi caratteri non numerici
+      event.target.value = value.replace(/[^0-9]/g, "");
+    },
     correctDate() {
       const dateParts = this.form.data.split("-");
       const year = parseInt(dateParts[0], 10);
@@ -319,11 +329,14 @@ export default {
       const day = parseInt(dateParts[2], 10);
 
       // Correzione dell'anno
-      if (year >= 3000) {
+      if (year > 2005) {
         dateParts[0] = "2005";
-      } else if (year === 0) {
-        dateParts[0] = "2001";
-      }
+      } //else if (year < 1900) {
+      //dateParts[0] = "1920";
+      //}
+      // PROBLEMA ANNO MINORE (CON QUEL CONTROLLO IMPOSTA A 1920 APPENA PREMI 1)
+      // TODO
+      // ----------------------------------------------------------------------
 
       // Correzione del mese
       if (month > 12) {
@@ -511,6 +524,7 @@ h2 {
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 12px;
+  text-transform: uppercase;
 }
 
 .input-group {
