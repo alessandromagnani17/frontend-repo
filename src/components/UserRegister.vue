@@ -58,16 +58,9 @@
               v-model="form.data"
               type="date"
               class="form-control"
-              :class="{ 'is-invalid': !isValidDate(form.data) && form.data }"
+              @change="correctDate"
               required
             />
-            <div
-              v-if="form.data && !isValidDate(form.data)"
-              class="text-danger mt-1"
-            >
-              Data non valida. Inserisci una data corretta (Giorni: 1-31, Mesi:
-              1-12, Anno: 1920-2005).
-            </div>
           </div>
         </div>
 
@@ -319,20 +312,31 @@ export default {
     },
   },
   methods: {
-    isValidDate(date) {
-      if (!date) return false;
+    correctDate() {
+      const dateParts = this.form.data.split("-");
+      const year = parseInt(dateParts[0], 10);
+      const month = parseInt(dateParts[1], 10);
+      const day = parseInt(dateParts[2], 10);
 
-      const [year, month, day] = date.split("-");
-      const yearNum = parseInt(year, 10);
-      const monthNum = parseInt(month, 10);
-      const dayNum = parseInt(day, 10);
+      // Correzione dell'anno
+      if (year >= 3000) {
+        dateParts[0] = "2005";
+      } else if (year === 0) {
+        dateParts[0] = "2001";
+      }
 
-      // Controllo su anno, mese e giorno
-      if (yearNum < 1920 || yearNum > 2005) return false;
-      if (monthNum < 1 || monthNum > 12) return false;
-      if (dayNum < 1 || dayNum > 31) return false;
+      // Correzione del mese
+      if (month > 12) {
+        dateParts[1] = "12";
+      }
 
-      return true;
+      // Correzione del giorno
+      if (day > 31) {
+        dateParts[2] = "31";
+      }
+
+      // Imposta la data corretta
+      this.form.data = dateParts.join("-");
     },
     goToNextStep() {
       if (this.isStepValid(this.currentStep)) {
@@ -582,9 +586,5 @@ h2 {
   height: 16px;
   vertical-align: middle;
   display: inline-block;
-}
-
-.is-invalid {
-  border-color: red;
 }
 </style>
