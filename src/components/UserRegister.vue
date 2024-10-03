@@ -364,7 +364,7 @@ export default {
           });
 
           // Modifica l'URL per il backend che stai usando
-          const response = await axios.post("http://127.0.0.1:5000/register", {
+          await axios.post("http://127.0.0.1:5000/register", {
             username,
             email,
             password,
@@ -378,11 +378,12 @@ export default {
             tax_code,
           });
 
-          alert(
-            "Registrazione avvenuta con successo! Controlla la tua email per la verifica."
-          );
-          console.log(response.data);
-          this.$router.push("/success"); // Naviga alla pagina di successo
+          // Rimuovi l'alert e reindirizza alla pagina di conferma
+          this.loading = false;
+          this.$router.push({
+            name: "EmailConfirmation",
+            params: { email }, // Passa l'email per usarla nella conferma
+          });
         } catch (error) {
           console.error("Errore nella registrazione:", error);
           if (error.response) {
@@ -393,11 +394,11 @@ export default {
             this.errors.general = error.message;
           }
           alert("Errore nella registrazione: " + this.errors.general);
-        } finally {
           this.loading = false;
         }
       }
     },
+
     isStepValid(step) {
       if (step === 1) {
         return (
