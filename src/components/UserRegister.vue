@@ -11,7 +11,7 @@
         </button>
       </div>
 
-      <span class="step-title">Passaggio {{ currentStep }} di 3</span>
+      <span class="step-title">Passaggio {{ currentStep }} di 4</span>
       <h2 class="mb-4">Crea un Account</h2>
 
       <form @submit.prevent="onSubmit">
@@ -262,6 +262,13 @@
             {{ errors.general }}
           </div>
         </div>
+
+        <div v-if="currentStep === 4">
+          <p>{{ successMessage }}</p>
+          <button class="btn btn-primary btn-next" @click="goToHome">
+            Torna alla home
+          </button>
+        </div>
       </form>
     </div>
 
@@ -313,6 +320,26 @@ export default {
     },
   },
   methods: {
+    goToHome() {
+      this.currentStep = 1;
+      this.successMessage = "";
+      this.form = {
+        nome: "",
+        cognome: "",
+        gender: "",
+        data: "",
+        address: "",
+        cap_code: "",
+        tax_code: "",
+        telefono: "",
+        username: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      };
+
+      this.$router.push("/");
+    },
     correctDate() {
       const dateParts = this.form.data.split("-");
       const year = parseInt(dateParts[0], 10);
@@ -391,7 +418,7 @@ export default {
           });
 
           // Modifica l'URL per il backend che stai usando
-          const response = await axios.post("http://127.0.0.1:5000/register", {
+          await axios.post("http://127.0.0.1:5000/register", {
             username,
             email,
             password,
@@ -405,11 +432,11 @@ export default {
             tax_code,
           });
 
-          alert(
-            "Registrazione avvenuta con successo! Controlla la tua email per la verifica."
-          );
-          console.log(response.data);
-          this.$router.push("/success"); // Naviga alla pagina di successo
+          // Imposta il messaggio di successo
+          this.successMessage =
+            "Registrazione avvenuta con successo! Controlla la tua email per il codice di verifica.";
+          this.loading = false;
+          this.currentStep = 4; // Passa al passo del messaggio di successo
         } catch (error) {
           console.error("Errore nella registrazione:", error);
           if (error.response) {
@@ -420,11 +447,11 @@ export default {
             this.errors.general = error.message;
           }
           alert("Errore nella registrazione: " + this.errors.general);
-        } finally {
           this.loading = false;
         }
       }
     },
+
     isStepValid(step) {
       if (step === 1) {
         return (
