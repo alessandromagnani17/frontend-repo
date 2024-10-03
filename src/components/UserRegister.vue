@@ -74,7 +74,6 @@
               type="text"
               class="form-control"
               required
-              placeholder="Via/Vicolo ..."
             />
           </div>
 
@@ -86,10 +85,6 @@
               type="text"
               class="form-control"
               required
-              minlength="5"
-              maxlength="5"
-              placeholder="XXXXX"
-              @input="validateInput"
             />
           </div>
 
@@ -101,24 +96,18 @@
               type="text"
               class="form-control"
               required
-              minlength="16"
-              maxlength="16"
             />
           </div>
 
           <div class="mb-3">
-            <label for="phone_number" class="form-label"
-              >Numero di telefono</label
-            >
+            <label for="telefono" class="form-label">Numero di Telefono</label>
             <input
-              id="phone_number"
-              v-model="form.phone_number"
+              id="telefono"
+              v-model="form.telefono"
               type="tel"
               class="form-control"
               required
-              pattern="^\+\d{2} \d{10}$"
-              placeholder="+XX XXXXXXXXXX"
-              @input="validatePhoneNumber"
+              placeholder="+PPNNNNNNNNNN"
             />
           </div>
         </div>
@@ -324,16 +313,6 @@ export default {
     },
   },
   methods: {
-    validatePhoneNumber() {
-      this.form.phone_number = this.form.phone_number
-        .replace(/[^+\d]/g, "")
-        .replace(/^(\+\d{2})(\d)/, "$1 $2"); // Aggiunge uno spazio dopo il prefisso
-    },
-    validateInput(event) {
-      const value = event.target.value;
-      // Rimuovi caratteri non numerici
-      event.target.value = value.replace(/[^0-9]/g, "");
-    },
     correctDate() {
       const dateParts = this.form.data.split("-");
       const year = parseInt(dateParts[0], 10);
@@ -341,14 +320,11 @@ export default {
       const day = parseInt(dateParts[2], 10);
 
       // Correzione dell'anno
-      if (year > 2005) {
+      if (year >= 3000) {
         dateParts[0] = "2005";
-      } //else if (year < 1900) {
-      //dateParts[0] = "1920";
-      //}
-      // PROBLEMA ANNO MINORE (CON QUEL CONTROLLO IMPOSTA A 1920 APPENA PREMI 1)
-      // TODO
-      // ----------------------------------------------------------------------
+      } else if (year === 0) {
+        dateParts[0] = "2001";
+      }
 
       // Correzione del mese
       if (month > 12) {
@@ -536,7 +512,6 @@ h2 {
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 12px;
-  text-transform: uppercase;
 }
 
 .input-group {
