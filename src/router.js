@@ -19,6 +19,11 @@ const routes = [
     name: "UserRegister",
     component: UserRegister,
   },
+  {
+    path: "/confirm-email/:email",
+    name: "EmailConfirmation",
+    component: () => import("@/components/EmailConfirmation.vue"),
+  },
 ];
 
 const router = createRouter({
