@@ -175,7 +175,6 @@ export default {
       showPassword.value = !showPassword.value;
     };
 
-    // Funzione per gestire il submit del form
     const onSubmit = async () => {
       if (!validateForm()) return;
       loading.value = true;
@@ -183,7 +182,7 @@ export default {
       try {
         // Effettua la richiesta POST per il login usando axios
         const response = await axios.post("/api/login", {
-          email: form.value.email,
+          email: form.value.email, // Passa l'email come username
           password: form.value.password,
         });
 
@@ -195,7 +194,7 @@ export default {
         // Naviga alla pagina di benvenuto o dashboard
         router.push({
           name: "Welcome",
-          query: { username: form.value.email },
+          query: { username: form.value.email }, // Passa l'email come parametro
         });
       } catch (error) {
         console.error("Errore di login:", error);
