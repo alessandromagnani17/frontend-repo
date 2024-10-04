@@ -1,4 +1,3 @@
-
 <template>
   <div class="register">
     <div class="container mt-5">
@@ -141,7 +140,7 @@
               >Password
               <span
                 class="info-icon"
-                title="Requisiti per la password: min 8 caratteri, almeno una maiuscola, una minuscola, un numero e un carattere speciale."
+                title="Requisiti per la password: min 8 caratteri, almeno una maiuscola, una minuscola un numero e un carattere speciale."
               >
                 <img
                   src="@/assets/info-icon.svg"
@@ -184,7 +183,7 @@
               class="text-danger mt-1"
             >
               La password deve contenere almeno: un numero, una lettera
-              maiuscola, una lettera minuscola, e un carattere speciale.
+              maiuscola, una lettera minuscola e un carattere speciale.
             </div>
           </div>
 
@@ -365,7 +364,7 @@ export default {
           });
 
           // Modifica l'URL per il backend che stai usando
-          const response = await axios.post("http://127.0.0.1:5000/register", {
+          await axios.post("http://127.0.0.1:5000/register", {
             username,
             email,
             password,
@@ -379,11 +378,12 @@ export default {
             tax_code,
           });
 
-          alert(
-            "Registrazione avvenuta con successo! Controlla la tua email per la verifica."
-          );
-          console.log(response.data);
-          this.$router.push("/success"); // Naviga alla pagina di successo
+          // Rimuovi l'alert e reindirizza alla pagina di conferma
+          this.loading = false;
+          this.$router.push({
+            name: "EmailConfirmation",
+            params: { email }, // Passa l'email per usarla nella conferma
+          });
         } catch (error) {
           console.error("Errore nella registrazione:", error);
           if (error.response) {
@@ -394,11 +394,11 @@ export default {
             this.errors.general = error.message;
           }
           alert("Errore nella registrazione: " + this.errors.general);
-        } finally {
           this.loading = false;
         }
       }
     },
+
     isStepValid(step) {
       if (step === 1) {
         return (
@@ -492,6 +492,10 @@ h2 {
   position: relative;
 }
 
+.text-danger {
+  font-size: 0.8rem; /* Font più piccolo (puoi modificarlo a piacere) */
+}
+
 .eye-button {
   background: transparent;
   border: 1px solid #ccc;
@@ -511,6 +515,7 @@ h2 {
 .info-icon {
   margin-left: 5px;
   display: inline-block;
+  font-size: 12px;
 }
 
 .info-image {
