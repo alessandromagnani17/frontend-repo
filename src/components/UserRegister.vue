@@ -78,6 +78,7 @@
               class="form-control"
               style="text-transform: uppercase"
               required
+              placeholder="(es. Via Roma 1)"
             />
           </div>
 
@@ -86,7 +87,7 @@
             <input
               id="cap_code"
               v-model="form.cap_code"
-              type="text"
+              type="number"
               class="form-control"
               required
             />
@@ -112,7 +113,7 @@
               type="tel"
               class="form-control"
               required
-              placeholder="+PPNNNNNNNNNN"
+              placeholder="(es. +391234567890)"
             />
           </div>
         </div>
