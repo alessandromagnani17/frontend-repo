@@ -190,7 +190,8 @@
               class="text-danger mt-1"
             >
               La password deve contenere almeno: un numero, una lettera
-              maiuscola, una lettera minuscola e un carattere speciale.
+              maiuscola, una lettera minuscola e un carattere speciale ed essere
+              lunga almeno 8 caratteri.
             </div>
           </div>
 
@@ -206,6 +207,7 @@
                 class="form-control password-input"
                 :class="{ 'is-invalid': showPasswordError }"
                 required
+                @input="confirmPasswordTouched = true"
                 @paste.prevent
               />
               <button
@@ -223,6 +225,14 @@
                   class="eye-icon"
                 />
               </button>
+            </div>
+            <div
+              v-if="
+                confirmPasswordTouched && form.password !== form.confirmPassword
+              "
+              class="text-danger mt-1"
+            >
+              Le password non corrispondono.
             </div>
           </div>
         </div>
@@ -301,6 +311,7 @@ export default {
       isHover: false,
       showDisabledIcon: false,
       errors: {},
+      confirmPasswordTouched: false,
       form: {
         nome: "",
         cognome: "",
@@ -440,7 +451,7 @@ export default {
 
           // Imposta il messaggio di successo
           this.successMessage =
-            "Registrazione avvenuta con successo! Controlla la tua email per il codice di verifica.";
+            "Registrazione avvenuta con successo! Controlla la tua email per verificare il tuo account.";
           this.loading = false;
           this.currentStep = 4; // Passa al passo del messaggio di successo
         } catch (error) {
@@ -478,6 +489,7 @@ export default {
           this.form.username &&
           this.form.email &&
           this.isPasswordValid &&
+          this.confirmPasswordTouched &&
           this.form.password === this.form.confirmPassword
         );
       }
