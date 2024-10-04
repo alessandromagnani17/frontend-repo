@@ -11,7 +11,7 @@
         </button>
       </div>
 
-      <span class="step-title">Passaggio {{ currentStep }} di 3</span>
+      <span class="step-title">Passaggio {{ currentStep }} di 4</span>
       <h2 class="mb-4">Crea un Account</h2>
 
       <form @submit.prevent="onSubmit">
@@ -24,6 +24,7 @@
               v-model="form.nome"
               type="text"
               class="form-control"
+              style="text-transform: uppercase"
               required
             />
           </div>
@@ -35,6 +36,7 @@
               v-model="form.cognome"
               type="text"
               class="form-control"
+              style="text-transform: uppercase"
               required
             />
           </div>
@@ -47,11 +49,10 @@
               class="form-control"
               required
             >
-              <option value="Male">Maschio</option>
-              <option value="Female">Femmina</option>
+              <option value="Male">MASCHIO</option>
+              <option value="Female">FEMMINA</option>
             </select>
           </div>
-
           <div class="mb-3">
             <label for="data" class="form-label">Data di Nascita</label>
             <input
@@ -59,6 +60,8 @@
               v-model="form.data"
               type="date"
               class="form-control"
+              @change="correctDate"
+              style="text-transform: uppercase"
               required
             />
           </div>
@@ -73,7 +76,9 @@
               v-model="form.address"
               type="text"
               class="form-control"
+              style="text-transform: uppercase"
               required
+              placeholder="(es. Via Roma 1)"
             />
           </div>
 
@@ -82,7 +87,7 @@
             <input
               id="cap_code"
               v-model="form.cap_code"
-              type="text"
+              type="number"
               class="form-control"
               required
             />
@@ -95,6 +100,7 @@
               v-model="form.tax_code"
               type="text"
               class="form-control"
+              style="text-transform: uppercase"
               required
             />
           </div>
@@ -107,6 +113,7 @@
               type="tel"
               class="form-control"
               required
+              placeholder="(es. +391234567890)"
             />
           </div>
         </div>
@@ -183,7 +190,8 @@
               class="text-danger mt-1"
             >
               La password deve contenere almeno: un numero, una lettera
-              maiuscola, una lettera minuscola e un carattere speciale.
+              maiuscola, una lettera minuscola e un carattere speciale ed essere
+              lunga almeno 8 caratteri.
             </div>
           </div>
 
@@ -199,6 +207,7 @@
                 class="form-control password-input"
                 :class="{ 'is-invalid': showPasswordError }"
                 required
+                @input="confirmPasswordTouched = true"
                 @paste.prevent
               />
               <button
@@ -216,6 +225,14 @@
                   class="eye-icon"
                 />
               </button>
+            </div>
+            <div
+              v-if="
+                confirmPasswordTouched && form.password !== form.confirmPassword
+              "
+              class="text-danger mt-1"
+            >
+              Le password non corrispondono.
             </div>
           </div>
         </div>
@@ -261,6 +278,13 @@
             {{ errors.general }}
           </div>
         </div>
+
+        <div v-if="currentStep === 4">
+          <p>{{ successMessage }}</p>
+          <button class="btn btn-primary btn-next" @click="goToHome">
+            Torna alla home
+          </button>
+        </div>
       </form>
     </div>
 
@@ -287,6 +311,7 @@ export default {
       isHover: false,
       showDisabledIcon: false,
       errors: {},
+      confirmPasswordTouched: false,
       form: {
         nome: "",
         cognome: "",
@@ -312,6 +337,52 @@ export default {
     },
   },
   methods: {
+    goToHome() {
+      this.currentStep = 1;
+      this.successMessage = "";
+      this.form = {
+        nome: "",
+        cognome: "",
+        gender: "",
+        data: "",
+        address: "",
+        cap_code: "",
+        tax_code: "",
+        telefono: "",
+        username: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      };
+
+      this.$router.push("/");
+    },
+    correctDate() {
+      const dateParts = this.form.data.split("-");
+      const year = parseInt(dateParts[0], 10);
+      const month = parseInt(dateParts[1], 10);
+      const day = parseInt(dateParts[2], 10);
+
+      // Correzione dell'anno
+      if (year >= 3000) {
+        dateParts[0] = "2005";
+      } else if (year === 0) {
+        dateParts[0] = "2001";
+      }
+
+      // Correzione del mese
+      if (month > 12) {
+        dateParts[1] = "12";
+      }
+
+      // Correzione del giorno
+      if (day > 31) {
+        dateParts[2] = "31";
+      }
+
+      // Imposta la data corretta
+      this.form.data = dateParts.join("-");
+    },
     goToNextStep() {
       if (this.isStepValid(this.currentStep)) {
         if (this.currentStep === 3) {
@@ -378,12 +449,11 @@ export default {
             tax_code,
           });
 
-          // Rimuovi l'alert e reindirizza alla pagina di conferma
+          // Imposta il messaggio di successo
+          this.successMessage =
+            "Registrazione avvenuta con successo! Controlla la tua email per verificare il tuo account.";
           this.loading = false;
-          this.$router.push({
-            name: "EmailConfirmation",
-            params: { email }, // Passa l'email per usarla nella conferma
-          });
+          this.currentStep = 4; // Passa al passo del messaggio di successo
         } catch (error) {
           console.error("Errore nella registrazione:", error);
           if (error.response) {
@@ -419,6 +489,7 @@ export default {
           this.form.username &&
           this.form.email &&
           this.isPasswordValid &&
+          this.confirmPasswordTouched &&
           this.form.password === this.form.confirmPassword
         );
       }
