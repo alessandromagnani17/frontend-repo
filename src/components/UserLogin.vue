@@ -181,7 +181,7 @@ export default {
 
       try {
         // Effettua la richiesta POST per il login usando axios
-        const response = await axios.post("/api/login", {
+        const response = await axios.post("http://127.0.0.1:5000/login", {
           email: form.value.email, // Passa l'email come username
           password: form.value.password,
         });
@@ -198,22 +198,23 @@ export default {
         });
       } catch (error) {
         console.error("Errore di login:", error);
-        alert(`Errore di login: ${error.message}`);
+
+        // Handle the error response properly
         if (error.response) {
-          alert(`Status code: ${error.response.status}`);
-          alert(`Errore dal server: ${error.response.data}`);
-          errors.value.general = `Errore di login: ${
-            error.response.data.message || error.response.statusText
-          }`;
+          console.error("Dati risposta errore:", error.response.data);
+
+          // Show specific error message from the server response
+          errors.value.general =
+            error.response.data.error || "Errore sconosciuto durante il login";
         } else if (error.request) {
-          alert(
-            "La richiesta è stata inviata ma non ha ricevuto risposta dal server."
-          );
-          errors.value.general = "Errore di rete o server non raggiungibile.";
+          errors.value.general =
+            "La richiesta è stata inviata ma non ha ricevuto risposta dal server.";
         } else {
-          alert("Errore sconosciuto durante la richiesta.");
           errors.value.general = "Errore sconosciuto durante la richiesta.";
         }
+
+        // Show the error to the user
+        alert(`Errore di login: ${errors.value.general}`);
       } finally {
         loading.value = false;
       }
