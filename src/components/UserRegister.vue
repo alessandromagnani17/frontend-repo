@@ -24,6 +24,7 @@
               v-model="form.nome"
               type="text"
               class="form-control"
+              style="text-transform: uppercase"
               required
             />
           </div>
@@ -35,6 +36,7 @@
               v-model="form.cognome"
               type="text"
               class="form-control"
+              style="text-transform: uppercase"
               required
             />
           </div>
@@ -47,8 +49,8 @@
               class="form-control"
               required
             >
-              <option value="Male">Maschio</option>
-              <option value="Female">Femmina</option>
+              <option value="Male">MASCHIO</option>
+              <option value="Female">FEMMINA</option>
             </select>
           </div>
           <div class="mb-3">
@@ -59,6 +61,7 @@
               type="date"
               class="form-control"
               @change="correctDate"
+              style="text-transform: uppercase"
               required
             />
           </div>
@@ -73,6 +76,7 @@
               v-model="form.address"
               type="text"
               class="form-control"
+              style="text-transform: uppercase"
               required
             />
           </div>
@@ -95,6 +99,7 @@
               v-model="form.tax_code"
               type="text"
               class="form-control"
+              style="text-transform: uppercase"
               required
             />
           </div>
