@@ -14,7 +14,8 @@
       <span class="step-title">Passaggio {{ currentStep }} di 2</span>
       <h2 class="mb-4">Accedi al tuo Account</h2>
 
-      <form @submit.prevent="onSubmit">
+      <!-- Step 1: Login Form -->
+      <form @submit.prevent="onSubmit" v-if="!showMfaStep">
         <!-- Step 1: Inserisci Email -->
         <div v-if="currentStep === 1">
           <div class="mb-3">
@@ -101,6 +102,36 @@
           </div>
         </div>
       </form>
+
+      <!-- Step 3: MFA Setup -->
+      <div v-if="showMfaStep">
+        <h2>Set up Google Authenticator</h2>
+        <p>
+          Scan the QR code below with your Google Authenticator app, then enter
+          the code.
+        </p>
+
+        <!-- QR Code Image -->
+        <img
+          :src="'data:image/png;base64,' + qrCodeUrl"
+          alt="QR Code for Google Authenticator"
+        />
+
+        <!-- Input field for MFA code -->
+        <form @submit.prevent="onMfaSubmit">
+          <div class="mb-3">
+            <label for="mfaCode" class="form-label">Enter 6-digit code</label>
+            <input
+              id="mfaCode"
+              v-model="mfaCode"
+              type="text"
+              class="form-control"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Verify Code</button>
+        </form>
+      </div>
     </div>
 
     <!-- Loading overlay -->
@@ -113,9 +144,9 @@
 </template>
 
 <script>
-import { ref } from "vue"; // Importa il composable ref da Vue 3
-import { useRouter } from "vue-router"; // Importa il router per la navigazione
-import axios from "axios"; // Importa axios per fare richieste HTTP
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
 export default {
   name: "UserLogin",
@@ -134,10 +165,14 @@ export default {
       general: "",
     });
 
-    const router = useRouter(); // Inizializza il router
+    const router = useRouter();
     const currentStep = ref(1);
     const loading = ref(false);
     const showPassword = ref(false);
+    const showMfaStep = ref(false); // Toggle MFA step visibility
+    const qrCodeUrl = ref(""); // Store QR code URL
+    const session = ref(""); // Store MFA session token
+    const mfaCode = ref(""); // Store user input MFA code
 
     // Funzione per passare allo step successivo
     const goToNextStep = () => {
@@ -182,39 +217,47 @@ export default {
       try {
         // Effettua la richiesta POST per il login usando axios
         const response = await axios.post("http://127.0.0.1:5000/login", {
-          email: form.value.email, // Passa l'email come username
+          email: form.value.email,
           password: form.value.password,
         });
 
-        // Simula successo del login
-        alert(
-          "Login avvenuto con successo! Benvenuto " + response.data.username
-        );
-
-        // Naviga alla pagina di benvenuto o dashboard
-        router.push({
-          name: "Welcome",
-          query: { username: form.value.email }, // Passa l'email come parametro
-        });
-      } catch (error) {
-        console.error("Errore di login:", error);
-
-        // Handle the error response properly
-        if (error.response) {
-          console.error("Dati risposta errore:", error.response.data);
-
-          // Show specific error message from the server response
-          errors.value.general =
-            error.response.data.error || "Errore sconosciuto durante il login";
-        } else if (error.request) {
-          errors.value.general =
-            "La richiesta è stata inviata ma non ha ricevuto risposta dal server.";
+        if (response.data.message === "MFA setup required") {
+          // Step 2: Show MFA setup form
+          showMfaStep.value = true;
+          qrCodeUrl.value = response.data.qr_code;
+          session.value = response.data.session;
         } else {
-          errors.value.general = "Errore sconosciuto durante la richiesta.";
+          // Simula successo del login
+          alert("Login avvenuto con successo!");
+          router.push({
+            name: "Welcome",
+            query: { username: form.value.email },
+          });
         }
+      } catch (error) {
+        errors.value.general =
+          error.response?.data?.error || "Errore sconosciuto durante il login";
+      } finally {
+        loading.value = false;
+      }
+    };
 
-        // Show the error to the user
-        alert(`Errore di login: ${errors.value.general}`);
+    const onMfaSubmit = async () => {
+      loading.value = true;
+      try {
+        // Effettua la richiesta POST per verificare MFA
+        const response = await axios.post("http://127.0.0.1:5000/verify-mfa", {
+          session: session.value,
+          code: mfaCode.value,
+        });
+
+        if (response.data.message === "MFA verified") {
+          alert("MFA verification successful!");
+          // Redirect or handle authenticated state here
+        }
+      } catch (error) {
+        errors.value.general =
+          error.response?.data?.error || "MFA verification failed.";
       } finally {
         loading.value = false;
       }
@@ -231,6 +274,11 @@ export default {
       goToPreviousStep,
       isStepValid,
       errors,
+      showMfaStep,
+      qrCodeUrl,
+      session,
+      mfaCode,
+      onMfaSubmit,
     };
   },
 };
