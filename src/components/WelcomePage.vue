@@ -1,15 +1,13 @@
 <template>
   <div class="welcome">
-    <div class="container mt-5 text-center">
-      <h2>Welcome, {{ username }}!</h2>
-      <p>You have successfully logged in to the Radiology Portal.</p>
+    <div class="container mt-5">
+      <h2 class="mb-4">Benvenuto, {{ username }}!</h2>
+      <p>Hai effettuato correttamente l'accesso al Radiology Portal.</p>
+
       <div class="btn-group mt-4">
-        <router-link to="/dashboard" class="btn btn-primary btn-lg"
-          >Go to Dashboard</router-link
-        >
-        <router-link to="/" class="btn btn-secondary btn-lg"
-          >Go to Home</router-link
-        >
+        <router-link to="/dashboard" class="btn btn-primary btn-next">
+          Vai alla Dashboard
+        </router-link>
       </div>
     </div>
   </div>
@@ -23,55 +21,48 @@ export default {
   name: "WelcomePage",
   setup() {
     const route = useRoute();
-    const username = ref(route.query.username);
+    const username = ref(route.query.username); // Ottiene lo username dalla query
 
-    return { username };
+    return { username }; // Restituisce solo lo username
   },
 };
 </script>
 
 <style scoped>
 .welcome {
-  background: linear-gradient(135deg, #f7f7f7, #e0e0e0);
+  background: #ffffff; /* Sfondo bianco, simile alla pagina di login */
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 0px 0px rgba(0, 0, 0, 0); /* Rimuove ombre esterne */
 }
 
 .container {
-  max-width: 700px;
+  max-width: 600px;
   padding: 40px;
   border-radius: 15px;
   background: #ffffff;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-  animation: slideIn 1s ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateY(-30px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1); /* Simile alla shadow del login */
+  margin-top: 100px;
+  height: auto;
+  text-align: center; /* Centra il testo */
 }
 
 h2 {
-  font-size: 2.5rem;
-  color: #343a40;
+  font-size: 18px; /* Uniforma il font size al login */
+  margin-bottom: 30px;
 }
 
 p {
-  font-size: 1.4rem;
+  font-size: 14px;
   color: #6c757d;
 }
 
 .btn-group .btn {
-  margin: 10px;
-  transition: background-color 0.3s, transform 0.3s;
+  width: 100%; /* Assicura che i bottoni occupino l'intera larghezza */
+  margin-top: 20px;
+  padding: 10px;
 }
 
 .btn-primary {
@@ -81,16 +72,5 @@ p {
 
 .btn-primary:hover {
   background-color: #0056b3;
-  transform: scale(1.1);
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  border: none;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
-  transform: scale(1.1);
 }
 </style>
