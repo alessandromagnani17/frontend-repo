@@ -216,27 +216,39 @@ export default {
 
       try {
         // Effettua la richiesta POST per il login usando axios
+        console.log("Effettuando richiesta di login...");
+
         const response = await axios.post("http://127.0.0.1:5000/login", {
           email: form.value.email,
           password: form.value.password,
         });
 
+        // Verifica la risposta
+        console.log("Risposta ricevuta dal server:", response.data);
+
         if (response.data.message === "MFA setup required") {
-          // Step 2: Show MFA setup form
+          // Step 2: Mostra il form per la configurazione del MFA
           showMfaStep.value = true;
           qrCodeUrl.value = response.data.qr_code;
           session.value = response.data.session;
+          console.log("È richiesta la configurazione MFA. QR code mostrato.");
         } else {
           // Simula successo del login
           alert("Login avvenuto con successo!");
+          console.log(
+            "Login avvenuto con successo! Ridirezionamento alla WelcomePage..."
+          );
+
           router.push({
-            name: "Welcome",
-            query: { username: form.value.email },
+            name: "WelcomePage", // Assicurati che il nome della rotta sia corretto
+            query: { username: form.value.email }, // Passa il nome utente come query
           });
         }
       } catch (error) {
+        console.error("Errore durante il login:", error);
         errors.value.general =
           error.response?.data?.error || "Errore sconosciuto durante il login";
+        alert("Errore durante il login: " + errors.value.general);
       } finally {
         loading.value = false;
       }
