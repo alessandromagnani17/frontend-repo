@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "./views/HomePage.vue";
 import UserLogin from "./components/UserLogin.vue";
 import UserRegister from "./components/UserRegister.vue";
+import WelcomePage from "./components/WelcomePage.vue";
 
 const routes = [
   {
@@ -24,10 +25,15 @@ const routes = [
     name: "EmailConfirmation",
     component: () => import("@/components/EmailConfirmation.vue"),
   },
+  {
+    path: "/welcome",
+    name: "WelcomePage",
+    component: WelcomePage,
+  },
 ];
 
 const router = createRouter({
-  history: createWebHistory(), // Usa createWebHistory per Vue 3
+  history: createWebHistory(),
   routes,
 });
 
