@@ -355,7 +355,7 @@ export default {
         confirmPassword: "",
       };
 
-      this.$router.push("/");
+      this.$router.push("/welcome");
     },
     correctDate() {
       const dateParts = this.form.data.split("-");
@@ -365,9 +365,9 @@ export default {
 
       // Correzione dell'anno
       if (year >= 3000) {
-        dateParts[0] = "2005";
+        dateParts[0] = "2006";
       } else if (year === 0) {
-        dateParts[0] = "2001";
+        dateParts[0] = "1900";
       }
 
       // Correzione del mese
