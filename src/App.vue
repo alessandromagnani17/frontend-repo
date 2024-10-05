@@ -20,18 +20,22 @@
         >
           <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-              <router-link class="nav-link" to="/">Home</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/register"
-                >Register</router-link
+              <router-link class="nav-link" to="/" @click="closeNavbar"
+                >Home</router-link
               >
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/login">Login</router-link>
+              <router-link class="nav-link" to="/register" @click="closeNavbar"
+                >Registrati</router-link
+              >
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/dashboard"
+              <router-link class="nav-link" to="/login" @click="closeNavbar"
+                >Login</router-link
+              >
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link" to="/dashboard" @click="closeNavbar"
                 >Dashboard</router-link
               >
             </li>
@@ -50,11 +54,17 @@
                 :class="{ show: dropdownOpen }"
                 style="position: absolute; top: 100%; left: 0"
               >
-                <router-link class="dropdown-item" to="/profile"
-                  >Profile</router-link
+                <router-link
+                  class="dropdown-item"
+                  to="/profile"
+                  @click="closeNavbar"
+                  >Profilo</router-link
                 >
-                <router-link class="dropdown-item" to="/settings"
-                  >Settings</router-link
+                <router-link
+                  class="dropdown-item"
+                  to="/settings"
+                  @click="closeNavbar"
+                  >Impostazioni</router-link
                 >
                 <a class="dropdown-item" href="#" @click.prevent="logout"
                   >Logout</a
@@ -68,21 +78,21 @@
     <div class="container-fluid">
       <div class="row">
         <aside class="col-md-3 sidebar bg-dark text-white">
-          <h4 class="text-center mt-3">Quick Links</h4>
+          <h4 class="text-center mt-3">Link Rapidi</h4>
           <ul class="nav flex-column">
             <li class="nav-item">
               <router-link class="nav-link text-white" to="/view-radiographs"
-                >View Radiographs</router-link
+                >Visualizza Radiografie</router-link
               >
             </li>
             <li class="nav-item">
               <router-link class="nav-link text-white" to="/manage-patients"
-                >Manage Patients</router-link
+                >Gestisci Pazienti</router-link
               >
             </li>
             <li class="nav-item">
               <router-link class="nav-link text-white" to="/reports"
-                >Reports</router-link
+                >Rapporti</router-link
               >
             </li>
           </ul>
@@ -109,11 +119,14 @@ export default {
     toggleNavbar() {
       this.navbarOpen = !this.navbarOpen; // Cambia lo stato della navbar
     },
+    closeNavbar() {
+      this.navbarOpen = false; // Chiude la navbar
+    },
     toggleDropdown() {
       this.dropdownOpen = !this.dropdownOpen; // Cambia lo stato del menu a tendina
     },
     logout() {
-      alert("Logged out!");
+      alert("Logout effettuato!");
       // Implementa qui la logica di logout
     },
   },
@@ -152,7 +165,7 @@ body {
 }
 
 .nav-link {
-  font-size: 1.2rem;
+  font-size: 1.2rem; /* Stile uniformato */
   color: #ffffff;
 }
 
