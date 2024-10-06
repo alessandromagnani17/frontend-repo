@@ -597,9 +597,14 @@ h2 {
 
 .btn-next {
   width: 100%;
-  margin-top: 20px;
-  padding: 10px;
+  margin-top: 15px;
+  padding: 0.4rem;
   cursor: pointer;
+  font-size: 13px; /* Dimensione del testo più piccola */
+}
+
+.btn-next {
+  font-size: 13px; /* Dimensione del testo più piccola per il pulsante "Avanti" */
 }
 
 .btn-next:hover {
