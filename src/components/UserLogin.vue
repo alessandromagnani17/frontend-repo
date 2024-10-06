@@ -416,7 +416,7 @@ h2 {
 
 .btn-next {
   width: 100%;
-  margin-top: 20px;
+  margin-top: 10px;
   padding: 0.4rem;
   cursor: pointer;
 }
@@ -440,8 +440,8 @@ h2 {
   background: #d9d9d9; /* Colore grigio chiaro */
   color: black; /* Colore del testo */
   width: 100%;
-  margin-top: 6px; /* Spazio sopra il pulsante */
-  padding: 0.3rem; /* Ridotto per i pulsanti, più corto verticalmente */
+  margin-top: 15px; /* Spazio sopra il pulsante */
+  padding: 0.4rem; /* Ridotto per i pulsanti, più corto verticalmente */
   font-size: 13px; /* Dimensione del testo più piccola */
 }
 
