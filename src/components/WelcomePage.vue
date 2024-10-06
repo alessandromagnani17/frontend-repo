@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref } from "vue"; // Rimuovi onMounted da qui
 import { useRoute } from "vue-router";
 
 export default {
@@ -22,6 +22,15 @@ export default {
   setup() {
     const route = useRoute();
     const username = ref(route.query.username); // Ottiene lo username dalla query
+
+    // Stampa di debug
+    console.log("Query Params:", route.query); // Stampa i parametri della query
+    console.log("Username:", username.value); // Stampa lo username
+
+    // Verifica se username è undefined o null
+    if (!username.value) {
+      console.error("Username is not defined!");
+    }
 
     return { username }; // Restituisce solo lo username
   },
