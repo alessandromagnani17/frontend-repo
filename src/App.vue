@@ -1,8 +1,12 @@
 <template>
   <div id="app">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-lg">
+    <nav
+      class="navbar navbar-expand-lg navbar-dark bg-primary shadow-lg sticky-top"
+    >
       <div class="container">
-        <a class="navbar-brand" href="#">Radiology Portal</a>
+        <a class="navbar-brand" href="#" @click.prevent="handleLogoClick"
+          >Radiology Portal</a
+        >
         <button
           class="navbar-toggler"
           type="button"
@@ -111,23 +115,36 @@ export default {
   name: "App",
   data() {
     return {
-      dropdownOpen: false, // Stato per il menu a tendina
-      navbarOpen: false, // Stato per la navbar
+      dropdownOpen: false,
+      navbarOpen: false,
     };
   },
   methods: {
     toggleNavbar() {
-      this.navbarOpen = !this.navbarOpen; // Cambia lo stato della navbar
+      this.navbarOpen = !this.navbarOpen;
     },
     closeNavbar() {
-      this.navbarOpen = false; // Chiude la navbar
+      this.navbarOpen = false;
     },
     toggleDropdown() {
-      this.dropdownOpen = !this.dropdownOpen; // Cambia lo stato del menu a tendina
+      this.dropdownOpen = !this.dropdownOpen;
     },
     logout() {
-      alert("Logout effettuato!");
-      // Implementa qui la logica di logout
+      // Clear the token from localStorage
+      localStorage.removeItem("authToken");
+      alert("Logout successful!");
+      this.$router.push("/"); // Redirect to homepage after logout
+    },
+    handleLogoClick() {
+      const authToken = localStorage.getItem("authToken");
+
+      if (authToken) {
+        // Redirect to the welcome page if logged in
+        this.$router.push("/WelcomePage");
+      } else {
+        // Redirect to the homepage if not logged in
+        this.$router.push("/");
+      }
     },
   },
 };
