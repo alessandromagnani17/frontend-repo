@@ -216,7 +216,7 @@ export default {
 
     // Funzione per creare un account (stub)
     const createAccount = () => {
-      alert("Funzione di creazione account non implementata.");
+      router.push({ name: "UserRegister" });
     };
 
     // Funzione per validare il form
@@ -248,7 +248,6 @@ export default {
       loading.value = true;
 
       try {
-        // Effettua la richiesta POST per il login usando axios
         const response = await axios.post("http://127.0.0.1:5000/login", {
           email: form.value.email,
           password: form.value.password,
@@ -259,22 +258,19 @@ export default {
           showMfaStep.value = true;
           qrCodeUrl.value = response.data.qr_code;
           session.value = response.data.session;
-        } else {
-          // Login avvenuto con successo, otteniamo lo username dal server
-          const username = response.data.username;
+        } else if (response.data.message === "Login successful") {
+          // Store the token in localStorage
+          localStorage.setItem("authToken", response.data.id_token);
 
-          // Simula successo del login
-          alert("Login avvenuto con successo!");
+          // Simulate login success and redirect
+          alert("Login successful!");
 
-          // Redireziona alla WelcomePage con lo username
-          router.push({
-            name: "WelcomePage",
-            query: { username: username }, // Passa lo username nella query
-          });
+          // Redirect to WelcomePage with a query parameter (username or token-based info)
+          router.push({ name: "WelcomePage" });
         }
       } catch (error) {
         errors.value.general =
-          error.response?.data?.error || "Errore sconosciuto durante il login";
+          error.response?.data?.error || "Unknown login error.";
       } finally {
         loading.value = false;
       }
