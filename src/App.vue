@@ -140,7 +140,7 @@ export default {
 
       if (authToken) {
         // Redirect to the welcome page if logged in
-        this.$router.push("/WelcomePage");
+        this.$router.push({ name: "WelcomePage" });
       } else {
         // Redirect to the homepage if not logged in
         this.$router.push("/");
