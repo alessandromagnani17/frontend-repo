@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" @click="closeNavbarOnClick">
     <nav
       class="navbar navbar-expand-lg navbar-dark bg-primary shadow-lg sticky-top"
     >
@@ -13,7 +13,7 @@
           aria-controls="navbarNav"
           aria-expanded="navbarOpen"
           aria-label="Toggle navigation"
-          @click="toggleNavbar"
+          @click.stop="toggleNavbar"
         >
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -79,28 +79,9 @@
         </div>
       </div>
     </nav>
+
     <div class="container-fluid">
       <div class="row">
-        <aside class="col-md-3 sidebar bg-dark text-white">
-          <h4 class="text-center mt-3">Link Rapidi</h4>
-          <ul class="nav flex-column">
-            <li class="nav-item">
-              <router-link class="nav-link text-white" to="/view-radiographs"
-                >Visualizza Radiografie</router-link
-              >
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link text-white" to="/manage-patients"
-                >Gestisci Pazienti</router-link
-              >
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link text-white" to="/reports"
-                >Rapporti</router-link
-              >
-            </li>
-          </ul>
-        </aside>
         <main class="col-md-9">
           <router-view></router-view>
           <!-- Visualizza il componente corretto in base alla rotta -->
@@ -125,6 +106,13 @@ export default {
     },
     closeNavbar() {
       this.navbarOpen = false;
+    },
+    closeNavbarOnClick(event) {
+      // Verifica se il clic è avvenuto all'esterno della navbar
+      const isNavbar = event.target.closest(".navbar");
+      if (!isNavbar) {
+        this.closeNavbar();
+      }
     },
     toggleDropdown() {
       this.dropdownOpen = !this.dropdownOpen;
@@ -165,6 +153,22 @@ body {
   flex-direction: column;
 }
 
+.row {
+  display: flex; /* Attiva Flexbox */
+  height: auto; /* Rimuovi l'altezza fissa */
+  justify-content: center; /* Centra orizzontalmente */
+  align-items: center; /* Centra verticalmente */
+  height: 100vh; /* Imposta l'altezza della riga al 100% della viewport */
+}
+
+main {
+  max-width: 900px; /* Imposta una larghezza massima per il contenuto */
+  max-height: 1300px;
+  width: 100%; /* Occupa il 100% della larghezza del suo contenitore */
+  padding: 20px; /* Aggiunge del padding interno */
+  background: #ffffff; /* Sfondo bianco per il main */
+}
+
 .navbar {
   background-color: #007bff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -201,24 +205,6 @@ body {
 .container-fluid {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 15px;
-}
-
-.sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  padding: 20px;
-  background: linear-gradient(180deg, #212529, #343a40);
-}
-
-.sidebar .nav-link {
-  color: #cfd2d6;
-}
-
-.sidebar .nav-link:hover {
-  background-color: #495057;
-  border-radius: 5px;
 }
 
 .dropdown-menu {
