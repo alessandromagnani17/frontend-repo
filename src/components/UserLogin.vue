@@ -30,10 +30,38 @@
             />
             <div class="invalid-feedback">{{ errors.email }}</div>
           </div>
+
+          <button
+            type="button"
+            class="btn btn-primary btn-next"
+            @click="goToNextStep"
+            :disabled="!isStepValid(currentStep)"
+          >
+            Avanti
+          </button>
+
+          <div class="line-container">
+            <hr class="line" />
+            <span class="or-text">oppure</span>
+            <hr class="line" />
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-light btn-create-account"
+            @click="createAccount"
+          >
+            Crea un Account
+          </button>
         </div>
 
         <!-- Step 2: Inserisci Password -->
         <div v-if="currentStep === 2">
+          <div class="email-display">
+            <span class="email-text">{{ form.email }}</span>
+            <span class="change-text" @click="goToPreviousStep">Cambia</span>
+          </div>
+
           <div class="mb-3">
             <label for="password" class="form-label">Password</label>
             <div class="input-group">
@@ -73,21 +101,7 @@
             />
             <label for="rememberMe" class="form-check-label">Ricordami</label>
           </div>
-        </div>
 
-        <!-- Bottone di avanzamento o login -->
-        <div v-if="currentStep < 2">
-          <button
-            type="button"
-            class="btn btn-primary btn-next"
-            @click="goToNextStep"
-            :disabled="!isStepValid(currentStep)"
-          >
-            Avanti
-          </button>
-        </div>
-
-        <div v-if="currentStep === 2">
           <button
             type="submit"
             class="btn btn-primary btn-next"
@@ -96,7 +110,21 @@
             <span v-if="loading">Login...</span>
             <span v-else>Accedi</span>
           </button>
-          <!-- Error message -->
+
+          <div class="line-container">
+            <hr class="line" />
+            <span class="or-text">oppure</span>
+            <hr class="line" />
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-light btn-create-account"
+            @click="createAccount"
+          >
+            Crea un Account
+          </button>
+
           <div v-if="errors.general" class="invalid-feedback mt-3">
             {{ errors.general }}
           </div>
@@ -186,6 +214,11 @@ export default {
       currentStep.value--;
     };
 
+    // Funzione per creare un account (stub)
+    const createAccount = () => {
+      router.push({ name: "UserRegister" });
+    };
+
     // Funzione per validare il form
     const validateForm = () => {
       errors.value = {
@@ -215,7 +248,6 @@ export default {
       loading.value = true;
 
       try {
-        // Effettua la richiesta POST per il login usando axios
         const response = await axios.post("http://127.0.0.1:5000/login", {
           email: form.value.email,
           password: form.value.password,
@@ -226,17 +258,19 @@ export default {
           showMfaStep.value = true;
           qrCodeUrl.value = response.data.qr_code;
           session.value = response.data.session;
-        } else {
-          // Simula successo del login
-          alert("Login avvenuto con successo!");
-          router.push({
-            name: "Welcome",
-            query: { username: form.value.email },
-          });
+        } else if (response.data.message === "Login successful") {
+          // Store the token in localStorage
+          localStorage.setItem("authToken", response.data.id_token);
+
+          // Simulate login success and redirect
+          alert("Login successful!");
+
+          // Redirect to WelcomePage with a query parameter (username or token-based info)
+          router.push({ name: "WelcomePage" });
         }
       } catch (error) {
         errors.value.general =
-          error.response?.data?.error || "Errore sconosciuto durante il login";
+          error.response?.data?.error || "Unknown login error.";
       } finally {
         loading.value = false;
       }
@@ -257,7 +291,8 @@ export default {
         }
       } catch (error) {
         errors.value.general =
-          error.response?.data?.error || "MFA verification failed.";
+          error.response?.data?.error ||
+          "Errore sconosciuto durante la verifica MFA";
       } finally {
         loading.value = false;
       }
@@ -265,19 +300,21 @@ export default {
 
     return {
       form,
+      errors,
       currentStep,
       loading,
       showPassword,
-      toggleShowPassword,
-      onSubmit,
-      goToNextStep,
-      goToPreviousStep,
-      isStepValid,
-      errors,
       showMfaStep,
       qrCodeUrl,
       session,
       mfaCode,
+      goToNextStep,
+      goToPreviousStep,
+      createAccount,
+      validateForm,
+      isStepValid,
+      toggleShowPassword,
+      onSubmit,
       onMfaSubmit,
     };
   },
@@ -295,7 +332,7 @@ export default {
 }
 
 .container {
-  max-width: 600px;
+  max-width: 400px;
   padding: 40px;
   border-radius: 15px;
   background: #ffffff;
@@ -344,6 +381,15 @@ h2 {
   font-size: 12px;
 }
 
+.form-check-label {
+  font-size: 12px; /* Dimensione del testo più piccola */
+}
+
+.form-check-input {
+  transform: scale(0.75); /* Riduce la dimensione della checkbox di poco */
+  margin-top: 5px; /* Sposta leggermente la checkbox verso il basso per allineamento */
+}
+
 .input-group {
   position: relative;
 }
@@ -366,9 +412,56 @@ h2 {
 
 .btn-next {
   width: 100%;
-  margin-top: 20px;
-  padding: 10px;
+  margin-top: 10px;
+  padding: 0.4rem;
   cursor: pointer;
+}
+
+.line-container {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.line {
+  flex: 1;
+}
+
+.or-text {
+  margin: 0 1rem;
+  font-size: small;
+}
+
+.btn-create-account {
+  background: #d9d9d9; /* Colore grigio chiaro */
+  color: black; /* Colore del testo */
+  width: 100%;
+  margin-top: 15px; /* Spazio sopra il pulsante */
+  padding: 0.4rem; /* Ridotto per i pulsanti, più corto verticalmente */
+  font-size: 13px; /* Dimensione del testo più piccola */
+}
+
+.btn-next {
+  font-size: 13px; /* Dimensione del testo più piccola per il pulsante "Avanti" */
+}
+
+.email-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.email-text {
+  font-size: 14px; /* Dimensione testo per l'email */
+  color: black; /* Colore del testo */
+}
+
+.change-text {
+  font-size: 14px; /* Dimensione testo per "Cambia" */
+  color: black; /* Colore del testo */
+  text-decoration: underline; /* Sottolinea il testo */
+  cursor: pointer; /* Aggiunge il cursore pointer */
 }
 
 .loading-overlay {

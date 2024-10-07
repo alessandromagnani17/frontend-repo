@@ -355,7 +355,7 @@ export default {
         confirmPassword: "",
       };
 
-      this.$router.push("/");
+      this.$router.push("/welcome");
     },
     correctDate() {
       const dateParts = this.form.data.split("-");
@@ -365,9 +365,9 @@ export default {
 
       // Correzione dell'anno
       if (year >= 3000) {
-        dateParts[0] = "2005";
+        dateParts[0] = "2006";
       } else if (year === 0) {
-        dateParts[0] = "2001";
+        dateParts[0] = "1900";
       }
 
       // Correzione del mese
@@ -510,7 +510,7 @@ export default {
 }
 
 .container {
-  max-width: 600px;
+  max-width: 400px;
   padding: 40px;
   border-radius: 15px;
   background: #ffffff;
@@ -597,9 +597,14 @@ h2 {
 
 .btn-next {
   width: 100%;
-  margin-top: 20px;
-  padding: 10px;
+  margin-top: 15px;
+  padding: 0.4rem;
   cursor: pointer;
+  font-size: 13px; /* Dimensione del testo più piccola */
+}
+
+.btn-next {
+  font-size: 13px; /* Dimensione del testo più piccola per il pulsante "Avanti" */
 }
 
 .btn-next:hover {
