@@ -1,5 +1,25 @@
 <template>
   <div class="welcome">
+    <aside class="col-md-3 sidebar bg-dark text-white">
+      <h4 class="text-center mt-3">Link Rapidi</h4>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <router-link class="nav-link text-white" to="/view-radiographs"
+            >Visualizza Radiografie</router-link
+          >
+        </li>
+        <li class="nav-item">
+          <router-link class="nav-link text-white" to="/manage-patients"
+            >Gestisci Pazienti</router-link
+          >
+        </li>
+        <li class="nav-item">
+          <router-link class="nav-link text-white" to="/reports"
+            >Rapporti</router-link
+          >
+        </li>
+      </ul>
+    </aside>
     <div class="container mt-5">
       <h2 class="mb-4">Benvenuto, {{ username }}!</h2>
       <p>Hai effettuato correttamente l'accesso al Radiology Portal.</p>
@@ -81,5 +101,32 @@ p {
 
 .btn-primary:hover {
   background-color: #0056b3;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 20px;
+  background: linear-gradient(180deg, #212529, #343a40);
+}
+
+.sidebar .nav-link {
+  color: #cfd2d6;
+}
+
+.sidebar .nav-link:hover {
+  background-color: #495057;
+  border-radius: 5px;
+}
+
+@media (max-width: 767.98px) {
+  .navbar-brand {
+    font-size: 1.5rem;
+  }
+
+  .sidebar {
+    display: none;
+  }
 }
 </style>
