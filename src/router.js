@@ -3,6 +3,12 @@ import HomePage from "./views/HomePage.vue";
 import UserLogin from "./components/UserLogin.vue";
 import UserRegister from "./components/UserRegister.vue";
 import WelcomePage from "./components/WelcomePage.vue";
+import DashboardPage from "./components/DashboardPage.vue";
+import ProfilePage from "./views/ProfilePage.vue";
+import SettingsPage from "./views/SettingsPage.vue";
+import ViewRadiographs from "./views/ViewRadiographs.vue";
+import ReportsPage from "./views/ReportsPage.vue";
+import ManagePatients from "./views/ManagePatients.vue";
 
 const routes = [
   {
@@ -26,7 +32,43 @@ const routes = [
     path: "/welcome",
     name: "WelcomePage",
     component: WelcomePage,
-    meta: { requiresAuth: true }, // Set meta to mark this route as requiring authentication
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/dashboard",
+    name: "DashboardPage",
+    component: DashboardPage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/profile",
+    name: "ProfilePage",
+    component: ProfilePage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/settings",
+    name: "SettingsPage",
+    component: SettingsPage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/view-radiographs",
+    name: "ViewRadiographs",
+    component: ViewRadiographs,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/reports",
+    name: "ReportsPage",
+    component: ReportsPage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/manage-patients",
+    name: "ManagePatients",
+    component: ManagePatients,
+    meta: { requiresAuth: true },
   },
 ];
 
