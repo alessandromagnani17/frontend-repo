@@ -163,7 +163,6 @@ body {
 
 main {
   max-width: 900px; /* Imposta una larghezza massima per il contenuto */
-  max-height: 1300px;
   width: 100%; /* Occupa il 100% della larghezza del suo contenitore */
   padding: 20px; /* Aggiunge del padding interno */
   background: #ffffff; /* Sfondo bianco per il main */
@@ -173,6 +172,7 @@ main {
   background-color: #007bff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s;
+  padding-left: 20px;
 }
 
 .navbar:hover {
@@ -205,6 +205,8 @@ main {
 .container-fluid {
   max-width: 1200px;
   margin: 0 auto;
+  margin-left: 0px;
+  padding-left: 0px;
 }
 
 .dropdown-menu {
