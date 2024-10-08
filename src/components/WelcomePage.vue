@@ -1,29 +1,29 @@
 <template>
   <div class="welcome">
-    <aside class="col-md-3 sidebar bg-dark text-white">
+    <aside class="sidebar bg-dark text-white">
       <h4 class="text-center mt-3">Link Rapidi</h4>
       <ul class="nav flex-column">
         <li class="nav-item">
-          <router-link class="nav-link text-white" to="/view-radiographs"
-            >Visualizza Radiografie</router-link
-          >
+          <router-link class="nav-link text-white" to="/view-radiographs">
+            Visualizza Radiografie
+          </router-link>
         </li>
         <li class="nav-item">
-          <router-link class="nav-link text-white" to="/manage-patients"
-            >Gestisci Pazienti</router-link
-          >
+          <router-link class="nav-link text-white" to="/manage-patients">
+            Gestisci Pazienti
+          </router-link>
         </li>
         <li class="nav-item">
-          <router-link class="nav-link text-white" to="/reports"
-            >Rapporti</router-link
-          >
+          <router-link class="nav-link text-white" to="/reports">
+            Rapporti
+          </router-link>
         </li>
       </ul>
     </aside>
+
     <div class="container mt-5">
       <h2 class="mb-4">Benvenuto, {{ username }}!</h2>
       <p>Hai effettuato correttamente l'accesso al Radiology Portal.</p>
-
       <div class="btn-group mt-4">
         <router-link to="/dashboard" class="btn btn-primary btn-next">
           Vai alla Dashboard
@@ -34,25 +34,23 @@
 </template>
 
 <script>
-import { ref } from "vue"; // Rimuovi onMounted da qui
+import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 
 export default {
   name: "WelcomePage",
   setup() {
     const route = useRoute();
-    const username = ref(route.query.username); // Ottiene lo username dalla query
+    const username = ref("");
 
-    // Stampa di debug
-    console.log("Query Params:", route.query); // Stampa i parametri della query
-    console.log("Username:", username.value); // Stampa lo username
+    // Recupera lo username dai parametri della query
+    onMounted(() => {
+      username.value = route.query.username || "Utente"; // Fallback a "Utente" se non trovato
+    });
 
-    // Verifica se username è undefined o null
-    if (!username.value) {
-      console.error("Username is not defined!");
-    }
-
-    return { username }; // Restituisce solo lo username
+    return {
+      username,
+    };
   },
 };
 </script>
@@ -76,6 +74,8 @@ export default {
   margin-top: 100px;
   height: auto;
   text-align: center; /* Centra il testo */
+  flex-grow: 1; /* Permette al contenuto principale di occupare lo spazio rimanente */
+  margin-left: 20px; /* Margine sinistro per distanziare il contenuto dalla sidebar */
 }
 
 h2 {
@@ -104,10 +104,10 @@ p {
 }
 
 .sidebar {
-  position: sticky;
   top: 0;
-  height: 100vh;
-  padding: 20px;
+  width: 250px; /* Imposta la larghezza della sidebar */
+  height: 100vh; /* Imposta l'altezza della sidebar al 100% della viewport */
+  padding: 20px; /* Padding interno */
   background: linear-gradient(180deg, #212529, #343a40);
 }
 
@@ -118,6 +118,10 @@ p {
 .sidebar .nav-link:hover {
   background-color: #495057;
   border-radius: 5px;
+}
+
+.nav-link {
+  padding: 10px 15px; /* Aggiunge padding ai link per migliorarne l'aspetto */
 }
 
 @media (max-width: 767.98px) {
