@@ -130,36 +130,6 @@
           </div>
         </div>
       </form>
-
-      <!-- Step 3: MFA Setup -->
-      <div v-if="showMfaStep">
-        <h2>Set up Google Authenticator</h2>
-        <p>
-          Scan the QR code below with your Google Authenticator app, then enter
-          the code.
-        </p>
-
-        <!-- QR Code Image -->
-        <img
-          :src="'data:image/png;base64,' + qrCodeUrl"
-          alt="QR Code for Google Authenticator"
-        />
-
-        <!-- Input field for MFA code -->
-        <form @submit.prevent="onMfaSubmit">
-          <div class="mb-3">
-            <label for="mfaCode" class="form-label">Enter 6-digit code</label>
-            <input
-              id="mfaCode"
-              v-model="mfaCode"
-              type="text"
-              class="form-control"
-              required
-            />
-          </div>
-          <button type="submit" class="btn btn-primary">Verify Code</button>
-        </form>
-      </div>
     </div>
 
     <!-- Loading overlay -->
@@ -253,46 +223,28 @@ export default {
           password: form.value.password,
         });
 
-        if (response.data.message === "MFA setup required") {
-          // Step 2: Show MFA setup form
-          showMfaStep.value = true;
-          qrCodeUrl.value = response.data.qr_code;
-          session.value = response.data.session;
-        } else if (response.data.message === "Login successful") {
+        if (response.data.message === "Login successful") {
           // Store the token in localStorage
-          localStorage.setItem("authToken", response.data.id_token);
+          const token = response.data.id_token;
+          localStorage.setItem("authToken", token); // Salva il token in localStorage
 
-          // Simulate login success and redirect
-          alert("Login successful!");
+          // Imposta il token come Authorization Header per le richieste future
+          axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+          const userData = JSON.parse(atob(token.split(".")[1]));
+          const username = userData["cognito:username"];
+
+          console.log("Reindirizzo alla WelcomePage con username:", username);
 
           // Redirect to WelcomePage with a query parameter (username or token-based info)
-          router.push({ name: "WelcomePage" });
+          router.push({
+            name: "WelcomePage",
+            query: { username: username }, // Passa lo username come parametro di query
+          });
         }
       } catch (error) {
         errors.value.general =
           error.response?.data?.error || "Unknown login error.";
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    const onMfaSubmit = async () => {
-      loading.value = true;
-      try {
-        // Effettua la richiesta POST per verificare MFA
-        const response = await axios.post("http://127.0.0.1:5000/verify-mfa", {
-          session: session.value,
-          code: mfaCode.value,
-        });
-
-        if (response.data.message === "MFA verified") {
-          alert("MFA verification successful!");
-          // Redirect or handle authenticated state here
-        }
-      } catch (error) {
-        errors.value.general =
-          error.response?.data?.error ||
-          "Errore sconosciuto durante la verifica MFA";
       } finally {
         loading.value = false;
       }
@@ -315,7 +267,6 @@ export default {
       isStepValid,
       toggleShowPassword,
       onSubmit,
-      onMfaSubmit,
     };
   },
 };

@@ -14,16 +14,13 @@ const routes = [
     path: "/login",
     name: "UserLogin",
     component: UserLogin,
+    meta: { requiresGuest: true },
   },
   {
     path: "/register",
     name: "UserRegister",
     component: UserRegister,
-  },
-  {
-    path: "/confirm-email/:email",
-    name: "EmailConfirmation",
-    component: () => import("@/components/EmailConfirmation.vue"),
+    meta: { requiresGuest: true },
   },
   {
     path: "/welcome",
@@ -38,18 +35,26 @@ const router = createRouter({
   routes,
 });
 
-// Route guard to protect routes that require authentication
+// Route guard to protect authenticated routes and redirect guests
 router.beforeEach((to, from, next) => {
   const authToken = localStorage.getItem("authToken");
 
   if (to.matched.some((record) => record.meta.requiresAuth)) {
+    // Check if the user is authenticated
     if (!authToken) {
-      // Redirect to login if not authenticated
+      // If no token, redirect to login
       return next({ name: "UserLogin" });
     }
   }
 
-  next(); // Always call next() to proceed
+  if (to.matched.some((record) => record.meta.requiresGuest)) {
+    // Prevent logged-in users from accessing login/register routes
+    if (authToken) {
+      return next({ name: "WelcomePage" }); // Redirect to the welcome page if already logged in
+    }
+  }
+
+  next(); // Always proceed to the next route if checks pass
 });
 
 export default router;

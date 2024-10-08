@@ -27,11 +27,7 @@
 <script>
 export default {
   name: "HomePage",
-  mounted() {
-    console.log(
-      "HomePage mounted - AWS Amplify Cognito is configured. No API calls are made."
-    );
-  },
+  mounted() {},
 };
 </script>
 

@@ -24,8 +24,8 @@ export default {
     const username = ref(route.query.username); // Ottiene lo username dalla query
 
     // Stampa di debug
-    console.log("Query Params:", route.query); // Stampa i parametri della query
-    console.log("Username:", username.value); // Stampa lo username
+    //console.log("Query Params:", route.query); // Stampa i parametri della query
+    //console.log("Username:", username.value); // Stampa lo username
 
     // Verifica se username è undefined o null
     if (!username.value) {
