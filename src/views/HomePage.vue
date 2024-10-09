@@ -72,7 +72,9 @@ p {
 
 /* Stile comune per i pulsanti */
 .btn {
-  width: calc(100% - 20px); /* Larghezza totale meno margine per evitare tagli */
+  width: calc(
+    100% - 20px
+  ); /* Larghezza totale meno margine per evitare tagli */
   padding: 0.5rem 1.5rem;
   font-size: 14px;
   border-radius: 15px;

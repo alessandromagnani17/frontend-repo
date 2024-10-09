@@ -25,7 +25,10 @@
       <h2 class="mb-4">Benvenuto, {{ username }}!</h2>
       <p>Hai effettuato correttamente l'accesso al Radiology Portal.</p>
       <div class="btn-group mt-4">
-        <router-link to="/dashboard" class="btn btn-primary btn-next">
+        <router-link
+          :to="{ path: '/doctor-dashboard', query: { userId: userId } }"
+          class="btn btn-primary btn-next"
+        >
           Vai alla Dashboard
         </router-link>
       </div>

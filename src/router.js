@@ -3,6 +3,7 @@ import HomePage from "./views/HomePage.vue";
 import UserLogin from "./components/UserLogin.vue";
 import UserRegister from "./components/UserRegister.vue";
 import WelcomePage from "./components/WelcomePage.vue";
+import DoctorDashboard from "./components/DoctorDashboard.vue";
 
 const routes = [
   {
@@ -30,6 +31,12 @@ const routes = [
     name: "WelcomePage",
     component: WelcomePage,
     meta: { requiresAuth: true }, // Set meta to mark this route as requiring authentication
+  },
+  {
+    path: "/doctor-dashboard",
+    name: "DoctorDashboard",
+    component: DoctorDashboard,
+    meta: { requiresAuth: true }, // Proteggi la rotta
   },
 ];
 
