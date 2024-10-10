@@ -4,6 +4,12 @@ import UserLogin from "./components/UserLogin.vue";
 import UserRegister from "./components/UserRegister.vue";
 import WelcomePage from "./components/WelcomePage.vue";
 import DoctorDashboard from "./components/DoctorDashboard.vue";
+import DashboardPage from "./components/DashboardPage.vue";
+import ProfilePage from "./views/ProfilePage.vue";
+import SettingsPage from "./views/SettingsPage.vue";
+import ViewRadiographs from "./views/ViewRadiographs.vue";
+import ReportsPage from "./views/ReportsPage.vue";
+import ManagePatients from "./views/ManagePatients.vue";
 
 const routes = [
   {
@@ -15,22 +21,55 @@ const routes = [
     path: "/login",
     name: "UserLogin",
     component: UserLogin,
+    meta: { requiresGuest: true },
   },
   {
     path: "/register",
     name: "UserRegister",
     component: UserRegister,
-  },
-  {
-    path: "/confirm-email/:email",
-    name: "EmailConfirmation",
-    component: () => import("@/components/EmailConfirmation.vue"),
+    meta: { requiresGuest: true },
   },
   {
     path: "/welcome",
     name: "WelcomePage",
     component: WelcomePage,
-    meta: { requiresAuth: true }, // Set meta to mark this route as requiring authentication
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/dashboard",
+    name: "DashboardPage",
+    component: DashboardPage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/profile",
+    name: "ProfilePage",
+    component: ProfilePage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/settings",
+    name: "SettingsPage",
+    component: SettingsPage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/view-radiographs",
+    name: "ViewRadiographs",
+    component: ViewRadiographs,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/reports",
+    name: "ReportsPage",
+    component: ReportsPage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/manage-patients",
+    name: "ManagePatients",
+    component: ManagePatients,
+    meta: { requiresAuth: true },
   },
   {
     path: "/doctor-dashboard",
@@ -45,18 +84,26 @@ const router = createRouter({
   routes,
 });
 
-// Route guard to protect routes that require authentication
+// Route guard to protect authenticated routes and redirect guests
 router.beforeEach((to, from, next) => {
   const authToken = localStorage.getItem("authToken");
 
   if (to.matched.some((record) => record.meta.requiresAuth)) {
+    // Check if the user is authenticated
     if (!authToken) {
-      // Redirect to login if not authenticated
+      // If no token, redirect to login
       return next({ name: "UserLogin" });
     }
   }
 
-  next(); // Always call next() to proceed
+  if (to.matched.some((record) => record.meta.requiresGuest)) {
+    // Prevent logged-in users from accessing login/register routes
+    if (authToken) {
+      return next({ name: "WelcomePage" }); // Redirect to the welcome page if already logged in
+    }
+  }
+
+  next(); // Always proceed to the next route if checks pass
 });
 
 export default router;
