@@ -12,7 +12,7 @@
       </div>
 
       <span class="step-title">Passaggio {{ currentStep }} di 4</span>
-      <h2 class="mb-4">Crea un Account</h2>
+      <h2 class="mb-4">Crea un Account {{ role }}</h2>
 
       <form @submit.prevent="onSubmit">
         <!-- Step 1: Dati Anagrafici -->
@@ -120,6 +120,42 @@
 
         <!-- Step 3: Credenziali -->
         <div v-if="currentStep === 3">
+          <div v-if="currentStep === 3 && isDoctorRole">
+            <div class="mb-3">
+              <label for="doctorID" class="form-label">Doctor ID</label>
+              <input
+                id="doctorID"
+                v-model="form.doctorID"
+                type="text"
+                class="form-control"
+                required
+              />
+            </div>
+          </div>
+
+          <div v-if="currentStep === 3 && !isDoctorRole">
+            <div class="mb-3">
+              <label for="doctorID" class="form-label"
+                >Seleziona il Doctor ID</label
+              >
+              <select
+                id="doctorID"
+                v-model="form.doctorID"
+                class="form-control"
+                required
+              >
+                <option value="" disabled>Seleziona un dottore</option>
+                <option
+                  v-for="doctor in doctors"
+                  :key="doctor.id"
+                  :value="doctor.id"
+                >
+                  {{ doctor.name }} (ID: {{ doctor.id }})
+                </option>
+              </select>
+            </div>
+          </div>
+
           <div class="mb-3">
             <label for="username" class="form-label">Username</label>
             <input
@@ -312,6 +348,9 @@ export default {
       showDisabledIcon: false,
       errors: {},
       confirmPasswordTouched: false,
+      passwordInputTouched: false,
+      isDoctorRole: false,
+      doctors: [],
       form: {
         nome: "",
         cognome: "",
@@ -325,8 +364,21 @@ export default {
         email: "",
         password: "",
         confirmPassword: "",
+        role: "",
+        doctorID: "",
       },
     };
+  },
+  created() {
+    this.role = localStorage.getItem("userRole") || "";
+    this.isDoctorRole = this.role === "doctor"; // Imposta isDoctorRole in base al ruolo
+
+    if (this.isDoctorRole) {
+      this.form.role = "doctor"; // Imposta il role a 'doctor' se l'utente è un dottore
+    } else {
+      this.form.role = "patient"; // Imposta il role a 'patient' se è un paziente
+      this.fetchDoctors();
+    }
   },
   computed: {
     // Computed property per la validazione della password
@@ -356,6 +408,22 @@ export default {
       };
 
       this.$router.push("/welcome");
+    },
+    fetchDoctors() {
+      console.log("Sono dentro fetch doctors frontend");
+      fetch("http://localhost:5000/api/doctors")
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          this.doctors = data; // Popola l'array con i dottori
+        })
+        .catch((error) => {
+          console.error("Errore nel recupero dei dottori:", error);
+        });
     },
     correctDate() {
       const dateParts = this.form.data.split("-");
@@ -405,49 +473,53 @@ export default {
       if (this.isStepValid(3)) {
         this.loading = true;
         this.errors = {};
+
         try {
-          const {
-            username,
-            email,
-            password,
-            nome,
-            cognome,
-            data,
-            telefono,
-            gender,
-            address,
-            cap_code,
-            tax_code,
-          } = this.form;
+          const { email, password, ...userData } = this.form;
+          console.log("REGISTRAZIONE:", JSON.stringify(userData, null, 2));
 
-          console.log("Dati registrazione:", {
-            username,
-            email,
-            password,
-            nome,
-            cognome,
-            data,
-            telefono,
-            gender,
-            address,
-            cap_code,
-            tax_code,
-          });
+          if (this.isDoctorRole) {
+            const response = await axios.post(
+              "http://127.0.0.1:5000/register",
+              {
+                email: email,
+                password: password, // Invio della password al backend
+                nome: userData.nome,
+                cognome: userData.cognome,
+                gender: userData.gender,
+                data: userData.data,
+                address: userData.address,
+                cap_code: userData.cap_code,
+                tax_code: userData.tax_code,
+                telefono: userData.telefono,
+                username: userData.username,
+                role: userData.role,
+                doctorID: userData.doctorID,
+              }
+            );
 
-          // Modifica l'URL per il backend che stai usando
-          await axios.post("http://127.0.0.1:5000/register", {
-            username,
-            email,
-            password,
-            nome,
-            cognome,
-            data,
-            telefono,
-            gender,
-            address,
-            cap_code,
-            tax_code,
-          });
+            console.log("Response dal backend:", response.data);
+          } else {
+            const response = await axios.post(
+              "http://127.0.0.1:5000/register",
+              {
+                email: email,
+                password: password, // Invio della password al backend
+                nome: userData.nome,
+                cognome: userData.cognome,
+                gender: userData.gender,
+                data: userData.data,
+                address: userData.address,
+                cap_code: userData.cap_code,
+                tax_code: userData.tax_code,
+                telefono: userData.telefono,
+                username: userData.username,
+                role: userData.role,
+              }
+            );
+
+            console.log("Response dal backend:", response.data);
+          }
 
           // Imposta il messaggio di successo
           this.successMessage =
