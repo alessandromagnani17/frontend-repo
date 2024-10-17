@@ -16,8 +16,19 @@
         <router-link to="/login" class="btn btn-primary btn-lg mx-2">
           Accedi
         </router-link>
-        <router-link to="/register" class="btn btn-secondary btn-lg mx-2">
-          Registrati
+        <router-link
+          to="/register"
+          class="btn btn-secondary btn-lg mx-2"
+          @click="setRole('patient')"
+        >
+          Registrati come Paziente
+        </router-link>
+        <router-link
+          to="/register"
+          class="btn btn-secondary btn-lg mx-2"
+          @click="setRole('doctor')"
+        >
+          Registrati come Dottore
         </router-link>
       </div>
     </div>
@@ -27,9 +38,15 @@
 <script>
 export default {
   name: "HomePage",
-  mounted() {},
+  methods: {
+    setRole(role) {
+      localStorage.setItem("userRole", role); // Salva il ruolo nel local storage
+      this.$router.push("/register"); // Naviga verso la pagina di registrazione senza query
+    },
+  },
 };
 </script>
+
 <style scoped>
 .home {
   height: 100vh;
