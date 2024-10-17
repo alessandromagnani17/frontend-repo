@@ -22,4 +22,5 @@ const auth = getAuth(app); // Crea l'oggetto auth
 // Initialize Firestore
 const db = getFirestore(app); // Crea l'oggetto db per Firestore
 
-export { auth, db }; // Esporta sia l'oggetto auth che l'oggetto db
+// Esporta sia l'oggetto auth che l'oggetto db e la funzione di login
+export { auth, db };
