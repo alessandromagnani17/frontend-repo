@@ -19,8 +19,8 @@ import PatientList from "./PatientList.vue";
 import PatientRadiographs from "./PatientRadiographs.vue";
 import UploadRadiograph from "./UploadRadiographs.vue";
 import { ref, onMounted } from "vue";
-import { useStore } from "vuex"; // Importa useStore
-import { getRadiographs, getPatients } from "../services/api-service"; // Assicurati che il percorso sia corretto
+import { useStore } from "vuex";
+import { getRadiographs, getPatients } from "../services/api-service";
 
 export default {
   components: {
