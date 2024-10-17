@@ -145,6 +145,8 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { auth } from "@/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth"; // Importa il modulo di autenticazione
 
 export default {
   name: "UserLogin",
@@ -214,35 +216,40 @@ export default {
     };
 
     const onSubmit = async () => {
+      console.log("Attempting login...");
       if (!validateForm()) return;
       loading.value = true;
 
       try {
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          form.value.email,
+          form.value.password
+        );
+        const user = userCredential.user;
+
+        console.log("Login successful:", user);
+
+        // Ottieni il token ID
+        const token = await user.getIdToken();
+
+        // Invia il token al backend
         const response = await axios.post("http://127.0.0.1:5000/login", {
-          email: form.value.email,
-          password: form.value.password,
+          idToken: token,
         });
 
         if (response.data.message === "Login successful") {
-          // Store the token in localStorage
-          const token = response.data.id_token;
-          localStorage.setItem("authToken", token); // Salva il token in localStorage
-
-          // Imposta il token come Authorization Header per le richieste future
+          localStorage.setItem("authToken", token);
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-          const userData = JSON.parse(atob(token.split(".")[1]));
-          const username = userData["cognito:username"];
-
-          console.log("Reindirizzo alla WelcomePage con username:", username);
-
-          // Redirect to WelcomePage with a query parameter (username or token-based info)
+          const username = user.email; // O user.uid
+          console.log("Redirecting to WelcomePage with username:", username);
           router.push({
             name: "WelcomePage",
-            query: { username: username }, // Passa lo username come parametro di query
+            query: { username: username },
           });
         }
       } catch (error) {
+        console.error("Error during login process:", error);
         errors.value.general =
           error.response?.data?.error || "Unknown login error.";
       } finally {
