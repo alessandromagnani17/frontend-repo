@@ -37,23 +37,22 @@
 </template>
 
 <script>
-import { ref } from "vue";
-import { useRoute } from "vue-router";
+import { ref, onMounted } from "vue";
 
 export default {
   name: "WelcomePage",
   setup() {
-    const route = useRoute();
-    const username = ref(route.query.username); // Ottiene lo username dalla query
+    const username = ref("");
 
-    // Stampa di debug
-    //console.log("Query Params:", route.query); // Stampa i parametri della query
-    //console.log("Username:", username.value); // Stampa lo username
+    onMounted(() => {
+      // Ottieni l'username dal localStorage
+      username.value = localStorage.getItem("username");
 
-    // Verifica se username è undefined o null
-    if (!username.value) {
-      console.error("Username is not defined!");
-    }
+      // Verifica se username è undefined o null
+      if (!username.value) {
+        console.error("Username is not defined!");
+      }
+    });
 
     return { username }; // Restituisce solo lo username
   },

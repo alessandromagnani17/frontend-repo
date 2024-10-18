@@ -242,6 +242,7 @@ export default {
 
         if (response.data.message === "Login successful") {
           localStorage.setItem("authToken", token);
+          localStorage.setItem("username", user.email);
           if (response.data.role) {
             console.log("SETTO RUOLO");
             localStorage.setItem("userRole", response.data.role);
@@ -258,10 +259,7 @@ export default {
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
           const username = user.email; // O user.uid
           console.log("Redirecting to WelcomePage with username:", username);
-          router.push({
-            name: "WelcomePage",
-            query: { username: username },
-          });
+          router.push({ name: "WelcomePage" });
         }
       } catch (error) {
         console.error("Error during login process:", error);
