@@ -136,7 +136,7 @@
           <div v-if="currentStep === 3 && !isDoctorRole">
             <div class="mb-3">
               <label for="doctorID" class="form-label"
-                >Seleziona il Doctor ID</label
+                >Seleziona il dottore</label
               >
               <select
                 id="doctorID"
@@ -147,10 +147,11 @@
                 <option value="" disabled>Seleziona un dottore</option>
                 <option
                   v-for="doctor in doctors"
-                  :key="doctor.id"
-                  :value="doctor.id"
+                  :key="doctor.doctorID"
+                  :value="doctor.doctorID"
                 >
-                  {{ doctor.name }} (ID: {{ doctor.id }})
+                  {{ doctor.name }} {{ doctor.family_name }} (ID:
+                  {{ doctor.doctorID }})
                 </option>
               </select>
             </div>
@@ -515,6 +516,7 @@ export default {
                 telefono: userData.telefono,
                 username: userData.username,
                 role: userData.role,
+                doctorID: this.form.doctorID,
               }
             );
 
