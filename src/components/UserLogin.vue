@@ -238,8 +238,23 @@ export default {
           idToken: token,
         });
 
+        console.log("Responseeessss --> " + JSON.stringify(response, null, 2));
+
         if (response.data.message === "Login successful") {
           localStorage.setItem("authToken", token);
+          if (response.data.role) {
+            console.log("SETTO RUOLO");
+            localStorage.setItem("userRole", response.data.role);
+          } else {
+            console.log("NON SENTTO ROLE");
+          }
+          if (response.data.doctorId) {
+            // Aggiungere controllo SE PAZIENTE O DOTTORE
+            console.log("SETTO ID");
+            localStorage.setItem("doctorId", response.data.doctorId);
+          } else {
+            console.log("NON SENTTO ID");
+          }
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
           const username = user.email; // O user.uid
           console.log("Redirecting to WelcomePage with username:", username);

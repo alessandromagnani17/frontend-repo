@@ -15,31 +15,33 @@
 </template>
 
 <script>
-import PatientList from "./PatientList.vue";
 import PatientRadiographs from "./PatientRadiographs.vue";
 import UploadRadiograph from "./UploadRadiographs.vue";
 import { ref, onMounted } from "vue";
-import { useStore } from "vuex";
-import { getRadiographs, getPatients } from "../services/api-service";
+import { getPatients, getRadiographs } from "../services/api-service"; // Assicurati di importare getPatients
 
 export default {
   components: {
-    PatientList,
     PatientRadiographs,
     UploadRadiograph,
   },
   setup() {
-    const store = useStore(); // Crea un'istanza dello store
     const patients = ref([]);
     const selectedPatient = ref(null);
     const selectedPatientRadiographs = ref([]);
 
-    // Ottieni l'ID del dottore loggato
-    const doctorId = store.state.user.id;
+    // Ottieni il DoctorID dal localStorage
+    const doctorId = localStorage.getItem("doctorId");
 
     onMounted(async () => {
-      // Ottieni i pazienti associati
-      patients.value = await getPatients(doctorId);
+      console.log("Cerco pazienti associati a: " + doctorId);
+      // Assicurati che doctorId non sia null
+      if (doctorId) {
+        // Ottieni i pazienti associati
+        patients.value = await getPatients(doctorId);
+      } else {
+        console.error("Nessun DoctorID trovato nel localStorage.");
+      }
     });
 
     // Seleziona un paziente e ottieni le sue radiografie
