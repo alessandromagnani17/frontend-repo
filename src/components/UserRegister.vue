@@ -366,7 +366,8 @@ export default {
       emailErrorMessage: "",
       dateErrorMessage: "",
       minDate: "1900-01-01", // Data minima: 1 gennaio 1900
-      maxDate: this.calculateMaxDate(), // Calcola la data massima (18 anni fa da oggi)
+      maxDate: this.calculateMaxDate(),
+      isValid: false,
       doctors: [],
       patients: [],
       form: {
@@ -625,7 +626,7 @@ export default {
           this.form.nome &&
           this.form.cognome &&
           this.form.gender &&
-          this.validateDate(this.form.data)
+          this.isValid
         );
       } else if (step === 2) {
         return (
