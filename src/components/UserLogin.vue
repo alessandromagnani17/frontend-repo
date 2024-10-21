@@ -232,39 +232,60 @@ export default {
 
         // Ottieni il token ID
         const token = await user.getIdToken();
+        console.log("Token ottenuto:", token);
 
         // Invia il token al backend
         const response = await axios.post("http://127.0.0.1:5000/login", {
           idToken: token,
         });
 
-        console.log("Responseeessss --> " + JSON.stringify(response, null, 2));
+        if (response.data.message === "Email not verified") {
+          console.log("Email NON verificata");
+          alert(
+            "La tua email non è stata verificata. Verifica la tua email prima di accedere."
+          );
+          return; // Interrompi il flusso di login
+        }
 
         if (response.data.message === "Login successful") {
           localStorage.setItem("authToken", token);
           localStorage.setItem("username", user.email);
+
           if (response.data.role) {
-            console.log("SETTO RUOLOsssssss");
+            console.log("Impostando il ruolo...");
             localStorage.setItem("userRole", response.data.role);
           } else {
-            console.log("NON SENTTO ROLE");
+            console.log("Ruolo non presente.");
           }
+
           if (response.data.doctorId) {
-            // Aggiungere controllo SE PAZIENTE O DOTTORE
-            console.log("SETTO ID");
+            console.log("Impostando l'ID del dottore...");
             localStorage.setItem("doctorId", response.data.doctorId);
           } else {
-            console.log("NON SENTTO ID");
+            console.log("ID del dottore non presente.");
           }
+
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-          const username = user.email; // O user.uid
-          console.log("Redirecting to WelcomePage with username:", username);
+          const username = user.email;
+          console.log("Redirezione alla WelcomePage con username:", username);
           router.push({ name: "WelcomePage" });
         }
       } catch (error) {
-        console.error("Error during login process:", error);
-        errors.value.general =
-          error.response?.data?.error || "Unknown login error.";
+        console.error("Errore durante il processo di login:", error);
+
+        if (
+          error.response?.status === 403 &&
+          error.response?.data?.message === "Email not verified"
+        ) {
+          // Gestisci l'errore per email non verificata
+          alert(
+            "La tua email non è stata verificata. Verifica la tua email prima di accedere."
+          );
+        } else {
+          errors.value.general =
+            error.response?.data?.error ||
+            "Errore sconosciuto durante il login.";
+        }
       } finally {
         loading.value = false;
       }
