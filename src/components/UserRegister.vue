@@ -60,10 +60,15 @@
               v-model="form.data"
               type="date"
               class="form-control"
-              @change="correctDate"
-              style="text-transform: uppercase"
+              :class="{ 'is-invalid': dateErrorMessage }"
+              :max="maxDate"
+              :min="minDate"
+              @change="validateDate"
               required
             />
+            <div v-if="dateErrorMessage" class="invalid-feedback">
+              {{ dateErrorMessage }}
+            </div>
           </div>
         </div>
 
@@ -341,6 +346,7 @@
 
 <script>
 import axios from "axios";
+import { parse, format, isValid, isBefore, isAfter, subYears } from "date-fns";
 
 export default {
   data() {
@@ -358,6 +364,9 @@ export default {
       isDoctorRole: false,
       emailError: false,
       emailErrorMessage: "",
+      dateErrorMessage: "",
+      minDate: "1900-01-01", // Data minima: 1 gennaio 1900
+      maxDate: this.calculateMaxDate(), // Calcola la data massima (18 anni fa da oggi)
       doctors: [],
       patients: [],
       form: {
@@ -475,8 +484,8 @@ export default {
 
       // Estrai tutte le email dai dottori e dai pazienti
       const allEmails = [
-        ...this.doctors.map((doctor) => doctor.email || ""), // Assicurati di gestire eventuali undefined
-        ...this.patients.map((patient) => patient.email || ""), // Assicurati di gestire eventuali undefined
+        ...this.doctors.map((doctor) => doctor.email || ""),
+        ...this.patients.map((patient) => patient.email || ""),
       ];
 
       // Controlla se l'email esiste già
@@ -492,33 +501,34 @@ export default {
         this.emailErrorMessage = "";
       }
     },
-
     correctDate() {
-      const dateParts = this.form.data.split("-");
-      const year = parseInt(dateParts[0], 10);
-      const month = parseInt(dateParts[1], 10);
-      const day = parseInt(dateParts[2], 10);
+      if (!this.form.data) return; // Se non c'è una data, esci
 
-      // Correzione dell'anno
-      if (year >= 3000) {
-        dateParts[0] = "2006";
-      } else if (year === 0) {
-        dateParts[0] = "1900";
+      const inputDate = this.form.data;
+      const parsedDate = parse(inputDate, "yyyy-MM-dd", new Date());
+
+      // Definisci il range di date valide
+      const minDate = new Date(1900, 0, 1); // 1 gennaio 1900
+      const maxDate = subYears(new Date(), 18); // 18 anni fa
+
+      // Resetta il messaggio di errore
+      this.dateErrorMessage = "";
+
+      // Controlla se la data è valida e rientra nel range richiesto
+      if (
+        isValid(parsedDate) &&
+        isBefore(parsedDate, maxDate) &&
+        isAfter(parsedDate, minDate)
+      ) {
+        // Se valida, formatta la data
+        this.form.data = format(parsedDate, "yyyy-MM-dd");
+      } else {
+        // Gestisci date non valide o restrizioni sull'età
+        this.dateErrorMessage =
+          "Devi avere almeno 18 anni e la data deve essere compresa tra il 1900 e oggi.";
       }
-
-      // Correzione del mese
-      if (month > 12) {
-        dateParts[1] = "12";
-      }
-
-      // Correzione del giorno
-      if (day > 31) {
-        dateParts[2] = "31";
-      }
-
-      // Imposta la data corretta
-      this.form.data = dateParts.join("-");
     },
+
     goToNextStep() {
       if (this.isStepValid(this.currentStep)) {
         if (this.currentStep === 3) {
@@ -609,14 +619,13 @@ export default {
         }
       }
     },
-
     isStepValid(step) {
       if (step === 1) {
         return (
           this.form.nome &&
           this.form.cognome &&
           this.form.gender &&
-          this.form.data
+          this.validateDate(this.form.data)
         );
       } else if (step === 2) {
         return (
@@ -635,6 +644,41 @@ export default {
         );
       }
       return false;
+    },
+    calculateMaxDate() {
+      const today = new Date();
+      const year = today.getFullYear() - 18; // 18 anni fa
+      const month = String(today.getMonth() + 1).padStart(2, "0"); // Aggiusta il mese (gennaio è 0)
+      const day = String(today.getDate()).padStart(2, "0"); // Aggiusta il giorno
+      return `${year}-${month}-${day}`;
+    },
+    validateDate() {
+      const today = new Date();
+      const selectedDate = new Date(this.form.data);
+
+      // Se l'input è vuoto, mostra l'errore
+      if (!this.form.data) {
+        this.dateErrorMessage = "Il campo data di nascita è obbligatorio.";
+        this.isValid = false;
+        return;
+      }
+
+      // Limita la data tra il 1900 e 18 anni fa
+      const minAllowedDate = new Date(1900, 0, 1);
+      const maxAllowedDate = new Date(
+        today.getFullYear() - 18,
+        today.getMonth(),
+        today.getDate()
+      );
+
+      if (selectedDate < minAllowedDate || selectedDate > maxAllowedDate) {
+        this.dateErrorMessage =
+          "La data deve essere compresa tra il 1900 e 18 anni fa.";
+        this.isValid = false;
+      } else {
+        this.dateErrorMessage = "";
+        this.isValid = true;
+      }
     },
   },
 };
