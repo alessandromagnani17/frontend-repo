@@ -25,14 +25,13 @@
       <h2 class="mb-4">{{ verificationMessage }}</h2>
       <p v-if="errorMessage">{{ errorMessage }}</p>
       <div class="btn-group mt-4" v-if="!isLoading && !errorMessage">
-        <router-link to="/" class="btn btn-primary btn-next">
-          Torna alla Home
-        </router-link>
+        <button class="btn btn-primary btn-next" @click="goToLogin">
+          Esegui il login
+        </button>
       </div>
     </div>
   </div>
 </template>
-
 <script>
 import axios from "axios";
 
@@ -59,6 +58,11 @@ export default {
     } finally {
       this.isLoading = false;
     }
+  },
+  methods: {
+    goToLogin() {
+      this.$router.push("/login");
+    },
   },
 };
 </script>

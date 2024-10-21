@@ -46,13 +46,21 @@
             <hr class="line" />
           </div>
 
-          <button
-            type="button"
+          <router-link
+            to="/register"
             class="btn btn-light btn-create-account"
-            @click="createAccount"
+            @click="createAccount('doctor')"
           >
-            Crea un Account
-          </button>
+            Registrati come Dottore
+          </router-link>
+
+          <router-link
+            to="/register"
+            class="btn btn-light btn-create-account"
+            @click="createAccount('patient')"
+          >
+            Registrati come Paziente
+          </router-link>
         </div>
 
         <!-- Step 2: Inserisci Password -->
@@ -117,13 +125,21 @@
             <hr class="line" />
           </div>
 
-          <button
-            type="button"
+          <router-link
+            to="/register"
             class="btn btn-light btn-create-account"
-            @click="createAccount"
+            @click="createAccount('doctor')"
           >
-            Crea un Account
-          </button>
+            Registrati come Dottore
+          </router-link>
+
+          <router-link
+            to="/register"
+            class="btn btn-light btn-create-account"
+            @click="createAccount('patient')"
+          >
+            Registrati come Paziente
+          </router-link>
 
           <div v-if="errors.general" class="invalid-feedback mt-3">
             {{ errors.general }}
@@ -187,8 +203,9 @@ export default {
     };
 
     // Funzione per creare un account (stub)
-    const createAccount = () => {
-      router.push({ name: "UserRegister" });
+    const createAccount = (role) => {
+      localStorage.setItem("userRole", role); // Salva il ruolo nel local storage
+      router.push("/register");
     };
 
     // Funzione per validare il form
@@ -232,7 +249,6 @@ export default {
 
         // Ottieni il token ID
         const token = await user.getIdToken();
-        console.log("Token ottenuto:", token);
 
         // Invia il token al backend
         const response = await axios.post("http://127.0.0.1:5000/login", {
@@ -244,30 +260,17 @@ export default {
           alert(
             "La tua email non è stata verificata. Verifica la tua email prima di accedere."
           );
-          return; // Interrompi il flusso di login
+          return;
         }
 
         if (response.data.message === "Login successful") {
+          console.log("Setting local storage...");
+          const userData = response.data.user;
+          console.log("User Data:  ", userData);
           localStorage.setItem("authToken", token);
-          localStorage.setItem("username", user.email);
-
-          if (response.data.role) {
-            console.log("Impostando il ruolo...");
-            localStorage.setItem("userRole", response.data.role);
-          } else {
-            console.log("Ruolo non presente.");
-          }
-
-          if (response.data.doctorId) {
-            console.log("Impostando l'ID del dottore...");
-            localStorage.setItem("doctorId", response.data.doctorId);
-          } else {
-            console.log("ID del dottore non presente.");
-          }
+          localStorage.setItem("userData", JSON.stringify(userData));
 
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-          const username = user.email;
-          console.log("Redirezione alla WelcomePage con username:", username);
           router.push({ name: "WelcomePage" });
         }
       } catch (error) {

@@ -22,39 +22,36 @@
     </aside>
 
     <div class="container mt-5">
-      <h2 class="mb-4">Benvenuto, {{ username }}!</h2>
+      <h2 class="mb-4">Benvenuto, {{ fullName }}!</h2>
       <p>Hai effettuato correttamente l'accesso al Radiology Portal.</p>
-      <div class="btn-group mt-4">
-        <router-link
-          :to="{ path: '/doctor-dashboard', query: { userId: userId } }"
-          class="btn btn-primary btn-next"
-        >
-          Vai alla Dashboard
-        </router-link>
-      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 
 export default {
   name: "WelcomePage",
   setup() {
-    const username = ref("");
+    const name = ref("");
+    const familyName = ref("");
+    const userId = ref("");
 
     onMounted(() => {
-      // Ottieni l'username dal localStorage
-      username.value = localStorage.getItem("username");
+      const userDataString = localStorage.getItem("userData");
+      const userData = JSON.parse(userDataString);
 
-      // Verifica se username è undefined o null
-      if (!username.value) {
-        console.error("Username is not defined!");
-      }
+      name.value = userData.name;
+      familyName.value = userData.family_name;
+      userId.value = userData.userId;
+
+      return { name, familyName, userId };
     });
 
-    return { username }; // Restituisce solo lo username
+    const fullName = computed(() => `${name.value} ${familyName.value}`);
+
+    return { fullName }; // Restituisce solo il nome completo
   },
 };
 </script>
