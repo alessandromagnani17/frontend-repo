@@ -175,8 +175,13 @@
               v-model="form.email"
               type="email"
               class="form-control"
+              :class="{ 'is-invalid': emailError }"
               required
+              @blur="checkEmail"
             />
+            <div v-if="emailError" class="text-danger mt-1">
+              {{ emailErrorMessage }}
+            </div>
           </div>
 
           <div class="mb-3">
@@ -304,7 +309,7 @@
           <button
             type="submit"
             class="btn btn-primary btn-next"
-            :disabled="loading || !isStepValid(currentStep)"
+            :disabled="loading || !isStepValid(currentStep) || emailError"
           >
             <span v-if="loading">Registrazione...</span>
             <span v-else>Registrati</span>
@@ -351,7 +356,10 @@ export default {
       confirmPasswordTouched: false,
       passwordInputTouched: false,
       isDoctorRole: false,
+      emailError: false,
+      emailErrorMessage: "",
       doctors: [],
+      patients: [],
       form: {
         nome: "",
         cognome: "",
@@ -378,8 +386,16 @@ export default {
       this.form.role = "doctor"; // Imposta il role a 'doctor' se l'utente è un dottore
     } else {
       this.form.role = "patient"; // Imposta il role a 'patient' se è un paziente
-      this.fetchDoctors();
     }
+
+    // Aspetta che entrambe le funzioni siano completate
+    Promise.all([this.fetchDoctors(), this.fetchPatients()])
+      .then(() => {
+        this.checkEmail(); // Chiama checkEmail dopo aver recuperato i dati
+      })
+      .catch((error) => {
+        console.error("Errore nel recupero dei dottori o pazienti:", error);
+      });
   },
   computed: {
     // Computed property per la validazione della password
@@ -412,20 +428,71 @@ export default {
     },
     fetchDoctors() {
       console.log("Sono dentro fetch doctors frontend");
-      fetch("http://localhost:5000/api/doctors")
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          this.doctors = data; // Popola l'array con i dottori
-        })
-        .catch((error) => {
-          console.error("Errore nel recupero dei dottori:", error);
-        });
+      return new Promise((resolve, reject) => {
+        fetch("http://localhost:5000/api/doctors")
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Dati dottori ricevuti:", data); // Aggiunto log
+            this.doctors = data; // Popola l'array con i dottori
+            resolve();
+          })
+          .catch((error) => {
+            console.error("Errore nel recupero dei dottori:", error);
+            reject(error);
+          });
+      });
     },
+
+    fetchPatients() {
+      console.log("Sono dentro fetch patients frontend");
+      return new Promise((resolve, reject) => {
+        fetch("http://localhost:5000/api/patients")
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Dati pazienti ricevuti:", data); // Aggiunto log
+            this.patients = data; // Popola l'array con i pazienti
+            resolve();
+          })
+          .catch((error) => {
+            console.error("Errore nel recupero dei pazienti:", error);
+            reject(error);
+          });
+      });
+    },
+    checkEmail() {
+      console.log("Dottori:", this.doctors); // Log dei dottori
+      console.log("Pazienti:", this.patients); // Log dei pazienti
+
+      // Estrai tutte le email dai dottori e dai pazienti
+      const allEmails = [
+        ...this.doctors.map((doctor) => doctor.email || ""), // Assicurati di gestire eventuali undefined
+        ...this.patients.map((patient) => patient.email || ""), // Assicurati di gestire eventuali undefined
+      ];
+
+      // Controlla se l'email esiste già
+      const emailExists = allEmails.includes(this.form.email);
+      console.log("Esiste:? " + emailExists);
+
+      // Aggiorna gli stati dell'errore in base all'esistenza dell'email
+      if (emailExists) {
+        this.emailError = true;
+        this.emailErrorMessage = "L'email inserita è già in uso";
+      } else {
+        this.emailError = false;
+        this.emailErrorMessage = "";
+      }
+    },
+
     correctDate() {
       const dateParts = this.form.data.split("-");
       const year = parseInt(dateParts[0], 10);
