@@ -244,7 +244,7 @@ export default {
           localStorage.setItem("authToken", token);
           localStorage.setItem("username", user.email);
           if (response.data.role) {
-            console.log("SETTO RUOLO");
+            console.log("SETTO RUOLOsssssss");
             localStorage.setItem("userRole", response.data.role);
           } else {
             console.log("NON SENTTO ROLE");

@@ -5,6 +5,7 @@ import UserRegister from "./components/UserRegister.vue";
 import WelcomePage from "./components/WelcomePage.vue";
 import DoctorDashboard from "./components/DoctorDashboard.vue";
 import DashboardPage from "./components/DashboardPage.vue";
+import VerifyEmail from "./components/VerifyEmail.vue";
 import ProfilePage from "./views/ProfilePage.vue";
 import SettingsPage from "./views/SettingsPage.vue";
 import ViewRadiographs from "./views/ViewRadiographs.vue";
@@ -76,6 +77,11 @@ const routes = [
     name: "DoctorDashboard",
     component: DoctorDashboard,
     meta: { requiresAuth: true }, // Proteggi la rotta
+  },
+  {
+    path: "/verify-email/:uid",
+    name: "VerifyEmail",
+    component: VerifyEmail,
   },
 ];
 
