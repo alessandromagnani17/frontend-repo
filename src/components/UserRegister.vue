@@ -469,7 +469,7 @@ export default {
             return response.json();
           })
           .then((data) => {
-            console.log("Dati pazienti ricevuti:", data); // Aggiunto log
+            console.log("Dati pazienti ricevuti:", data);
             this.patients = data; // Popola l'array con i pazienti
             resolve();
           })
@@ -480,8 +480,8 @@ export default {
       });
     },
     checkEmail() {
-      console.log("Dottori:", this.doctors); // Log dei dottori
-      console.log("Pazienti:", this.patients); // Log dei pazienti
+      console.log("Dottori:", this.doctors);
+      console.log("Pazienti:", this.patients);
 
       // Estrai tutte le email dai dottori e dai pazienti
       const allEmails = [
