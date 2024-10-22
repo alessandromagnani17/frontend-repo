@@ -43,24 +43,37 @@ export const uploadRadiograph = async (patientId, file) => {
   }
 };
 
-// Funzione per ottenere i pazienti associati a un dottore
-export const getPatients = async (doctorId) => {
+// Funzione per ottenere i pazienti associati a un dottore specifico
+export async function getPatientsFromDoctor(doctorId) {
   try {
-    const response = await axios.get(`${API_URL}/doctors/${doctorId}/patients`);
-    return response.data;
+    const response = await fetch(`/api/${doctorId}/patients`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Errore nel recupero dei pazienti.");
+    }
+
+    const patients = await response.json();
+    return patients;
   } catch (error) {
-    throw new Error(error.response ? error.response.data.error : error.message);
+    console.error("Errore:", error);
+    return [];
   }
-};
+}
 
 // Funzione per ottenere le radiografie di un paziente
 export const getRadiographs = async (patientId) => {
   try {
     const response = await axios.get(
-      `${API_URL}/patients/${patientId}/radiographs`
+      `http://localhost:5000/patients/${patientId}/radiographs`
     );
     return response.data;
   } catch (error) {
-    throw new Error(error.response ? error.response.data.error : error.message);
+    console.error("Errore nel recupero delle radiografie:", error);
+    throw error; // Rilancia l'errore per gestirlo più in alto nella chiamata
   }
 };
