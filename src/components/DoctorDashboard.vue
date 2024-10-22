@@ -1,49 +1,58 @@
 <template>
-  <div>
-    <h1>Dashboard Dottore</h1>
-
-    <div v-if="patients.length > 0">
-      <h2>Elenco Pazienti</h2>
-      <ul>
-        <li
-          v-for="patient in patients"
-          :key="patient.userId"
-          @click="selectPatient(patient)"
-          style="cursor: pointer; text-decoration: underline"
-        >
-          {{ patient.name }} {{ patient.family_name }}
-        </li>
-      </ul>
-    </div>
-    <div v-else>
-      <p>Nessun paziente associato trovato.</p>
-    </div>
-
-    <div v-if="selectedPatient">
-      <h2>Dettagli Paziente</h2>
-      <div>
-        <p><strong>Nome:</strong> {{ selectedPatient.name }}</p>
-        <p><strong>Cognome:</strong> {{ selectedPatient.family_name }}</p>
-        <p><strong>Email:</strong> {{ selectedPatient.email }}</p>
-        <p><strong>Data di nascita:</strong> {{ selectedPatient.birthdate }}</p>
-        <p>
-          <strong>Numero di telefono:</strong>
-          {{ selectedPatient.phone_number }}
-        </p>
-        <p><strong>Indirizzo:</strong> {{ selectedPatient.address }}</p>
-        <!-- Aggiungi qui ulteriori attributi del paziente se necessario -->
+  <div class="dashboard">
+    <div class="container">
+      <div class="header">
+        <h1>Dashboard Dottore</h1>
       </div>
 
-      <UploadRadiograph
-        @uploadSuccess="handleUploadSuccess"
-        :patientId="selectedPatient.userId"
-      />
+      <div v-if="patients.length > 0">
+        <h2>Elenco Pazienti</h2>
+        <ul class="patient-list">
+          <li
+            v-for="patient in patients"
+            :key="patient.userId"
+            @click="selectPatient(patient)"
+            class="patient-item"
+          >
+            {{ patient.name }} {{ patient.family_name }}
+          </li>
+        </ul>
+      </div>
+      <div v-else>
+        <p class="no-patients">Nessun paziente associato trovato.</p>
+      </div>
 
-      <PatientRadiographs
-        :radiographs="selectedPatientRadiographs"
-        :patientId="selectedPatient.userId"
-        :patientName="selectedPatient.name"
-      />
+      <div v-if="selectedPatient" class="details">
+        <h2>Dettagli Paziente</h2>
+        <div class="patient-details">
+          <p><strong>Nome:</strong> {{ selectedPatient.name }}</p>
+          <p><strong>Cognome:</strong> {{ selectedPatient.family_name }}</p>
+          <p><strong>Email:</strong> {{ selectedPatient.email }}</p>
+          <p>
+            <strong>Data di nascita:</strong> {{ selectedPatient.birthdate }}
+          </p>
+          <p>
+            <strong>Numero di telefono:</strong>
+            {{ selectedPatient.phone_number }}
+          </p>
+          <p><strong>Indirizzo:</strong> {{ selectedPatient.address }}</p>
+        </div>
+
+        <div class="upload-section">
+          <UploadRadiograph
+            @uploadSuccess="handleUploadSuccess"
+            :patientId="selectedPatient.userId"
+          />
+        </div>
+
+        <div class="radiographs-section">
+          <PatientRadiographs
+            :radiographs="selectedPatientRadiographs"
+            :patientId="selectedPatient.userId"
+            :patientName="selectedPatient.name"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -62,18 +71,14 @@ export default {
   setup() {
     const patients = ref([]);
     const selectedPatient = ref(null);
-    const selectedPatientRadiographs = ref([]); // Qui hai definito la proprietà
+    const selectedPatientRadiographs = ref([]);
 
-    // Ottieni il DoctorID dal localStorage
     const doctorId = localStorage.getItem("doctorId");
 
     onMounted(async () => {
-      console.log("Cerco pazienti associati a: " + doctorId);
       if (doctorId) {
-        // Ottieni i pazienti associati
         try {
           patients.value = await getPatientsFromDoctor(doctorId);
-          console.log("patients.value: ", patients.value); // Stampa dopo l'assegnazione
         } catch (error) {
           console.error("Errore nel caricamento dei pazienti:", error);
         }
@@ -82,22 +87,17 @@ export default {
       }
     });
 
-    // Seleziona un paziente e ottieni le sue radiografie
     const selectPatient = async (patient) => {
-      console.log("Paziente selezionato:", patient); // Log del paziente selezionato
       selectedPatient.value = patient;
 
-      // Usa userId al posto di id
       if (!patient.userId) {
-        console.error("ID paziente non trovato."); // Log dell'errore
+        console.error("ID paziente non trovato.");
         return;
       }
 
       try {
-        // Imposta le radiografie su un array vuoto se non ci sono radiografie
         selectedPatientRadiographs.value =
-          (await getRadiographs(patient.userId)) || []; // Cambiato da patient.id a patient.userId
-        console.log("Radiografie caricate:", selectedPatientRadiographs.value); // Log delle radiografie caricate
+          (await getRadiographs(patient.userId)) || [];
       } catch (error) {
         console.error(
           "Errore nel caricamento delle radiografie per il paziente:",
@@ -107,7 +107,7 @@ export default {
     };
 
     const handleUploadSuccess = () => {
-      selectPatient(selectedPatient.value); // Ricarica le radiografie
+      selectPatient(selectedPatient.value);
     };
 
     return {
@@ -122,5 +122,100 @@ export default {
 </script>
 
 <style scoped>
-/* Puoi aggiungere qui il tuo stile personalizzato per la dashboard */
+.dashboard {
+  background: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  max-width: 600px;
+  padding: 40px;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  margin-top: 100px;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.patient-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.patient-item {
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: #007bff;
+}
+
+.patient-item:hover {
+  color: #0056b3;
+}
+
+.no-patients {
+  font-size: 14px;
+  color: #999;
+}
+
+.details {
+  margin-top: 30px;
+}
+
+.patient-details p {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.upload-section,
+.radiographs-section {
+  margin-top: 30px;
+}
+
+.btn-next {
+  width: 100%;
+  margin-top: 10px;
+  padding: 0.4rem;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-icon {
+  width: 50px;
+  height: 50px;
+}
 </style>
