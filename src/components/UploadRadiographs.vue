@@ -7,7 +7,10 @@
 </template>
 
 <script>
-import { uploadRadiograph, getPatients } from "../services/api-service"; // Importa le funzioni necessarie
+import {
+  uploadRadiograph,
+  getPatientsFromDoctor,
+} from "../services/api-service"; // Importa le funzioni necessarie
 
 export default {
   data() {
@@ -18,7 +21,7 @@ export default {
   },
   async created() {
     const doctorId = this.$store.state.user.id; // ID del dottore loggato
-    this.patients = await getPatients(doctorId); // Ottieni la lista dei pazienti
+    this.patients = await getPatientsFromDoctor(doctorId); // Ottieni la lista dei pazienti
   },
   methods: {
     onFileChange(event) {
