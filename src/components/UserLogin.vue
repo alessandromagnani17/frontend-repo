@@ -238,27 +238,27 @@ export default {
           idToken: token,
         });
 
-        console.log("Responseeessss --> " + JSON.stringify(response, null, 2));
-
         if (response.data.message === "Login successful") {
           localStorage.setItem("authToken", token);
           localStorage.setItem("username", user.email);
-          if (response.data.role) {
-            console.log("SETTO RUOLOsssssss");
-            localStorage.setItem("userRole", response.data.role);
-          } else {
-            console.log("NON SENTTO ROLE");
-          }
+
+          // Controlla e setta il ruolo e il doctorId se presenti
           if (response.data.doctorId) {
-            // Aggiungere controllo SE PAZIENTE O DOTTORE
-            console.log("SETTO ID");
+            console.log("Setting Doctor ID");
             localStorage.setItem("doctorId", response.data.doctorId);
           } else {
-            console.log("NON SENTTO ID");
+            console.log("No Doctor ID found");
           }
+
+          if (response.data.role) {
+            console.log("Setting user role");
+            localStorage.setItem("userRole", response.data.role);
+          } else {
+            console.log("No role found");
+          }
+
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-          const username = user.email; // O user.uid
-          console.log("Redirecting to WelcomePage with username:", username);
+          console.log("Redirecting to WelcomePage");
           router.push({ name: "WelcomePage" });
         }
       } catch (error) {
