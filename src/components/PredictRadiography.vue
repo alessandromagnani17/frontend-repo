@@ -3,76 +3,75 @@
     <aside class="sidebar bg-dark text-white">
       <h4 class="text-center mt-3">Link Rapidi</h4>
       <ul class="nav flex-column">
-        <li class="nav-item" v-if="role === 'doctor'">
-          <router-link
-            class="nav-link text-white"
-            to="/view-radiographs-doctor"
-          >
-            Visualizza Radiografie (Doctor)
+        <li class="nav-item">
+          <router-link class="nav-link text-white" to="/view-radiographs">
+            Visualizza Radiografie
           </router-link>
         </li>
-        <li class="nav-item" v-if="role === 'patient'">
-          <router-link
-            class="nav-link text-white"
-            to="/view-radiographs-patient"
-          >
-            Visualizza Radiografie (Patient)
-          </router-link>
-        </li>
-        <li class="nav-item" v-if="role === 'doctor'">
+        <li class="nav-item">
           <router-link class="nav-link text-white" to="/manage-patients">
             Gestisci Pazienti
           </router-link>
         </li>
-        <li class="nav-item" v-if="role === 'doctor'">
+        <li class="nav-item">
           <router-link class="nav-link text-white" to="/reports">
             Rapporti
           </router-link>
         </li>
-        <li class="nav-item" v-if="role === 'doctor'">
-          <router-link class="nav-link text-white" to="/predict-doctor">
-            Carica Radiografia (Doctor)
-          </router-link>
-        </li>
-        <li class="nav-item" v-if="role === 'patient'">
-          <router-link class="nav-link text-white" to="/predict-patient">
-            Carica Radiografia (Patient)
+        <li class="nav-item">
+          <router-link class="nav-link text-white" to="/predict">
+            Predict
           </router-link>
         </li>
       </ul>
     </aside>
 
     <div class="container mt-5">
-      <h2 class="mb-4">Benvenuto, {{ fullName }}!</h2>
-      <p>Hai effettuato correttamente l'accesso al Radiology Portal.</p>
+      <input type="file" @change="onFileChange" accept="image/*" />
+      <button @click="submitImage" class="btn btn-primary">Predict</button>
+      <div v-if="predictedClass !== null" class="mt-4">
+        Predicted Class: {{ predictedClass }}
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, computed } from "vue";
+import axios from "axios";
 
 export default {
-  name: "WelcomePage",
-  setup() {
-    const name = ref("");
-    const familyName = ref("");
-    const userId = ref("");
-    const role = ref("");
+  data() {
+    return {
+      selectedFile: null,
+      predictedClass: null,
+    };
+  },
+  methods: {
+    onFileChange(event) {
+      this.selectedFile = event.target.files[0];
+    },
+    async submitImage() {
+      if (!this.selectedFile) return;
 
-    onMounted(() => {
-      const userDataString = localStorage.getItem("userData");
-      const userData = JSON.parse(userDataString);
+      const formData = new FormData();
+      formData.append("file", this.selectedFile);
 
-      name.value = userData.name;
-      familyName.value = userData.family_name;
-      userId.value = userData.userId;
-      role.value = userData.role;
-    });
+      try {
+        const response = await axios.post(
+          "http://127.0.0.1:5000/predict",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
 
-    const fullName = computed(() => `${name.value} ${familyName.value}`);
-
-    return { fullName, role };
+        this.predictedClass = response.data.predicted_class;
+      } catch (error) {
+        console.error("Error predicting image:", error);
+      }
+    },
   },
 };
 </script>

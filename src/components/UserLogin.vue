@@ -97,7 +97,9 @@
                 />
               </button>
             </div>
-            <div class="invalid-feedback">{{ errors.password }}</div>
+            <div v-if="errors.general" class="text-danger mt-1">
+              {{ errors.general }}
+            </div>
           </div>
 
           <div class="mb-3 form-check">
@@ -162,7 +164,8 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { auth } from "@/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth"; // Importa il modulo di autenticazione
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 export default {
   name: "UserLogin",
@@ -227,6 +230,16 @@ export default {
       return false;
     };
 
+    const sendPasswordResetEmailHandler = async () => {
+      try {
+        await sendPasswordResetEmail(auth, form.value.email); // Passa l'oggetto auth come primo argomento
+        alert("Un'email per reimpostare la password è stata inviata.");
+      } catch (error) {
+        console.error("Errore durante l'invio dell'email di reset:", error);
+        errors.value.general = "Errore durante l'invio dell'email di reset.";
+      }
+    };
+
     // Funzione per mostrare/nascondere la password
     const toggleShowPassword = () => {
       showPassword.value = !showPassword.value;
@@ -275,20 +288,51 @@ export default {
         }
       } catch (error) {
         console.error("Errore durante il processo di login:", error);
+        // Azzera gli errori generali
+        errors.value.general = "";
 
-        if (
-          error.response?.status === 403 &&
-          error.response?.data?.message === "Email not verified"
-        ) {
-          // Gestisci l'errore per email non verificata
-          alert(
-            "La tua email non è stata verificata. Verifica la tua email prima di accedere."
+        // Controllo per credenziali non valide
+        if (error.code === "auth/wrong-password") {
+          errors.value.general = "Password errata. Riprova.";
+        } else if (error.code === "auth/user-not-found") {
+          errors.value.general = "Utente non trovato. Controlla l'email.";
+        } else if (error.code === "auth/invalid-credential") {
+          console.log(
+            "Inviando l'email per decrementare i tentativi..." +
+              form.value.email
           );
-        } else {
+          try {
+            // Invia l'email al server per decrementare i tentativi
+            console.log("Email inviata al server:", form.value.email);
+            const decrementResponse = await axios.post(
+              "http://127.0.0.1:5000/decrement-attempts",
+              {
+                email: form.value.email,
+              }
+            );
+
+            // Aggiorna il numero di tentativi rimanenti
+            const attemptsRemaining = decrementResponse.data.loginAttemptsLeft;
+            errors.value.general = `Password errata. Hai ${attemptsRemaining} tentativi rimanenti.`;
+          } catch (decrementError) {
+            console.error(
+              "Errore durante il decremento dei tentativi:",
+              decrementError
+            );
+            errors.value.general = "Errore nel decremento dei tentativi.";
+          }
+        } else if (error.code === "auth/too-many-requests") {
           errors.value.general =
-            error.response?.data?.error ||
-            "Errore sconosciuto durante il login.";
+            "Tentativi di accesso esauriti. Controlla la tua email per il link di reimpostazione della password.";
+          await sendPasswordResetEmailHandler();
+        } else if (error.response.status === 403) {
+          errors.value.general =
+            "La tua email non è stata verificata. Verifica la tua email prima di accedere.";
+        } else {
+          errors.value.general = "Errore sconosciuto durante il login.";
         }
+
+        console.log("Messaggio di errore generale:", errors.value.general);
       } finally {
         loading.value = false;
       }
@@ -474,5 +518,9 @@ h2 {
 .loading-icon {
   width: 50px;
   height: 50px;
+}
+
+.text-danger {
+  font-size: 0.8rem; /* Font più piccolo (puoi modificarlo a piacere) */
 }
 </style>
