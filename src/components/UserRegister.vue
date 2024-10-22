@@ -485,8 +485,8 @@ export default {
 
       // Estrai tutte le email dai dottori e dai pazienti
       const allEmails = [
-        ...this.doctors.map((doctor) => doctor.email || ""),
-        ...this.patients.map((patient) => patient.email || ""),
+        ...this.doctors.map((doctor) => doctor.email),
+        ...this.patients.map((patient) => patient.email),
       ];
 
       // Controlla se l'email esiste già
