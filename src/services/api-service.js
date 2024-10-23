@@ -26,10 +26,14 @@ export const loginUser = async (loginData) => {
 export const uploadRadiograph = async (patientId, file) => {
   const formData = new FormData();
   formData.append("file", file);
+  formData.append("patientId", patientId); // Aggiunto l'ID paziente ai formData
+  console.log("PatientID: " + patientId);
 
   try {
+    console.log("DOPO DEL TRY");
+
     const response = await axios.post(
-      `${API_URL}/patients/${patientId}/radiographs`,
+      `${API_URL}/api/patients/${patientId}/radiographs`,
       formData,
       {
         headers: {
@@ -39,6 +43,8 @@ export const uploadRadiograph = async (patientId, file) => {
     );
     return response.data;
   } catch (error) {
+    // Aggiungi maggiori dettagli all'errore
+    console.error("Errore durante il caricamento:", error);
     throw new Error(error.response ? error.response.data.error : error.message);
   }
 };
