@@ -40,11 +40,13 @@ export default {
       }
 
       try {
+        // Corretto il passaggio dei parametri
         const response = await uploadRadiograph(this.patientId, this.file);
-        this.$emit("uploadSuccess", response);
+        this.$emit("uploadSuccess", response.fileUrl); // Modificato per emettere l'URL del file
       } catch (error) {
-        console.error(error.message);
-        alert("Errore nel caricamento della radiografia.");
+        // Stampa dettagli significativi sugli errori
+        console.error("Dettagli errore:", error);
+        alert("Errore nel caricamento della radiografia: " + error.message);
       }
     },
   },
