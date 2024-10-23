@@ -30,7 +30,7 @@
           </router-link>
         </li>
         <li class="nav-item" v-if="role === 'doctor'">
-          <router-link class="nav-link text-white" to="/predict-doctor">
+          <router-link class="nav-link text-white" to="/predict">
             Carica Radiografia (Doctor)
           </router-link>
         </li>
