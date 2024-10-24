@@ -22,20 +22,48 @@
     </aside>
 
     <div class="container mt-5">
-      <h2 class="mb-4">Email Verificata</h2>
-      <p>La tua email è stata verificata con successo.</p>
-      <div class="btn-group mt-4">
-        <router-link to="/" class="btn btn-primary btn-next">
-          Torna alla Home
-        </router-link>
+      <h2 class="mb-4">{{ verificationMessage }}</h2>
+      <p v-if="errorMessage">{{ errorMessage }}</p>
+      <div class="btn-group mt-4" v-if="!isLoading && !errorMessage">
+        <button class="btn btn-primary btn-next" @click="goToLogin">
+          Esegui il login
+        </button>
       </div>
     </div>
   </div>
 </template>
-
 <script>
+import axios from "axios";
+
 export default {
   name: "VerifyEmail",
+  data() {
+    return {
+      verificationMessage: "Verificando la tua email...",
+      errorMessage: null,
+      isLoading: true,
+    };
+  },
+  async mounted() {
+    const uid = this.$route.params.uid; // Assicurati che l'UID sia presente nell'URL
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/verify-email/${uid}`
+      );
+      this.verificationMessage = response.data.message; // "Email verificata con successo!"
+      console.log("Risposta server --> " + response.data.message);
+    } catch (error) {
+      this.errorMessage =
+        error.response?.data?.error || "Errore durante la verifica dell'email.";
+    } finally {
+      this.isLoading = false;
+    }
+  },
+  methods: {
+    goToLogin() {
+      this.$router.push("/login");
+    },
+  },
 };
 </script>
 

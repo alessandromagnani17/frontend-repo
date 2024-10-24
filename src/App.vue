@@ -118,9 +118,17 @@ export default {
       this.dropdownOpen = !this.dropdownOpen;
     },
     logout() {
-      // Clear the token from localStorage
-      localStorage.removeItem("authToken");
-      alert("Logout successful!");
+      // Clear the token from all items
+      localStorage.clear();
+      //console.log("Has to be 0 --> " + localStorage.length);
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        console.log("<");
+        console.log(`${key}: ${value}`);
+        console.log(">");
+      }
+
       this.$router.push("/"); // Redirect to homepage after logout
     },
     handleLogoClick() {

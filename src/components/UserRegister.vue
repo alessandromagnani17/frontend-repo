@@ -11,8 +11,10 @@
         </button>
       </div>
 
-      <span class="step-title">Passaggio {{ currentStep }} di 4</span>
-      <h2 class="mb-4">Crea un Account {{ role }}</h2>
+      <span class="step-title" v-if="currentStep < 4"
+        >Passaggio {{ currentStep }} di 4</span
+      >
+      <h2 class="mb-4" v-if="currentStep < 4">Crea un Account {{ role }}</h2>
 
       <form @submit.prevent="onSubmit">
         <!-- Step 1: Dati Anagrafici -->
@@ -60,10 +62,15 @@
               v-model="form.data"
               type="date"
               class="form-control"
-              @change="correctDate"
-              style="text-transform: uppercase"
+              :class="{ 'is-invalid': dateErrorMessage }"
+              :max="maxDate"
+              :min="minDate"
+              @change="validateDate"
               required
             />
+            <div v-if="dateErrorMessage" class="invalid-feedback">
+              {{ dateErrorMessage }}
+            </div>
           </div>
         </div>
 
@@ -175,8 +182,13 @@
               v-model="form.email"
               type="email"
               class="form-control"
+              :class="{ 'is-invalid': emailError }"
               required
+              @blur="checkEmail"
             />
+            <div v-if="emailError" class="text-danger mt-1">
+              {{ emailErrorMessage }}
+            </div>
           </div>
 
           <div class="mb-3">
@@ -304,7 +316,7 @@
           <button
             type="submit"
             class="btn btn-primary btn-next"
-            :disabled="loading || !isStepValid(currentStep)"
+            :disabled="loading || !isStepValid(currentStep) || emailError"
           >
             <span v-if="loading">Registrazione...</span>
             <span v-else>Registrati</span>
@@ -317,9 +329,12 @@
         </div>
 
         <div v-if="currentStep === 4">
-          <p>{{ successMessage }}</p>
+          <h2 class="mb-4" style="font-weight: bold">
+            Registrazione avvenuta con successo!
+          </h2>
+          <p>Controlla la tua email per verificare il tuo account.</p>
           <button class="btn btn-primary btn-next" @click="goToHome">
-            Torna alla home
+            Esegui il login
           </button>
         </div>
       </form>
@@ -336,6 +351,7 @@
 
 <script>
 import axios from "axios";
+import { parse, format, isValid, isBefore, isAfter, subYears } from "date-fns";
 
 export default {
   data() {
@@ -351,7 +367,14 @@ export default {
       confirmPasswordTouched: false,
       passwordInputTouched: false,
       isDoctorRole: false,
+      emailError: false,
+      emailErrorMessage: "",
+      dateErrorMessage: "",
+      minDate: "1900-01-01", // Data minima: 1 gennaio 1900
+      maxDate: this.calculateMaxDate(),
+      isValid: false,
       doctors: [],
+      patients: [],
       form: {
         nome: "",
         cognome: "",
@@ -378,8 +401,16 @@ export default {
       this.form.role = "doctor"; // Imposta il role a 'doctor' se l'utente è un dottore
     } else {
       this.form.role = "patient"; // Imposta il role a 'patient' se è un paziente
-      this.fetchDoctors();
     }
+
+    // Aspetta che entrambe le funzioni siano completate
+    Promise.all([this.fetchDoctors(), this.fetchPatients()])
+      .then(() => {
+        this.checkEmail(); // Chiama checkEmail dopo aver recuperato i dati
+      })
+      .catch((error) => {
+        console.error("Errore nel recupero dei dottori o pazienti:", error);
+      });
   },
   computed: {
     // Computed property per la validazione della password
@@ -392,7 +423,6 @@ export default {
   methods: {
     goToHome() {
       this.currentStep = 1;
-      this.successMessage = "";
       this.form = {
         nome: "",
         cognome: "",
@@ -412,46 +442,98 @@ export default {
     },
     fetchDoctors() {
       console.log("Sono dentro fetch doctors frontend");
-      fetch("http://localhost:5000/api/doctors")
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          this.doctors = data; // Popola l'array con i dottori
-        })
-        .catch((error) => {
-          console.error("Errore nel recupero dei dottori:", error);
-        });
+      return new Promise((resolve, reject) => {
+        fetch("http://localhost:5000/api/doctors")
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Dati dottori ricevuti:", data); // Aggiunto log
+            this.doctors = data; // Popola l'array con i dottori
+            resolve();
+          })
+          .catch((error) => {
+            console.error("Errore nel recupero dei dottori:", error);
+            reject(error);
+          });
+      });
+    },
+
+    fetchPatients() {
+      console.log("Sono dentro fetch patients frontend");
+      return new Promise((resolve, reject) => {
+        fetch("http://localhost:5000/api/patients")
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Dati pazienti ricevuti:", data);
+            this.patients = data; // Popola l'array con i pazienti
+            resolve();
+          })
+          .catch((error) => {
+            console.error("Errore nel recupero dei pazienti:", error);
+            reject(error);
+          });
+      });
+    },
+    checkEmail() {
+      console.log("Dottori:", this.doctors);
+      console.log("Pazienti:", this.patients);
+
+      // Estrai tutte le email dai dottori e dai pazienti
+      const allEmails = [
+        ...this.doctors.map((doctor) => doctor.email),
+        ...this.patients.map((patient) => patient.email),
+      ];
+
+      // Controlla se l'email esiste già
+      const emailExists = allEmails.includes(this.form.email);
+      console.log("Esiste:? " + emailExists);
+
+      // Aggiorna gli stati dell'errore in base all'esistenza dell'email
+      if (emailExists) {
+        this.emailError = true;
+        this.emailErrorMessage = "L'email inserita è già in uso";
+      } else {
+        this.emailError = false;
+        this.emailErrorMessage = "";
+      }
     },
     correctDate() {
-      const dateParts = this.form.data.split("-");
-      const year = parseInt(dateParts[0], 10);
-      const month = parseInt(dateParts[1], 10);
-      const day = parseInt(dateParts[2], 10);
+      if (!this.form.data) return; // Se non c'è una data, esci
 
-      // Correzione dell'anno
-      if (year >= 3000) {
-        dateParts[0] = "2006";
-      } else if (year === 0) {
-        dateParts[0] = "1900";
+      const inputDate = this.form.data;
+      const parsedDate = parse(inputDate, "yyyy-MM-dd", new Date());
+
+      // Definisci il range di date valide
+      const minDate = new Date(1900, 0, 1); // 1 gennaio 1900
+      const maxDate = subYears(new Date(), 18); // 18 anni fa
+
+      // Resetta il messaggio di errore
+      this.dateErrorMessage = "";
+
+      // Controlla se la data è valida e rientra nel range richiesto
+      if (
+        isValid(parsedDate) &&
+        isBefore(parsedDate, maxDate) &&
+        isAfter(parsedDate, minDate)
+      ) {
+        // Se valida, formatta la data
+        this.form.data = format(parsedDate, "yyyy-MM-dd");
+      } else {
+        // Gestisci date non valide o restrizioni sull'età
+        this.dateErrorMessage =
+          "Devi avere almeno 18 anni e la data deve essere compresa tra il 1900 e oggi.";
       }
-
-      // Correzione del mese
-      if (month > 12) {
-        dateParts[1] = "12";
-      }
-
-      // Correzione del giorno
-      if (day > 31) {
-        dateParts[2] = "31";
-      }
-
-      // Imposta la data corretta
-      this.form.data = dateParts.join("-");
     },
+
     goToNextStep() {
       if (this.isStepValid(this.currentStep)) {
         if (this.currentStep === 3) {
@@ -524,8 +606,6 @@ export default {
           }
 
           // Imposta il messaggio di successo
-          this.successMessage =
-            "Registrazione avvenuta con successo! Controlla la tua email per verificare il tuo account.";
           this.loading = false;
           this.currentStep = 4; // Passa al passo del messaggio di successo
         } catch (error) {
@@ -542,14 +622,13 @@ export default {
         }
       }
     },
-
     isStepValid(step) {
       if (step === 1) {
         return (
           this.form.nome &&
           this.form.cognome &&
           this.form.gender &&
-          this.form.data
+          this.isValid
         );
       } else if (step === 2) {
         return (
@@ -568,6 +647,41 @@ export default {
         );
       }
       return false;
+    },
+    calculateMaxDate() {
+      const today = new Date();
+      const year = today.getFullYear() - 18; // 18 anni fa
+      const month = String(today.getMonth() + 1).padStart(2, "0"); // Aggiusta il mese (gennaio è 0)
+      const day = String(today.getDate()).padStart(2, "0"); // Aggiusta il giorno
+      return `${year}-${month}-${day}`;
+    },
+    validateDate() {
+      const today = new Date();
+      const selectedDate = new Date(this.form.data);
+
+      // Se l'input è vuoto, mostra l'errore
+      if (!this.form.data) {
+        this.dateErrorMessage = "Il campo data di nascita è obbligatorio.";
+        this.isValid = false;
+        return;
+      }
+
+      // Limita la data tra il 1900 e 18 anni fa
+      const minAllowedDate = new Date(1900, 0, 1);
+      const maxAllowedDate = new Date(
+        today.getFullYear() - 18,
+        today.getMonth(),
+        today.getDate()
+      );
+
+      if (selectedDate < minAllowedDate || selectedDate > maxAllowedDate) {
+        this.dateErrorMessage =
+          "La data deve essere compresa tra il 1900 e 18 anni fa.";
+        this.isValid = false;
+      } else {
+        this.dateErrorMessage = "";
+        this.isValid = true;
+      }
     },
   },
 };
