@@ -35,20 +35,26 @@ export default {
       radiographs: [],
     };
   },
-  mounted() {
-    // Simulazione di un'API che recupera le radiografie di un paziente
-    this.radiographs = [
-      {
-        id: "1",
-        date: "2024-01-10",
-        url: "https://example.com/radiograph1.jpg",
-      },
-      {
-        id: "2",
-        date: "2024-02-15",
-        url: "https://example.com/radiograph2.jpg",
-      },
-    ];
+  async mounted() {
+    try {
+      const response = await fetch(
+        `/api/patients/${this.patientId}/radiographs`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        this.radiographs = await response.json();
+      } else {
+        console.error("Errore nel recupero delle radiografie.");
+      }
+    } catch (error) {
+      console.error("Errore:", error);
+    }
   },
 };
 </script>
