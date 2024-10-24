@@ -75,7 +75,7 @@ export async function getPatientsFromDoctor(doctorId) {
 export const getRadiographs = async (patientId) => {
   try {
     const response = await axios.get(
-      `http://localhost:5000/patients/${patientId}/radiographs`
+      `http://localhost:5000/api/patients/${patientId}/radiographs`
     );
     return response.data;
   } catch (error) {
