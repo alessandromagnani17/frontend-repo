@@ -11,8 +11,10 @@
         </button>
       </div>
 
-      <span class="step-title">Passaggio {{ currentStep }} di 4</span>
-      <h2 class="mb-4">Crea un Account {{ role }}</h2>
+      <span class="step-title" v-if="currentStep < 4"
+        >Passaggio {{ currentStep }} di 4</span
+      >
+      <h2 class="mb-4" v-if="currentStep < 4">Crea un Account {{ role }}</h2>
 
       <form @submit.prevent="onSubmit">
         <!-- Step 1: Dati Anagrafici -->
@@ -327,9 +329,12 @@
         </div>
 
         <div v-if="currentStep === 4">
-          <p>{{ successMessage }}</p>
+          <h2 class="mb-4" style="font-weight: bold">
+            Registrazione avvenuta con successo!
+          </h2>
+          <p>Controlla la tua email per verificare il tuo account.</p>
           <button class="btn btn-primary btn-next" @click="goToHome">
-            Torna alla home
+            Esegui il login
           </button>
         </div>
       </form>
@@ -418,7 +423,6 @@ export default {
   methods: {
     goToHome() {
       this.currentStep = 1;
-      this.successMessage = "";
       this.form = {
         nome: "",
         cognome: "",
@@ -602,8 +606,6 @@ export default {
           }
 
           // Imposta il messaggio di successo
-          this.successMessage =
-            "Registrazione avvenuta con successo! Controlla la tua email per verificare il tuo account.";
           this.loading = false;
           this.currentStep = 4; // Passa al passo del messaggio di successo
         } catch (error) {

@@ -46,13 +46,21 @@
             <hr class="line" />
           </div>
 
-          <button
-            type="button"
+          <router-link
+            to="/register"
             class="btn btn-light btn-create-account"
-            @click="createAccount"
+            @click="createAccount('doctor')"
           >
-            Crea un Account
-          </button>
+            Registrati come Dottore
+          </router-link>
+
+          <router-link
+            to="/register"
+            class="btn btn-light btn-create-account"
+            @click="createAccount('patient')"
+          >
+            Registrati come Paziente
+          </router-link>
         </div>
 
         <!-- Step 2: Inserisci Password -->
@@ -89,7 +97,9 @@
                 />
               </button>
             </div>
-            <div class="invalid-feedback">{{ errors.password }}</div>
+            <div v-if="errors.general" class="text-danger mt-1">
+              {{ errors.general }}
+            </div>
           </div>
 
           <div class="mb-3 form-check">
@@ -117,13 +127,21 @@
             <hr class="line" />
           </div>
 
-          <button
-            type="button"
+          <router-link
+            to="/register"
             class="btn btn-light btn-create-account"
-            @click="createAccount"
+            @click="createAccount('doctor')"
           >
-            Crea un Account
-          </button>
+            Registrati come Dottore
+          </router-link>
+
+          <router-link
+            to="/register"
+            class="btn btn-light btn-create-account"
+            @click="createAccount('patient')"
+          >
+            Registrati come Paziente
+          </router-link>
 
           <div v-if="errors.general" class="invalid-feedback mt-3">
             {{ errors.general }}
@@ -146,7 +164,8 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { auth } from "@/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth"; // Importa il modulo di autenticazione
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 export default {
   name: "UserLogin",
@@ -210,6 +229,16 @@ export default {
       return false;
     };
 
+    const sendPasswordResetEmailHandler = async () => {
+      try {
+        await sendPasswordResetEmail(auth, form.value.email); // Passa l'oggetto auth come primo argomento
+        alert("Un'email per reimpostare la password è stata inviata.");
+      } catch (error) {
+        console.error("Errore durante l'invio dell'email di reset:", error);
+        errors.value.general = "Errore durante l'invio dell'email di reset.";
+      }
+    };
+
     // Funzione per mostrare/nascondere la password
     const toggleShowPassword = () => {
       showPassword.value = !showPassword.value;
@@ -238,33 +267,91 @@ export default {
           idToken: token,
         });
 
+        if (response.data.message === "Email not verified") {
+          console.log("Email NON verificata");
+          alert(
+            "La tua email non è stata verificata. Verifica la tua email prima di accedere."
+          );
+          return;
+        }
+
         if (response.data.message === "Login successful") {
+          console.log("Setting local storage...");
+          const userData = response.data.user;
+          console.log("User Data:  ", userData);
+
           localStorage.setItem("authToken", token);
           localStorage.setItem("username", user.email);
 
           // Controlla e setta il ruolo e il doctorId se presenti
-          if (response.data.doctorId) {
+          if (userData.doctorID) {
             console.log("Setting Doctor ID");
-            localStorage.setItem("doctorId", response.data.doctorId);
+            localStorage.setItem("doctorId", userData.doctorID);
           } else {
             console.log("No Doctor ID found");
           }
 
-          if (response.data.role) {
+          if (userData.role) {
             console.log("Setting user role");
-            localStorage.setItem("userRole", response.data.role);
+            localStorage.setItem("userRole", userData.role);
           } else {
             console.log("No role found");
           }
 
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
           console.log("Redirecting to WelcomePage");
+          localStorage.setItem("userData", JSON.stringify(userData));
+
+          axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
           router.push({ name: "WelcomePage" });
         }
       } catch (error) {
-        console.error("Error during login process:", error);
-        errors.value.general =
-          error.response?.data?.error || "Unknown login error.";
+        console.error("Errore durante il processo di login:", error);
+        // Azzera gli errori generali
+        errors.value.general = "";
+
+        // Controllo per credenziali non valide
+        if (error.code === "auth/wrong-password") {
+          errors.value.general = "Password errata. Riprova.";
+        } else if (error.code === "auth/user-not-found") {
+          errors.value.general = "Utente non trovato. Controlla l'email.";
+        } else if (error.code === "auth/invalid-credential") {
+          console.log(
+            "Inviando l'email per decrementare i tentativi..." +
+              form.value.email
+          );
+          try {
+            // Invia l'email al server per decrementare i tentativi
+            console.log("Email inviata al server:", form.value.email);
+            const decrementResponse = await axios.post(
+              "http://127.0.0.1:5000/decrement-attempts",
+              {
+                email: form.value.email,
+              }
+            );
+
+            // Aggiorna il numero di tentativi rimanenti
+            const attemptsRemaining = decrementResponse.data.loginAttemptsLeft;
+            errors.value.general = `Password errata. Hai ${attemptsRemaining} tentativi rimanenti.`;
+          } catch (decrementError) {
+            console.error(
+              "Errore durante il decremento dei tentativi:",
+              decrementError
+            );
+            errors.value.general = "Errore nel decremento dei tentativi.";
+          }
+        } else if (error.code === "auth/too-many-requests") {
+          errors.value.general =
+            "Tentativi di accesso esauriti. Controlla la tua email per il link di reimpostazione della password.";
+          await sendPasswordResetEmailHandler();
+        } else if (error.response.status === 403) {
+          errors.value.general =
+            "La tua email non è stata verificata. Verifica la tua email prima di accedere.";
+        } else {
+          errors.value.general = "Errore sconosciuto durante il login.";
+        }
+
+        console.log("Messaggio di errore generale:", errors.value.general);
       } finally {
         loading.value = false;
       }
@@ -450,5 +537,9 @@ h2 {
 .loading-icon {
   width: 50px;
   height: 50px;
+}
+
+.text-danger {
+  font-size: 0.8rem; /* Font più piccolo (puoi modificarlo a piacere) */
 }
 </style>
