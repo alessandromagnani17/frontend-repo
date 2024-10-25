@@ -6,7 +6,7 @@ import WelcomePage from "./components/WelcomePage.vue";
 import DoctorDashboard from "./components/DoctorDashboard.vue";
 import DashboardPage from "./components/DashboardPage.vue";
 import VerifyEmail from "./components/VerifyEmail.vue";
-import PredictRadiography from "./components/PredictRadiography.vue";
+import PredictRadiograph from "./components/PredictRadiograph.vue";
 import ProfilePage from "./views/ProfilePage.vue";
 import SettingsPage from "./views/SettingsPage.vue";
 import ViewRadiographs from "./views/ViewRadiographs.vue";
@@ -86,8 +86,8 @@ const routes = [
   },
   {
     path: "/predict",
-    name: "PredictRadiography",
-    component: PredictRadiography,
+    name: "PredictRadiograph",
+    component: PredictRadiograph,
     meta: { requiresAuth: true },
   },
 ];
