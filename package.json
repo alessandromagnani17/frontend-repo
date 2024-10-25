@@ -12,6 +12,7 @@
     "axios": "^1.7.7",
     "bootstrap": "^5.2.3",
     "core-js": "^3.8.3",
+    "date-fns": "^4.1.0",
     "firebase": "^10.14.1",
     "vue": "^3.2.13",
     "vue-multiselect-next": "^2.1.7",

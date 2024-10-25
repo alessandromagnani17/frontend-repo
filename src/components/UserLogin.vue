@@ -280,7 +280,31 @@ export default {
           console.log("Setting local storage...");
           const userData = response.data.user;
           console.log("User Data:  ", userData);
+<<<<<<< HEAD
           localStorage.setItem("authToken", token);
+=======
+
+          localStorage.setItem("authToken", token);
+          localStorage.setItem("username", user.email);
+
+          // Controlla e setta il ruolo e il doctorId se presenti
+          if (userData.doctorID) {
+            console.log("Setting Doctor ID");
+            localStorage.setItem("doctorId", userData.doctorID);
+          } else {
+            console.log("No Doctor ID found");
+          }
+
+          if (userData.role) {
+            console.log("Setting user role");
+            localStorage.setItem("userRole", userData.role);
+          } else {
+            console.log("No role found");
+          }
+
+          axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+          console.log("Redirecting to WelcomePage");
+>>>>>>> 673b4c938ac012908d7bf02eeec37126cc92eb54
           localStorage.setItem("userData", JSON.stringify(userData));
 
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
