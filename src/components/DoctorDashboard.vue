@@ -89,6 +89,9 @@ export default {
 
     const selectPatient = async (patient) => {
       selectedPatient.value = patient;
+      selectedPatientRadiographs.value = []; // Svuota le radiografie precedenti
+
+      console.log("Patient ID selezionato:", patient.userId); // Debug per verificare il patientId
 
       if (!patient.userId) {
         console.error("ID paziente non trovato.");
@@ -98,6 +101,7 @@ export default {
       try {
         selectedPatientRadiographs.value =
           (await getRadiographs(patient.userId)) || [];
+        console.log("Radiografie caricate:", selectedPatientRadiographs.value); // Debug per verificare le radiografie caricate
       } catch (error) {
         console.error(
           "Errore nel caricamento delle radiografie per il paziente:",
