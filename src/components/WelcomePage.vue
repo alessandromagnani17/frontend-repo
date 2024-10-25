@@ -46,12 +46,9 @@
       <h2 class="mb-4">Benvenuto, {{ fullName }}!</h2>
       <p>Hai effettuato correttamente l'accesso al Radiology Portal.</p>
       <div class="btn-group mt-4">
-        <router-link
-          :to="{ path: '/doctor-dashboard', query: { userId: userId } }"
-          class="btn btn-primary btn-next"
-        >
+        <button class="btn btn-primary btn-next" @click="goToDashboard">
           Vai alla Dashboard
-        </router-link>
+        </button>
       </div>
     </div>
   </div>
@@ -59,6 +56,7 @@
 
 <script>
 import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
 
 export default {
   name: "WelcomePage",
@@ -67,6 +65,7 @@ export default {
     const familyName = ref("");
     const userId = ref("");
     const role = ref("");
+    const router = useRouter();
 
     onMounted(() => {
       const userDataString = localStorage.getItem("userData");
@@ -76,11 +75,28 @@ export default {
       familyName.value = userData.family_name;
       userId.value = userData.userId;
       role.value = userData.role;
+
+      // Stampa le informazioni dell'utente nella console
+      console.log("Informazioni utente loggato:", userData);
     });
 
     const fullName = computed(() => `${name.value} ${familyName.value}`);
 
-    return { fullName, role };
+    const goToDashboard = () => {
+      if (role.value === "doctor") {
+        router.push({
+          name: "DoctorDashboard",
+          query: { userId: userId.value },
+        });
+      } else if (role.value === "patient") {
+        router.push({
+          name: "PatientDashboard",
+          query: { userId: userId.value },
+        });
+      }
+    };
+
+    return { fullName, goToDashboard };
   },
 };
 </script>
