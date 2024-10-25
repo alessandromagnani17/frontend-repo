@@ -14,12 +14,10 @@
           </button>
         </div>
 
-        <!-- Se l'immagine è selezionata, mostriamo l'anteprima -->
         <div
           v-if="selectedRadiograph === radiograph"
           class="radiograph-preview"
         >
-          <!-- Aggiungiamo una classe che gestisce l'animazione (sliding up/down) -->
           <div
             class="content-with-animation"
             :class="{ 'slide-down': isSlidingDown, 'slide-up': isSlidingUp }"
@@ -28,7 +26,7 @@
               :src="radiograph.url"
               alt="Radiografia"
               class="radiograph-image"
-              v-if="isImageVisible"
+              v-show="isImageVisible"
             />
           </div>
           <div class="radiograph-controls">
@@ -38,7 +36,13 @@
             >
               <img src="@/assets/zoom.svg" alt="Zoom" class="icon" />
             </button>
-            <a :href="radiograph.url" download class="control-button">
+            <a
+              :href="`/api/download-radiograph?url=${encodeURIComponent(
+                radiograph.url
+              )}&filename=radiografia_${radiograph.date}.png`"
+              class="control-button"
+              download
+            >
               <img src="@/assets/download.svg" alt="Download" class="icon" />
             </a>
           </div>
@@ -47,17 +51,22 @@
     </ul>
     <p v-else>Nessuna radiografia trovata per questo paziente.</p>
 
-    <!-- Modale per ingrandire l'immagine -->
     <div v-if="isModalOpen" class="modal">
       <div class="modal-content">
-        <span @click="closeModal" class="close-button">&times;</span>
+        <span @click="closeModal" class="close-button">
+          <img src="@/assets/cross.svg" alt="Chiudi" class="close-icon" />
+        </span>
         <img
           :src="modalImageUrl"
           alt="Immagine ingrandita"
           class="modal-image"
         />
-        <button @click="closeModal" class="close-button">Rimpicciolisci</button>
       </div>
+    </div>
+
+    <div v-if="errorMessage" class="error-alert">
+      {{ errorMessage }}
+      <button @click="errorMessage = ''" class="close-error">×</button>
     </div>
   </div>
 </template>
@@ -78,12 +87,13 @@ export default {
   data() {
     return {
       radiographs: [],
-      selectedRadiograph: null, // Per tracciare quale radiografia è stata selezionata
-      isModalOpen: false, // Stato per il modale
-      modalImageUrl: "", // URL dell'immagine ingrandita
-      isImageVisible: false, // Stato per la visibilità dell'immagine
-      isSlidingDown: false, // Stato per l'animazione di apertura
-      isSlidingUp: false, // Stato per l'animazione di chiusura
+      selectedRadiograph: null,
+      isModalOpen: false,
+      modalImageUrl: "",
+      isImageVisible: false,
+      isSlidingDown: false,
+      isSlidingUp: false,
+      errorMessage: "",
     };
   },
   async mounted() {
@@ -101,40 +111,37 @@ export default {
       if (response.ok) {
         this.radiographs = await response.json();
       } else {
-        console.error("Errore nel recupero delle radiografie.");
+        this.errorMessage = "Errore nel recupero delle radiografie.";
       }
     } catch (error) {
+      this.errorMessage = "Errore di connessione al server.";
       console.error("Errore:", error);
     }
   },
   methods: {
     toggleRadiograph(radiograph) {
       if (this.selectedRadiograph === radiograph) {
-        // Se l'immagine è già selezionata, esegui l'animazione di chiusura
-        this.isSlidingDown = false; // Disattiviamo l'animazione di apertura
-        this.isSlidingUp = true; // Inizio dell'animazione di chiusura
+        this.isSlidingDown = false;
+        this.isSlidingUp = true;
         setTimeout(() => {
-          this.isImageVisible = false; // Nascondiamo l'immagine dopo l'animazione
-          this.selectedRadiograph = null; // Deselezioniamo la radiografia
-          this.isSlidingUp = false; // Reset dello stato dell'animazione di chiusura
-        }, 300); // Ritardo per permettere il completamento dell'animazione
+          this.isImageVisible = false;
+          this.selectedRadiograph = null;
+          this.isSlidingUp = false;
+        }, 300);
       } else {
-        // Seleziona l'immagine e esegui l'animazione di apertura
         this.selectedRadiograph = radiograph;
-        this.isSlidingUp = false; // Disattiviamo l'animazione di chiusura
-        this.isSlidingDown = true; // Inizio dell'animazione di apertura
-        setTimeout(() => {
-          this.isImageVisible = true; // Mostriamo l'immagine dopo l'animazione
-        }, 300); // Leggero ritardo per garantire la transizione CSS
+        this.isSlidingUp = false;
+        this.isSlidingDown = true;
+        this.isImageVisible = true;
       }
     },
+
     enlargeRadiograph(url) {
-      // Apri il modale e mostra l'immagine ingrandita
       this.modalImageUrl = url;
       this.isModalOpen = true;
     },
+
     closeModal() {
-      // Chiudi il modale
       this.isModalOpen = false;
     },
   },
@@ -142,6 +149,37 @@ export default {
 </script>
 
 <style scoped>
+.error-alert {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #f44336;
+  color: white;
+  padding: 16px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  font-size: 14px;
+}
+
+.close-error {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.control-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .radiograph-list {
   max-width: 800px;
   margin: 20px auto;
@@ -173,7 +211,7 @@ li.radiograph-item {
   border: none;
   cursor: pointer;
   font-weight: bold;
-  transition: color 0.5s ease; /* Animazione più lenta */
+  transition: color 0.5s ease;
   padding: 0;
   margin: 0;
 }
@@ -183,35 +221,32 @@ li.radiograph-item {
 }
 
 .radiograph-preview {
-  margin-top: 10px;
+  margin-top: 15px;
+  width: 95%;
+  align-self: center;
 }
 
 .radiograph-image {
   width: 100%;
-  max-width: 400px;
   display: block;
   margin-bottom: 10px;
 }
 
-/* Sezione per l'animazione */
 .content-with-animation {
   overflow: hidden;
-  transition: max-height 0.3s ease, transform 0.3s ease; /* Aggiunta della trasformazione */
-  max-height: 0; /* Impostazione predefinita: l'immagine è nascosta */
-  transform: translateY(
-    -20px
-  ); /* Spostiamo l'immagine verso l'alto come stato iniziale */
+  max-height: 0;
+  transition: max-height 0.5s ease-out, transform 0.5s ease-out;
+  transform: translateY(-20px);
 }
 
-/* Classe per l'animazione di apertura (mostrare l'immagine) */
 .content-with-animation.slide-down {
-  max-height: 400px; /* Consente il display completo dell'immagine */
-  transform: translateY(0); /* L'immagine scende dall'alto */
+  max-height: 550px;
+  transform: translateY(0);
 }
 
-/* Classe per l'animazione di chiusura (nascondere l'immagine) */
 .content-with-animation.slide-up {
-  max-height: 0; /* Ritorna alla modalità nascosta */
+  max-height: 0;
+  transform: translateY(-20px);
 }
 
 .radiograph-controls {
@@ -227,8 +262,8 @@ li.radiograph-item {
 }
 
 .icon {
-  width: 24px; /* Dimensione dell'icona */
-  height: 24px; /* Dimensione dell'icona */
+  width: 20px;
+  height: 20px;
 }
 
 .modal {
@@ -248,21 +283,30 @@ li.radiograph-item {
   max-width: 80%;
   max-height: 80%;
   background: white;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 20px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-image {
-  max-width: 100%;
-  max-height: 70vh;
+  width: 92%;
+  max-height: 80vh;
+  display: block;
+  margin: 0 auto;
 }
 
 .close-button {
   position: absolute;
   top: 10px;
-  right: 10px;
+  right: 16px;
   cursor: pointer;
-  font-size: 24px;
+}
+
+.close-icon {
+  width: 12px;
+  height: 12px;
 }
 </style>
