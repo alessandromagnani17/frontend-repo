@@ -27,8 +27,18 @@
     </aside>
 
     <div class="container mt-5">
-      <input type="file" @change="onFileChange" accept="image/*" />
-      <button @click="submitImage" class="btn btn-primary">Predict</button>
+      <h5><strong>Carica una radiografia</strong></h5>
+      <div>
+        <input type="file" @change="onFileChange" accept="image/*" />
+      </div>
+      <div v-if="imagePreview" class="mt-3">
+        <img :src="imagePreview" alt="Anteprima immagine" class="img-preview" />
+      </div>
+      <div>
+        <button @click="submitImage" class="btn btn-primary mt-5">
+          Predict
+        </button>
+      </div>
       <div v-if="predictedClass !== null" class="mt-4">
         Predicted Class: {{ predictedClass }}
       </div>
@@ -44,11 +54,13 @@ export default {
     return {
       selectedFile: null,
       predictedClass: null,
+      imagePreview: null,
     };
   },
   methods: {
     onFileChange(event) {
       this.selectedFile = event.target.files[0];
+      this.imagePreview = URL.createObjectURL(this.selectedFile);
     },
     async submitImage() {
       if (!this.selectedFile) return;
@@ -78,12 +90,12 @@ export default {
 
 <style scoped>
 .welcome {
-  background: #ffffff; /* Sfondo bianco, simile alla pagina di login */
+  background: #ffffff;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0px 0px rgba(0, 0, 0, 0); /* Rimuove ombre esterne */
+  box-shadow: 0 0px 0px rgba(0, 0, 0, 0);
 }
 
 .container {
@@ -91,16 +103,22 @@ export default {
   padding: 40px;
   border-radius: 15px;
   background: #ffffff;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1); /* Simile alla shadow del login */
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
   margin-top: 100px;
   height: auto;
-  text-align: center; /* Centra il testo */
-  flex-grow: 1; /* Permette al contenuto principale di occupare lo spazio rimanente */
-  margin-left: 20px; /* Margine sinistro per distanziare il contenuto dalla sidebar */
+  text-align: center;
+  flex-grow: 1;
+  margin-left: 20px;
+}
+
+.img-preview {
+  max-width: 100%;
+  max-height: 300px;
+  margin-top: 15px;
 }
 
 h2 {
-  font-size: 18px; /* Uniforma il font size al login */
+  font-size: 18px;
   margin-bottom: 30px;
 }
 
@@ -110,7 +128,7 @@ p {
 }
 
 .btn-group .btn {
-  width: 100%; /* Assicura che i bottoni occupino l'intera larghezza */
+  width: 100%;
   margin-top: 20px;
   padding: 10px;
 }
@@ -126,9 +144,9 @@ p {
 
 .sidebar {
   top: 0;
-  width: 250px; /* Imposta la larghezza della sidebar */
-  height: 100vh; /* Imposta l'altezza della sidebar al 100% della viewport */
-  padding: 20px; /* Padding interno */
+  width: 250px;
+  height: 100vh;
+  padding: 20px;
   background: linear-gradient(180deg, #212529, #343a40);
 }
 
@@ -142,7 +160,7 @@ p {
 }
 
 .nav-link {
-  padding: 10px 15px; /* Aggiunge padding ai link per migliorarne l'aspetto */
+  padding: 10px 15px;
 }
 
 @media (max-width: 767.98px) {
