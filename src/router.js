@@ -4,6 +4,7 @@ import UserLogin from "./components/UserLogin.vue";
 import UserRegister from "./components/UserRegister.vue";
 import WelcomePage from "./components/WelcomePage.vue";
 import DoctorDashboard from "./components/DoctorDashboard.vue";
+import PatientDashboard from "./components/PatientDashboard.vue";
 import DashboardPage from "./components/DashboardPage.vue";
 import VerifyEmail from "./components/VerifyEmail.vue";
 import PredictRadiograph from "./components/PredictRadiograph.vue";
@@ -77,6 +78,12 @@ const routes = [
     path: "/doctor-dashboard",
     name: "DoctorDashboard",
     component: DoctorDashboard,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/patient-dashboard",
+    name: "PatientDashboard",
+    component: PatientDashboard,
     meta: { requiresAuth: true },
   },
   {
