@@ -39,10 +39,11 @@
               >
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/dashboard" @click="closeNavbar"
-                >Dashboard</router-link
+              <a class="nav-link" href="#" @click.prevent="goToDashboard"
+                >Dashboard</a
               >
             </li>
+
             <li class="nav-item dropdown" @click="toggleDropdown">
               <a
                 class="nav-link dropdown-toggle"
@@ -108,7 +109,6 @@ export default {
       this.navbarOpen = false;
     },
     closeNavbarOnClick(event) {
-      // Verifica se il clic è avvenuto all'esterno della navbar
       const isNavbar = event.target.closest(".navbar");
       if (!isNavbar) {
         this.closeNavbar();
@@ -118,28 +118,33 @@ export default {
       this.dropdownOpen = !this.dropdownOpen;
     },
     logout() {
-      // Clear the token from all items
       localStorage.clear();
-      //console.log("Has to be 0 --> " + localStorage.length);
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        const value = localStorage.getItem(key);
-        console.log("<");
-        console.log(`${key}: ${value}`);
-        console.log(">");
-      }
-
-      this.$router.push("/"); // Redirect to homepage after logout
+      this.$router.push("/");
     },
     handleLogoClick() {
       const authToken = localStorage.getItem("authToken");
 
       if (authToken) {
-        // Redirect to the welcome page if logged in
         this.$router.push({ name: "WelcomePage" });
       } else {
-        // Redirect to the homepage if not logged in
         this.$router.push("/");
+      }
+    },
+    goToDashboard() {
+      const authToken = localStorage.getItem("authToken");
+      const userData = JSON.parse(localStorage.getItem("userData"));
+
+      if (authToken) {
+        console.log("Informazioni utente loggato:", userData);
+
+        // Controlla il ruolo dell'utente e reindirizza di conseguenza
+        if (userData.role === "doctor") {
+          this.$router.push({ name: "DoctorDashboard" });
+        } else if (userData.role === "patient") {
+          this.$router.push({ name: "PatientDashboard" });
+        }
+      } else {
+        this.$router.push({ name: "DashboardPage" });
       }
     },
   },
