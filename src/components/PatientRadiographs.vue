@@ -94,31 +94,53 @@ export default {
       isSlidingDown: false,
       isSlidingUp: false,
       errorMessage: "",
+      currentPatientId: this.patientId, // Variabile locale per gestire il patientId
     };
   },
   async mounted() {
-    try {
-      const response = await fetch(
-        `/api/patients/${this.patientId}/radiographs`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.ok) {
-        this.radiographs = await response.json();
-      } else {
-        this.errorMessage = "Errore nel recupero delle radiografie.";
-      }
-    } catch (error) {
-      this.errorMessage = "Errore di connessione al server.";
-      console.error("Errore:", error);
-    }
+    await this.loadRadiographs(); // Carica le radiografie iniziali, se necessario
   },
+
+  watch: {
+    patientId(newPatientId) {
+      this.currentPatientId = newPatientId; // Aggiorna la variabile locale quando cambia la prop
+      this.loadRadiographs(); // Ricarica le radiografie quando la prop cambia
+    },
+  },
+
   methods: {
+    async loadRadiographs() {
+      try {
+        console.log("patientID:: " + this.currentPatientId); // Usa la variabile locale
+        const response = await fetch(
+          `/api/patients/${this.currentPatientId}/radiographs`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.ok) {
+          this.radiographs = await response.json();
+        } else {
+          this.errorMessage = "Errore nel recupero delle radiografie.";
+        }
+      } catch (error) {
+        this.errorMessage = "Errore di connessione al server.";
+        console.error("Errore:", error);
+      }
+    },
+
+    // Rimuovi la logica che cerca di modificare il patientId
+    async selectPatient(patient) {
+      this.selectedPatient = patient;
+      this.currentPatientId = patient.userId; // Aggiorna la variabile locale
+      this.radiographs = []; // Svuota le radiografie precedenti
+      await this.loadRadiographs(); // Carica le radiografie del nuovo paziente
+    },
+
     toggleRadiograph(radiograph) {
       if (this.selectedRadiograph === radiograph) {
         this.isSlidingDown = false;
