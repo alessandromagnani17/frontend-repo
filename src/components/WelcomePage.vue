@@ -96,7 +96,7 @@ export default {
       }
     };
 
-    return { fullName, goToDashboard };
+    return { fullName, role, goToDashboard };
   },
 };
 </script>

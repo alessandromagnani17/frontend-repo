@@ -56,10 +56,6 @@ export const getPatientsFromDoctor = async (doctorId) => {
       },
     });
 
-    if (!response.ok) {
-      throw new Error("Errore nel recupero dei pazienti.");
-    }
-
     return response.data;
   } catch (error) {
     console.error("Errore:", error);

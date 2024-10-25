@@ -74,6 +74,7 @@ export default {
     const selectedPatientRadiographs = ref([]);
 
     const doctorId = localStorage.getItem("doctorId");
+    console.log("doctorID: ", doctorId);
 
     onMounted(async () => {
       if (doctorId) {
@@ -87,6 +88,7 @@ export default {
       }
     });
 
+    console.log("PAZIENTI FRONTENDDOO: ", patients);
     const selectPatient = async (patient) => {
       selectedPatient.value = patient;
       selectedPatientRadiographs.value = []; // Svuota le radiografie precedenti
