@@ -30,8 +30,6 @@ export const uploadRadiograph = async (patientId, file) => {
   console.log("PatientID: " + patientId);
 
   try {
-    console.log("DOPO DEL TRY");
-
     const response = await axios.post(
       `${API_URL}/api/patients/${patientId}/radiographs`,
       formData,
@@ -50,10 +48,9 @@ export const uploadRadiograph = async (patientId, file) => {
 };
 
 // Funzione per ottenere i pazienti associati a un dottore specifico
-export async function getPatientsFromDoctor(doctorId) {
+export const getPatientsFromDoctor = async (doctorId) => {
   try {
-    const response = await fetch(`/api/${doctorId}/patients`, {
-      method: "GET",
+    const response = await axios.get(`/api/${doctorId}/patients`, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -63,23 +60,22 @@ export async function getPatientsFromDoctor(doctorId) {
       throw new Error("Errore nel recupero dei pazienti.");
     }
 
-    const patients = await response.json();
-    return patients;
+    return response.data;
   } catch (error) {
     console.error("Errore:", error);
     return [];
   }
-}
+};
 
 // Funzione per ottenere le radiografie di un paziente
 export const getRadiographs = async (patientId) => {
   try {
     const response = await axios.get(
-      `http://localhost:5000/api/patients/${patientId}/radiographs`
+      `${API_URL}/api/patients/${patientId}/radiographs`
     );
     return response.data;
   } catch (error) {
     console.error("Errore nel recupero delle radiografie:", error);
-    throw error; // Rilancia l'errore per gestirlo più in alto nella chiamata
+    throw error;
   }
 };
