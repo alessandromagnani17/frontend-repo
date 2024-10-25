@@ -111,7 +111,9 @@ export default {
   methods: {
     async loadRadiographs() {
       try {
-        console.log("patientID:: " + this.currentPatientId); // Usa la variabile locale
+        console.log("Props patientId:", this.patientId);
+        console.log("Props patientName:", this.patientName);
+
         const response = await fetch(
           `/api/patients/${this.currentPatientId}/radiographs`,
           {
