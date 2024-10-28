@@ -259,6 +259,16 @@ export default {
 
         console.log("Login successful:", user);
 
+        if (!user.emailVerified) {
+          console.log("Email NON verificata");
+          errors.value.general =
+            "La tua email non è stata verificata. Verifica la tua email prima di accedere.";
+          loading.value = false;
+          return;
+        } else {
+          console.log("Email verificata");
+        }
+
         // Ottieni il token ID
         const token = await user.getIdToken();
 
@@ -267,16 +277,7 @@ export default {
           idToken: token,
         });
 
-        if (response.data.message === "Email not verified") {
-          console.log("Email NON verificata");
-          alert(
-            "La tua email non è stata verificata. Verifica la tua email prima di accedere."
-          );
-          return;
-        }
-
         if (response.data.message === "Login successful") {
-          console.log("Setting local storage...");
           const userData = response.data.user;
           console.log("User Data:  ", userData);
 
@@ -285,17 +286,11 @@ export default {
 
           // Controlla e setta il ruolo e il doctorId se presenti
           if (userData.doctorID) {
-            console.log("Setting Doctor ID");
             localStorage.setItem("doctorId", userData.doctorID);
-          } else {
-            console.log("No Doctor ID found");
           }
 
           if (userData.role) {
-            console.log("Setting user role");
             localStorage.setItem("userRole", userData.role);
-          } else {
-            console.log("No role found");
           }
 
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -330,9 +325,14 @@ export default {
               }
             );
 
-            // Aggiorna il numero di tentativi rimanenti
-            const attemptsRemaining = decrementResponse.data.loginAttemptsLeft;
-            errors.value.general = `Password errata. Hai ${attemptsRemaining} tentativi rimanenti.`;
+            if (decrementResponse.data.message) {
+              errors.value.general = decrementResponse.data.message;
+            } else {
+              // Aggiorna il numero di tentativi rimanenti se il decremento è avvenuto con successo
+              const attemptsRemaining =
+                decrementResponse.data.loginAttemptsLeft;
+              errors.value.general = `Password errata. Hai ${attemptsRemaining} tentativi rimanenti.`;
+            }
           } catch (decrementError) {
             console.error(
               "Errore durante il decremento dei tentativi:",
@@ -345,6 +345,7 @@ export default {
             "Tentativi di accesso esauriti. Controlla la tua email per il link di reimpostazione della password.";
           await sendPasswordResetEmailHandler();
         } else if (error.response.status === 403) {
+          console.log("ENTRO QUAAAAA");
           errors.value.general =
             "La tua email non è stata verificata. Verifica la tua email prima di accedere.";
         } else {
