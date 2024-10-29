@@ -29,18 +29,30 @@
     <div class="container mt-5">
       <h5><strong>Carica una radiografia</strong></h5>
       <div>
-        <input type="file" @change="onFileChange" accept="image/*" />
+        <input
+          type="file"
+          ref="fileInput"
+          @change="onFileChange"
+          accept="image/*"
+          style="display: none"
+        />
+        <button @click="selectFile" class="btn btn-secondary">
+          Seleziona file
+        </button>
       </div>
       <div v-if="imagePreview" class="mt-3">
         <img :src="imagePreview" alt="Anteprima immagine" class="img-preview" />
       </div>
-      <div>
+      <div v-if="imagePreview">
         <button @click="submitImage" class="btn btn-primary mt-5">
-          Predict
+          Predici osteoartrite
         </button>
       </div>
       <div v-if="predictedClass !== null" class="mt-4">
         Predicted Class: {{ predictedClass }}
+      </div>
+      <div v-if="gradcamImage" class="mt-3">
+        <img :src="gradcamImage" alt="Grad-CAM Image" class="img-preview" />
       </div>
     </div>
   </div>
@@ -53,20 +65,30 @@ export default {
   data() {
     return {
       selectedFile: null,
+      selectedFileName: null, // Variabile per il nome del file selezionato
       predictedClass: null,
       imagePreview: null,
+      gradcamImage: null,
     };
   },
   methods: {
+    selectFile() {
+      this.$refs.fileInput.click(); // Clicca sul campo di input file nascosto
+    },
     onFileChange(event) {
       this.selectedFile = event.target.files[0];
-      this.imagePreview = URL.createObjectURL(this.selectedFile);
+      this.selectedFileName = this.selectedFile.name; // Memorizza il nome del file
+      this.imagePreview = URL.createObjectURL(this.selectedFile); // Crea un'anteprima dell'immagine
     },
     async submitImage() {
       if (!this.selectedFile) return;
 
       const formData = new FormData();
       formData.append("file", this.selectedFile);
+
+      const userData = JSON.parse(localStorage.getItem("userData"));
+      const userUid = userData.uid;
+      formData.append("userUID", userUid);
 
       try {
         const response = await axios.post(
@@ -79,7 +101,9 @@ export default {
           }
         );
 
+        console.log("Response from server:", response.data);
         this.predictedClass = response.data.predicted_class;
+        this.gradcamImage = response.data.gradcam_image;
       } catch (error) {
         console.error("Error predicting image:", error);
       }
