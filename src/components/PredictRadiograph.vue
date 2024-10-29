@@ -28,7 +28,11 @@
 
     <div class="container mt-5">
       <h5 v-if="showUploadSection"><strong>Carica una radiografia</strong></h5>
-      <div>
+      <div v-if="isLoading" class="alert alert-info">Caricamento...</div>
+      <div v-if="patients.length === 0" class="alert alert-warning">
+        NON PUOI PERCHE NON HAI PAZIENTI ASSOCIATI
+      </div>
+      <div v-else>
         <input
           v-if="showUploadSection"
           type="file"
@@ -101,6 +105,7 @@
 
 <script>
 import axios from "axios";
+import { getPatientsFromDoctor } from "@/services/api-service";
 
 export default {
   data() {
@@ -113,7 +118,16 @@ export default {
       showNewPredictionButton: false,
       showPredictButton: true,
       showUploadSection: true,
+      patients: [],
+      selectedPatient: null,
+      isLoading: true,
     };
+  },
+  async created() {
+    const userData = JSON.parse(localStorage.getItem("userData"));
+    const userUid = userData.doctorID;
+    this.patients = await getPatientsFromDoctor(userUid);
+    this.isLoading = false;
   },
   methods: {
     resetPrediction() {
@@ -146,6 +160,7 @@ export default {
       const userData = JSON.parse(localStorage.getItem("userData"));
       const userUid = userData.uid;
       formData.append("userUID", userUid);
+      formData.append("selectedPatientID", this.selectedPatient);
 
       try {
         const response = await axios.post(
@@ -167,6 +182,9 @@ export default {
       } catch (error) {
         console.error("Error predicting image:", error);
       }
+    },
+    onPatientChange() {
+      this.showPredictButton = this.selectedPatient !== null;
     },
   },
 };
