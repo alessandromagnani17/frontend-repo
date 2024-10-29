@@ -1,12 +1,13 @@
 <template>
   <div id="app" @click="closeNavbarOnClick">
     <nav
+      v-bind:key="authToken"
       class="navbar navbar-expand-lg navbar-dark bg-primary shadow-lg sticky-top"
     >
       <div class="container">
-        <a class="navbar-brand" href="#" @click.prevent="handleLogoClick"
-          >Radiology Portal</a
-        >
+        <a class="navbar-brand" href="#" @click.prevent="handleLogoClick">
+          Radiology Portal
+        </a>
         <button
           class="navbar-toggler"
           type="button"
@@ -24,57 +25,87 @@
         >
           <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-              <a class="nav-link" href="#" @click.prevent="handleHomeClick">
-                Home
-              </a>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/register" @click="closeNavbar">
-                Registrati
-              </router-link>
+              <a class="nav-link" href="#" @click.prevent="handleHomeClick"
+                >Home</a
+              >
             </li>
 
-            <li class="nav-item">
-              <router-link class="nav-link" to="/login" @click="closeNavbar">
-                Login
-              </router-link>
-            </li>
-            <li
-              class="nav-item dropdown"
-              v-if="isLoggedIn"
-              @click="toggleDropdown"
-            >
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                aria-haspopup="true"
-                aria-expanded="dropdownOpen"
-              >
-                <i class="fas fa-user"></i>
-              </a>
-              <div
-                class="dropdown-menu"
-                :class="{ show: dropdownOpen }"
-                style="position: absolute; top: 100%; left: 0"
-              >
+            <template v-if="isLoggedIn">
+              <li v-if="userRole === 'doctor'" class="nav-item">
                 <router-link
-                  class="dropdown-item"
-                  to="/profile"
+                  class="nav-link"
+                  to="/manage-patients"
                   @click="closeNavbar"
-                  >Profilo</router-link
+                  >Gestisci Pazienti</router-link
                 >
+              </li>
+              <li v-if="userRole === 'doctor'" class="nav-item">
                 <router-link
-                  class="dropdown-item"
-                  to="/settings"
+                  class="nav-link"
+                  to="/predict"
                   @click="closeNavbar"
-                  >Impostazioni</router-link
                 >
-                <a class="dropdown-item" href="#" @click.prevent="logout"
-                  >Logout</a
+                  Predici Radiografie
+                </router-link>
+              </li>
+              <li class="nav-item">
+                <router-link
+                  class="nav-link"
+                  to="/view-radiographs"
+                  @click="closeNavbar"
+                  >Visualizza Radiografie</router-link
                 >
-              </div>
-            </li>
+              </li>
+              <li class="nav-item dropdown" @click="toggleDropdown">
+                <a
+                  class="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  aria-haspopup="true"
+                  aria-expanded="dropdownOpen"
+                >
+                  <i class="fas fa-user"></i>
+                </a>
+                <div
+                  class="dropdown-menu"
+                  :class="{ show: dropdownOpen }"
+                  style="position: absolute; top: 100%; left: 0"
+                >
+                  <router-link
+                    class="dropdown-item"
+                    to="/profile"
+                    @click="closeNavbar"
+                    >Profilo</router-link
+                  >
+                  <router-link
+                    class="dropdown-item"
+                    to="/settings"
+                    @click="closeNavbar"
+                    >Impostazioni</router-link
+                  >
+                  <a class="dropdown-item" href="#" @click.prevent="logout">
+                    Logout
+                  </a>
+                </div>
+              </li>
+            </template>
+
+            <template v-else>
+              <li class="nav-item">
+                <router-link
+                  class="nav-link"
+                  to="/register"
+                  @click="closeNavbar"
+                >
+                  Registrati
+                </router-link>
+              </li>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/login" @click="closeNavbar">
+                  Login
+                </router-link>
+              </li>
+            </template>
           </ul>
         </div>
       </div>
@@ -100,12 +131,12 @@ export default {
     return {
       dropdownOpen: false,
       navbarOpen: false,
-      authToken: localStorage.getItem("authToken"), // Gestisce lo stato del token per la reattività
+      authToken: null,
+      userRole: null, // Aggiungi questa proprietà
     };
   },
   computed: {
     isLoggedIn() {
-      // isLoggedIn diventa reattivo grazie al cambiamento di authToken
       return !!this.authToken;
     },
   },
@@ -123,22 +154,17 @@ export default {
       }
     },
     toggleDropdown() {
+      console.log(this.dropdownOpen);
       this.dropdownOpen = !this.dropdownOpen;
     },
-    login() {
-      const token = "yourAuthToken"; // Sostituisci con il token reale
-      console.log("Esegui il login...");
-      localStorage.setItem("authToken", token);
-      this.authToken = token; // Aggiorna authToken per rendere reattivo isLoggedIn
-      console.log("Token salvato:", token);
-      EventBus.emit("auth-changed"); // Emit evento per il cambiamento di stato
-      this.$router.push("/dashboard"); // Naviga automaticamente dopo il login
-    },
     logout() {
-      console.log("Esegui il logout...");
-      localStorage.clear();
-      this.authToken = null; // Aggiorna authToken per rendere reattivo isLoggedIn
-      EventBus.emit("auth-changed"); // Emit evento per il cambiamento di stato
+      console.log("[DEBUG] Executing logout...");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userData"); // Aggiungi questa riga
+      this.authToken = null;
+      this.userRole = null; // Aggiungi questa riga
+      EventBus.emit("auth-changed");
+      alert("Logout avvenuto con successo");
       this.$router.push("/");
     },
     handleLogoClick() {
@@ -150,16 +176,13 @@ export default {
       }
     },
     handleHomeClick() {
-      this.goToDashboard(); // Chiama la tua funzione
-      this.closeNavbar(); // Chiude la navbar
+      this.goToDashboard();
+      this.closeNavbar();
     },
-
     goToDashboard() {
-      console.log("Navigating to Dashboard...");
-      const authToken = localStorage.getItem("authToken");
       const userData = JSON.parse(localStorage.getItem("userData"));
 
-      if (authToken) {
+      if (this.isLoggedIn) {
         if (userData.role === "doctor") {
           this.$router.push({ name: "DoctorDashboard" });
         } else if (userData.role === "patient") {
@@ -170,14 +193,19 @@ export default {
       }
     },
     updateAuthStatus() {
-      this.authToken = localStorage.getItem("authToken"); // Aggiorna lo stato del token per il cambiamento reattivo
+      this.authToken = localStorage.getItem("authToken");
+      this.userRole =
+        JSON.parse(localStorage.getItem("userData"))?.role || null; // Aggiorna il ruolo
+      console.log("[DEBUG] updateAuthStatus - authToken:", this.authToken);
+      console.log("[DEBUG] role:", this.userRole);
     },
   },
   mounted() {
-    EventBus.on("auth-changed", this.updateAuthStatus); // Ascolta l'evento
+    this.updateAuthStatus(); // Inizializza authToken e userRole
+    EventBus.on("auth-changed", this.updateAuthStatus);
   },
   beforeUnmount() {
-    EventBus.off("auth-changed", this.updateAuthStatus); // Rimuovi l'ascoltatore
+    EventBus.off("auth-changed", this.updateAuthStatus);
   },
 };
 </script>
@@ -229,6 +257,10 @@ main {
   color: #ffffff;
 }
 
+.navbar-nav .nav-item {
+  margin-left: 15px; /* Regola questo valore per aumentare o diminuire il distanziamento */
+}
+
 .nav-link {
   font-size: 1.2rem; /* Stile uniformato */
   color: #ffffff;
@@ -267,25 +299,5 @@ main {
 .dropdown-item:hover {
   background-color: #495057;
   color: #ffffff;
-}
-
-.navbar .nav-link i.fas.fa-user {
-  font-size: 1.5rem;
-}
-
-@media (max-width: 991.98px) {
-  .navbar-nav {
-    text-align: center;
-  }
-}
-
-@media (max-width: 767.98px) {
-  .navbar-brand {
-    font-size: 1.5rem;
-  }
-
-  .sidebar {
-    display: none;
-  }
 }
 </style>
