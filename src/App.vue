@@ -4,7 +4,7 @@
       v-bind:key="authToken"
       class="navbar navbar-expand-lg navbar-dark bg-primary shadow-lg sticky-top"
     >
-      <div class="container">
+      <div class="container d-flex justify-content-between">
         <a class="navbar-brand" href="#" @click.prevent="handleLogoClick">
           Radiology Portal
         </a>
@@ -23,7 +23,8 @@
           class="collapse navbar-collapse"
           :class="{ show: navbarOpen }"
         >
-          <ul class="navbar-nav ml-auto">
+          <ul class="navbar-nav me-auto">
+            <!-- Utilizza me-auto per spingere a destra -->
             <li class="nav-item">
               <a class="nav-link" href="#" @click.prevent="handleHomeClick"
                 >Home</a
@@ -56,38 +57,6 @@
                   >Visualizza Radiografie</router-link
                 >
               </li>
-              <li class="nav-item dropdown" @click="toggleDropdown">
-                <a
-                  class="nav-link dropdown-toggle"
-                  href="#"
-                  role="button"
-                  aria-haspopup="true"
-                  aria-expanded="dropdownOpen"
-                >
-                  <i class="fas fa-user"></i>
-                </a>
-                <div
-                  class="dropdown-menu"
-                  :class="{ show: dropdownOpen }"
-                  style="position: absolute; top: 100%; left: 0"
-                >
-                  <router-link
-                    class="dropdown-item"
-                    to="/profile"
-                    @click="closeNavbar"
-                    >Profilo</router-link
-                  >
-                  <router-link
-                    class="dropdown-item"
-                    to="/settings"
-                    @click="closeNavbar"
-                    >Impostazioni</router-link
-                  >
-                  <a class="dropdown-item" href="#" @click.prevent="logout">
-                    Logout
-                  </a>
-                </div>
-              </li>
             </template>
 
             <template v-else>
@@ -104,6 +73,45 @@
                 <router-link class="nav-link" to="/login" @click="closeNavbar">
                   Login
                 </router-link>
+              </li>
+            </template>
+          </ul>
+
+          <ul class="navbar-nav">
+            <!-- Contenitore per il dropdown -->
+            <template v-if="isLoggedIn">
+              <li class="nav-item dropdown">
+                <a
+                  class="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  aria-haspopup="true"
+                  aria-expanded="dropdownOpen"
+                  @click="toggleDropdown"
+                >
+                  <i class="fas fa-user"></i>
+                </a>
+                <div
+                  class="dropdown-menu"
+                  :class="{ show: dropdownOpen }"
+                  style="position: absolute; top: 100%; right: 0"
+                >
+                  <router-link
+                    class="dropdown-item"
+                    to="/profile"
+                    @click="closeNavbar"
+                    >Profilo</router-link
+                  >
+                  <router-link
+                    class="dropdown-item"
+                    to="/settings"
+                    @click="closeNavbar"
+                    >Impostazioni</router-link
+                  >
+                  <a class="dropdown-item" href="#" @click.prevent="logout"
+                    >Logout</a
+                  >
+                </div>
               </li>
             </template>
           </ul>
