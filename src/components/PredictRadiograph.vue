@@ -1,31 +1,5 @@
 <template>
   <div class="welcome">
-    <aside class="sidebar bg-dark text-white">
-      <h4 class="text-center mt-3">Link Rapidi</h4>
-      <ul class="nav flex-column">
-        <li class="nav-item">
-          <router-link class="nav-link text-white" to="/view-radiographs">
-            Visualizza Radiografie
-          </router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link text-white" to="/manage-patients">
-            Gestisci Pazienti
-          </router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link text-white" to="/reports">
-            Rapporti
-          </router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link text-white" to="/predict">
-            Predict
-          </router-link>
-        </li>
-      </ul>
-    </aside>
-
     <div class="container mt-5">
       <h5><strong>Carica una radiografia</strong></h5>
       <div>
@@ -90,31 +64,31 @@ export default {
 
 <style scoped>
 .welcome {
-  background: #ffffff;
+  background: #ffffff; /* Sfondo bianco */
   min-height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0px 0px rgba(0, 0, 0, 0);
+  align-items: center; /* Centra verticalmente */
+  justify-content: center; /* Centra orizzontalmente */
 }
 
 .container {
-  max-width: 600px;
+  max-width: 600px; /* Limita la larghezza massima */
+  width: 100%; /* Assicura che il contenitore occupi il 100% della larghezza */
   padding: 40px;
   border-radius: 15px;
-  background: #ffffff;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-  margin-top: 100px;
-  height: auto;
-  text-align: center;
-  flex-grow: 1;
-  margin-left: 20px;
+  background: #ffffff; /* Sfondo del contenitore */
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1); /* Ombra del contenitore */
+  margin-top: 100px; /* Margine superiore */
+  height: auto; /* Altezza automatica */
+  text-align: center; /* Centra il testo */
+  margin-left: auto; /* Margini automatici per centrare orizzontalmente */
+  margin-right: auto; /* Margini automatici per centrare orizzontalmente */
 }
 
 .img-preview {
-  max-width: 100%;
-  max-height: 300px;
-  margin-top: 15px;
+  max-width: 100%; /* Limita la larghezza massima delle anteprime */
+  max-height: 300px; /* Limita l'altezza massima delle anteprime */
+  margin-top: 15px; /* Margine superiore */
 }
 
 h2 {
@@ -140,36 +114,5 @@ p {
 
 .btn-primary:hover {
   background-color: #0056b3;
-}
-
-.sidebar {
-  top: 0;
-  width: 250px;
-  height: 100vh;
-  padding: 20px;
-  background: linear-gradient(180deg, #212529, #343a40);
-}
-
-.sidebar .nav-link {
-  color: #cfd2d6;
-}
-
-.sidebar .nav-link:hover {
-  background-color: #495057;
-  border-radius: 5px;
-}
-
-.nav-link {
-  padding: 10px 15px;
-}
-
-@media (max-width: 767.98px) {
-  .navbar-brand {
-    font-size: 1.5rem;
-  }
-
-  .sidebar {
-    display: none;
-  }
 }
 </style>
