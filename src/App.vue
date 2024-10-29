@@ -24,27 +24,26 @@
         >
           <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-              <router-link class="nav-link" to="/" @click="closeNavbar"
-                >Home</router-link
-              >
+              <a class="nav-link" href="#" @click.prevent="handleHomeClick">
+                Home
+              </a>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/register" @click="closeNavbar"
-                >Registrati</router-link
-              >
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/login" @click="closeNavbar"
-                >Login</router-link
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#" @click.prevent="goToDashboard"
-                >Dashboard</a
-              >
+              <router-link class="nav-link" to="/register" @click="closeNavbar">
+                Registrati
+              </router-link>
             </li>
 
-            <li class="nav-item dropdown" @click="toggleDropdown">
+            <li class="nav-item">
+              <router-link class="nav-link" to="/login" @click="closeNavbar">
+                Login
+              </router-link>
+            </li>
+            <li
+              class="nav-item dropdown"
+              v-if="isLoggedIn"
+              @click="toggleDropdown"
+            >
               <a
                 class="nav-link dropdown-toggle"
                 href="#"
@@ -93,13 +92,22 @@
 </template>
 
 <script>
+import EventBus from "./eventBus";
+
 export default {
   name: "App",
   data() {
     return {
       dropdownOpen: false,
       navbarOpen: false,
+      authToken: localStorage.getItem("authToken"), // Gestisce lo stato del token per la reattività
     };
+  },
+  computed: {
+    isLoggedIn() {
+      // isLoggedIn diventa reattivo grazie al cambiamento di authToken
+      return !!this.authToken;
+    },
   },
   methods: {
     toggleNavbar() {
@@ -117,36 +125,59 @@ export default {
     toggleDropdown() {
       this.dropdownOpen = !this.dropdownOpen;
     },
+    login() {
+      const token = "yourAuthToken"; // Sostituisci con il token reale
+      console.log("Esegui il login...");
+      localStorage.setItem("authToken", token);
+      this.authToken = token; // Aggiorna authToken per rendere reattivo isLoggedIn
+      console.log("Token salvato:", token);
+      EventBus.emit("auth-changed"); // Emit evento per il cambiamento di stato
+      this.$router.push("/dashboard"); // Naviga automaticamente dopo il login
+    },
     logout() {
+      console.log("Esegui il logout...");
       localStorage.clear();
+      this.authToken = null; // Aggiorna authToken per rendere reattivo isLoggedIn
+      EventBus.emit("auth-changed"); // Emit evento per il cambiamento di stato
       this.$router.push("/");
     },
     handleLogoClick() {
       const authToken = localStorage.getItem("authToken");
-
       if (authToken) {
         this.$router.push({ name: "WelcomePage" });
       } else {
         this.$router.push("/");
       }
     },
+    handleHomeClick() {
+      this.goToDashboard(); // Chiama la tua funzione
+      this.closeNavbar(); // Chiude la navbar
+    },
+
     goToDashboard() {
+      console.log("Navigating to Dashboard...");
       const authToken = localStorage.getItem("authToken");
       const userData = JSON.parse(localStorage.getItem("userData"));
 
       if (authToken) {
-        console.log("Informazioni utente loggato:", userData);
-
-        // Controlla il ruolo dell'utente e reindirizza di conseguenza
         if (userData.role === "doctor") {
           this.$router.push({ name: "DoctorDashboard" });
         } else if (userData.role === "patient") {
           this.$router.push({ name: "PatientDashboard" });
         }
       } else {
-        this.$router.push({ name: "DashboardPage" });
+        this.$router.push("/");
       }
     },
+    updateAuthStatus() {
+      this.authToken = localStorage.getItem("authToken"); // Aggiorna lo stato del token per il cambiamento reattivo
+    },
+  },
+  mounted() {
+    EventBus.on("auth-changed", this.updateAuthStatus); // Ascolta l'evento
+  },
+  beforeUnmount() {
+    EventBus.off("auth-changed", this.updateAuthStatus); // Rimuovi l'ascoltatore
   },
 };
 </script>
