@@ -1,47 +1,5 @@
 <template>
   <div class="welcome">
-    <aside class="sidebar bg-dark text-white">
-      <h4 class="text-center mt-3">Link Rapidi</h4>
-      <ul class="nav flex-column">
-        <li class="nav-item" v-if="role === 'doctor'">
-          <router-link
-            class="nav-link text-white"
-            to="/view-radiographs-doctor"
-          >
-            Visualizza Radiografie (Doctor)
-          </router-link>
-        </li>
-        <li class="nav-item" v-if="role === 'patient'">
-          <router-link
-            class="nav-link text-white"
-            to="/view-radiographs-patient"
-          >
-            Visualizza Radiografie (Patient)
-          </router-link>
-        </li>
-        <li class="nav-item" v-if="role === 'doctor'">
-          <router-link class="nav-link text-white" to="/manage-patients">
-            Gestisci Pazienti
-          </router-link>
-        </li>
-        <li class="nav-item" v-if="role === 'doctor'">
-          <router-link class="nav-link text-white" to="/reports">
-            Rapporti
-          </router-link>
-        </li>
-        <li class="nav-item" v-if="role === 'doctor'">
-          <router-link class="nav-link text-white" to="/predict">
-            Carica Radiografia (Doctor)
-          </router-link>
-        </li>
-        <li class="nav-item" v-if="role === 'patient'">
-          <router-link class="nav-link text-white" to="/predict-patient">
-            Carica Radiografia (Patient)
-          </router-link>
-        </li>
-      </ul>
-    </aside>
-
     <div class="container mt-5">
       <h2 class="mb-4">Benvenuto, {{ fullName }}!</h2>
       <p>Hai effettuato correttamente l'accesso al Radiology Portal.</p>
@@ -103,25 +61,25 @@ export default {
 
 <style scoped>
 .welcome {
-  background: #ffffff; /* Sfondo bianco, simile alla pagina di login */
+  background: #ffffff; /* Sfondo bianco */
   min-height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 0px 0px rgba(0, 0, 0, 0); /* Rimuove ombre esterne */
+  justify-content: center; /* Centra verticalmente */
 }
 
 .container {
   max-width: 600px;
+  width: 100%; /* Imposta una larghezza del 100% */
   padding: 40px;
   border-radius: 15px;
   background: #ffffff;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1); /* Simile alla shadow del login */
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1); /* Ombra del contenitore */
   margin-top: 100px;
-  height: auto;
   text-align: center; /* Centra il testo */
-  flex-grow: 1; /* Permette al contenuto principale di occupare lo spazio rimanente */
-  margin-left: 20px; /* Margine sinistro per distanziare il contenuto dalla sidebar */
+  flex-grow: 1; /* Permette al contenuto di occupare lo spazio rimanente */
+  margin-left: auto; /* Margini automatici per centrare orizzontalmente */
+  margin-right: auto; /* Margini automatici per centrare orizzontalmente */
 }
 
 h2 {
@@ -147,36 +105,5 @@ p {
 
 .btn-primary:hover {
   background-color: #0056b3;
-}
-
-.sidebar {
-  top: 0;
-  width: 250px; /* Imposta la larghezza della sidebar */
-  height: 100vh; /* Imposta l'altezza della sidebar al 100% della viewport */
-  padding: 20px; /* Padding interno */
-  background: linear-gradient(180deg, #212529, #343a40);
-}
-
-.sidebar .nav-link {
-  color: #cfd2d6;
-}
-
-.sidebar .nav-link:hover {
-  background-color: #495057;
-  border-radius: 5px;
-}
-
-.nav-link {
-  padding: 10px 15px; /* Aggiunge padding ai link per migliorarne l'aspetto */
-}
-
-@media (max-width: 767.98px) {
-  .navbar-brand {
-    font-size: 1.5rem;
-  }
-
-  .sidebar {
-    display: none;
-  }
 }
 </style>
