@@ -32,6 +32,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import axios from "axios";
 
@@ -50,7 +51,14 @@ export default {
       const response = await axios.get(
         `http://localhost:5000/verify-email/${uid}`
       );
-      this.verificationMessage = response.data.message; // "Email verificata con successo!"
+
+      // Imposta il messaggio di verifica basato sulla risposta del server
+      if (response.data.message === "Email già verificata!") {
+        this.verificationMessage = "La tua email è già stata verificata!";
+      } else if (response.data.message === "Email verificata con successo!") {
+        this.verificationMessage = "Email verificata con successo!";
+      }
+
       console.log("Risposta server --> " + response.data.message);
     } catch (error) {
       this.errorMessage =
