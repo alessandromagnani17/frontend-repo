@@ -250,6 +250,22 @@ export default {
       loading.value = true;
 
       try {
+        const verificationResponse = await axios.post(
+          "http://127.0.0.1:5000/check-email-verification",
+          {
+            email: form.value.email,
+          }
+        );
+
+        if (verificationResponse.data.message === "Email not verified") {
+          console.log("Email VERIFICATA");
+          errors.value.general =
+            "La tua email non è stata verificata. Verifica la tua email prima di accedere.";
+          loading.value = false;
+          return;
+        } else {
+          console.log("Email NON VERIFICATA");
+        }
         const userCredential = await signInWithEmailAndPassword(
           auth,
           form.value.email,
@@ -296,8 +312,6 @@ export default {
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
           console.log("Redirecting to WelcomePage");
           localStorage.setItem("userData", JSON.stringify(userData));
-
-          axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
           router.push({ name: "WelcomePage" });
         }
       } catch (error) {
@@ -328,7 +342,6 @@ export default {
             if (decrementResponse.data.message) {
               errors.value.general = decrementResponse.data.message;
             } else {
-              // Aggiorna il numero di tentativi rimanenti se il decremento è avvenuto con successo
               const attemptsRemaining =
                 decrementResponse.data.loginAttemptsLeft;
               errors.value.general = `Password errata. Hai ${attemptsRemaining} tentativi rimanenti.`;
