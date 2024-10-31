@@ -189,7 +189,6 @@ export default {
   max-width: 100%;
   max-height: 50vh; /* Modifica per utilizzare una percentuale dell'altezza della finestra */
   margin-top: 15px;
-
 }
 
 .row {

@@ -248,130 +248,171 @@ export default {
     const onSubmit = async () => {
       console.log("Attempting login...");
       if (!validateForm()) return;
-      loading.value = true;
 
+      loading.value = true;
+      errors.value.general = ""; // Reset errors
+
+      try {
+        if (!(await checkEmailVerification())) return;
+
+        console.log("Proseguo...");
+
+        const user = await signInUser();
+        if (!user) return; // Exit if sign-in failed
+
+        // Ottieni il token ID e invia al backend
+        const token = await getIdToken(user);
+        await handleLoginResponse(token);
+      } catch (error) {
+        handleError(error);
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    // Funzione per controllare la verifica dell'email
+    const checkEmailVerification = async () => {
       try {
         const verificationResponse = await axios.post(
           "http://127.0.0.1:5000/check-email-verification",
-          {
-            email: form.value.email,
-          }
+          { email: form.value.email }
         );
 
-        if (verificationResponse.data.message === "Email not verified") {
-          console.log("Email VERIFICATA");
-          errors.value.general =
-            "La tua email non è stata verificata. Verifica la tua email prima di accedere.";
-          loading.value = false;
-          return;
+        console.log(
+          `Risposta server verifica email: STATUS ${verificationResponse.status} MSG ${verificationResponse.data.message}`
+        );
+        return true;
+      } catch (error) {
+        console.log("Entro errori");
+        if (error.response) {
+          switch (error.response.status) {
+            case 403:
+              errors.value.general =
+                "La tua email non è stata verificata. Verifica la tua email prima di accedere.";
+              break;
+            case 404:
+              errors.value.general =
+                "Utente non trovato. Controlla le credenziali.";
+              break;
+            case 400:
+              errors.value.general = "Inserire email.";
+              break;
+            default:
+              errors.value.general =
+                error.response.data.error ||
+                "Errore nella verifica dell'email.";
+          }
         } else {
-          console.log("Email NON VERIFICATA");
+          errors.value.general = "Errore di connessione. Riprova più tardi.";
         }
+        console.error("Errore nella verifica dell'email:", error);
+        return false;
+      }
+    };
+
+    // Funzione per eseguire il login dell'utente
+    const signInUser = async () => {
+      try {
         const userCredential = await signInWithEmailAndPassword(
           auth,
           form.value.email,
           form.value.password
         );
-        const user = userCredential.user;
 
+        const user = userCredential.user;
         console.log("Login successful:", user);
 
-        if (!user.emailVerified) {
-          console.log("Email NON verificata");
-          errors.value.general =
-            "La tua email non è stata verificata. Verifica la tua email prima di accedere.";
-          loading.value = false;
-          return;
-        } else {
-          console.log("Email verificata");
-        }
+        return user; // Return user object
+      } catch (error) {
+        console.error("Errore durante il login:", error);
+        handleError(error);
+        return null; // Return null if failed
+      }
+    };
 
-        // Ottieni il token ID
-        const token = await user.getIdToken();
+    // Funzione per ottenere il token ID
+    const getIdToken = async (user) => {
+      try {
+        return await user.getIdToken(); // Return the token
+      } catch (error) {
+        console.error("Errore durante l'ottenimento del token ID:", error);
+        errors.value.general = "Errore durante il login.";
+      }
+    };
 
-        // Invia il token al backend
+    // Funzione per gestire la risposta del login
+    const handleLoginResponse = async (token) => {
+      try {
         const response = await axios.post("http://127.0.0.1:5000/login", {
           idToken: token,
         });
-
-        if (response.data.message === "Login successful") {
-          const userData = response.data.user;
-          console.log("User Data:  ", userData);
-
-          localStorage.setItem("authToken", token);
-          localStorage.setItem("username", user.email);
-
-          // Controlla e setta il ruolo e il doctorId se presenti
-          if (userData.doctorID) {
-            localStorage.setItem("doctorId", userData.doctorID);
-          }
-
-          if (userData.role) {
-            localStorage.setItem("userRole", userData.role);
-          }
-
-          axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-          console.log("Redirecting to WelcomePage");
-          localStorage.setItem("userData", JSON.stringify(userData));
-
-          // Emmetti un evento per notificare il login
-          EventBus.emit("auth-changed");
-          router.push({ name: "WelcomePage" });
-        }
+        console.log("Risposta server --> " + response.data.message);
+        storeUserData(response.data.user, token);
+        router.push({ name: "WelcomePage" });
       } catch (error) {
-        console.error("Errore durante il processo di login:", error);
-        // Azzera gli errori generali
-        errors.value.general = "";
+        console.error(
+          "Errore durante la gestione della risposta del login:",
+          error
+        );
+      }
+    };
 
-        // Controllo per credenziali non valide
-        if (error.code === "auth/wrong-password") {
-          errors.value.general = "Password errata. Riprova.";
-        } else if (error.code === "auth/user-not-found") {
-          errors.value.general = "Utente non trovato. Controlla l'email.";
-        } else if (error.code === "auth/invalid-credential") {
-          console.log(
-            "Inviando l'email per decrementare i tentativi..." +
-              form.value.email
-          );
-          try {
-            // Invia l'email al server per decrementare i tentativi
-            console.log("Email inviata al server:", form.value.email);
-            const decrementResponse = await axios.post(
-              "http://127.0.0.1:5000/decrement-attempts",
-              {
-                email: form.value.email,
-              }
-            );
+    // Funzione per memorizzare i dati dell'utente
+    const storeUserData = (userData, token) => {
+      localStorage.setItem("authToken", token);
+      localStorage.setItem("username", userData.email);
 
-            if (decrementResponse.data.message) {
-              errors.value.general = decrementResponse.data.message;
-            } else {
-              const attemptsRemaining =
-                decrementResponse.data.loginAttemptsLeft;
-              errors.value.general = `Password errata. Hai ${attemptsRemaining} tentativi rimanenti.`;
-            }
-          } catch (decrementError) {
-            console.error(
-              "Errore durante il decremento dei tentativi:",
-              decrementError
-            );
-            errors.value.general = "Errore nel decremento dei tentativi.";
-          }
-        } else if (error.code === "auth/too-many-requests") {
-          errors.value.general =
-            "Tentativi di accesso esauriti. Controlla la tua email per il link di reimpostazione della password.";
-          await sendPasswordResetEmailHandler();
-        } else if (error.response.status === 403) {
-          console.log("ENTRO QUAAAAA");
-          errors.value.general =
-            "La tua email non è stata verificata. Verifica la tua email prima di accedere.";
-        } else {
-          errors.value.general = "Errore sconosciuto durante il login.";
-        }
+      if (userData.doctorID) {
+        localStorage.setItem("doctorId", userData.doctorID);
+      }
 
-        console.log("Messaggio di errore generale:", errors.value.general);
-      } finally {
-        loading.value = false;
+      if (userData.role) {
+        localStorage.setItem("userRole", userData.role);
+      }
+
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      localStorage.setItem("userData", JSON.stringify(userData));
+
+      EventBus.emit("auth-changed"); // Emit event for login notification
+    };
+
+    // Funzione per gestire gli errori
+    const handleError = (error) => {
+      console.error("Errore durante il processo di login:", error);
+      if (error.code === "auth/wrong-password") {
+        errors.value.general = "Password errata. Riprova.";
+      } else if (error.code === "auth/user-not-found") {
+        errors.value.general = "Utente non trovato. Controlla l'email.";
+      } else if (error.code === "auth/invalid-credential") {
+        handleInvalidCredential();
+      } else if (error.code === "auth/too-many-requests") {
+        errors.value.general =
+          "Tentativi di accesso esauriti. Controlla la tua email per il link di reimpostazione della password.";
+        sendPasswordResetEmailHandler(); // Trigger password reset
+      } else {
+        errors.value.general = "Errore sconosciuto durante il login.";
+      }
+    };
+
+    // Funzione per gestire credenziali non valide
+    const handleInvalidCredential = async () => {
+      console.log(
+        "Inviando l'email per decrementare i tentativi..." + form.value.email
+      );
+      try {
+        const decrementResponse = await axios.post(
+          "http://127.0.0.1:5000/decrement-attempts",
+          { email: form.value.email }
+        );
+
+        const attemptsRemaining = decrementResponse.data.loginAttemptsLeft;
+        errors.value.general = `Password errata. Hai ${attemptsRemaining} tentativi rimanenti.`;
+      } catch (decrementError) {
+        console.error(
+          "Errore durante il decremento dei tentativi:",
+          decrementError
+        );
+        errors.value.general = "Errore nel decremento dei tentativi.";
       }
     };
 
