@@ -14,7 +14,9 @@
       <span class="step-title" v-if="currentStep < 4"
         >Passaggio {{ currentStep }} di 4</span
       >
-      <h2 class="mb-4" v-if="currentStep < 4">Crea un Account {{ role }}</h2>
+      <h2 class="mb-4" v-if="currentStep < 4">
+        Crea un Account {{ role === "patient" ? "paziente" : "dottore" }}
+      </h2>
 
       <form @submit.prevent="onSubmit">
         <!-- Step 1: Dati Anagrafici -->

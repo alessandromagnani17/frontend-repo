@@ -166,6 +166,7 @@ import axios from "axios";
 import { auth } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { sendPasswordResetEmail } from "firebase/auth";
+import EventBus from "../eventBus";
 
 export default {
   name: "UserLogin",
@@ -312,6 +313,9 @@ export default {
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
           console.log("Redirecting to WelcomePage");
           localStorage.setItem("userData", JSON.stringify(userData));
+
+          // Emmetti un evento per notificare il login
+          EventBus.emit("auth-changed");
           router.push({ name: "WelcomePage" });
         }
       } catch (error) {

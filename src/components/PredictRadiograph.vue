@@ -1,31 +1,5 @@
 <template>
   <div class="welcome">
-    <aside class="sidebar bg-dark text-white">
-      <h4 class="text-center mt-3">Link Rapidi</h4>
-      <ul class="nav flex-column">
-        <li class="nav-item">
-          <router-link class="nav-link text-white" to="/view-radiographs">
-            Visualizza Radiografie
-          </router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link text-white" to="/manage-patients">
-            Gestisci Pazienti
-          </router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link text-white" to="/reports">
-            Rapporti
-          </router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link text-white" to="/predict">
-            Predict
-          </router-link>
-        </li>
-      </ul>
-    </aside>
-
     <div class="container mt-5">
       <h5 v-if="showUploadSection"><strong>Carica una radiografia</strong></h5>
       <div v-if="isLoading" class="alert alert-info">Caricamento...</div>
@@ -192,12 +166,11 @@ export default {
 
 <style scoped>
 .welcome {
-  background: #ffffff;
+  background: #ffffff; /* Sfondo bianco */
   min-height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0px 0px rgba(0, 0, 0, 0);
+  align-items: center; /* Centra verticalmente */
+  justify-content: center; /* Centra orizzontalmente */
 }
 
 .container {
@@ -216,6 +189,7 @@ export default {
   max-width: 100%;
   max-height: 50vh; /* Modifica per utilizzare una percentuale dell'altezza della finestra */
   margin-top: 15px;
+
 }
 
 .row {

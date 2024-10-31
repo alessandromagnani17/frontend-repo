@@ -1,12 +1,13 @@
 <template>
   <div id="app" @click="closeNavbarOnClick">
     <nav
+      v-bind:key="authToken"
       class="navbar navbar-expand-lg navbar-dark bg-primary shadow-lg sticky-top"
     >
-      <div class="container">
-        <a class="navbar-brand" href="#" @click.prevent="handleLogoClick"
-          >Radiology Portal</a
-        >
+      <div class="container d-flex justify-content-between">
+        <a class="navbar-brand" href="#" @click.prevent="handleLogoClick">
+          Radiology Portal
+        </a>
         <button
           class="navbar-toggler"
           type="button"
@@ -22,60 +23,97 @@
           class="collapse navbar-collapse"
           :class="{ show: navbarOpen }"
         >
-          <ul class="navbar-nav ml-auto">
+          <ul class="navbar-nav me-auto">
+            <!-- Utilizza me-auto per spingere a destra -->
             <li class="nav-item">
-              <router-link class="nav-link" to="/" @click="closeNavbar"
-                >Home</router-link
-              >
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/register" @click="closeNavbar"
-                >Registrati</router-link
-              >
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/login" @click="closeNavbar"
-                >Login</router-link
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#" @click.prevent="goToDashboard"
-                >Dashboard</a
+              <a class="nav-link" href="#" @click.prevent="handleHomeClick"
+                >Home</a
               >
             </li>
 
-            <li class="nav-item dropdown" @click="toggleDropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                aria-haspopup="true"
-                aria-expanded="dropdownOpen"
-              >
-                <i class="fas fa-user"></i>
-              </a>
-              <div
-                class="dropdown-menu"
-                :class="{ show: dropdownOpen }"
-                style="position: absolute; top: 100%; left: 0"
-              >
+            <template v-if="isLoggedIn">
+              <li v-if="userRole === 'doctor'" class="nav-item">
                 <router-link
-                  class="dropdown-item"
-                  to="/profile"
+                  class="nav-link"
+                  to="/manage-patients"
                   @click="closeNavbar"
-                  >Profilo</router-link
+                  >Gestisci Pazienti</router-link
                 >
+              </li>
+              <li v-if="userRole === 'doctor'" class="nav-item">
                 <router-link
-                  class="dropdown-item"
-                  to="/settings"
+                  class="nav-link"
+                  to="/predict"
                   @click="closeNavbar"
-                  >Impostazioni</router-link
                 >
-                <a class="dropdown-item" href="#" @click.prevent="logout"
-                  >Logout</a
+                  Predici Radiografie
+                </router-link>
+              </li>
+              <li class="nav-item">
+                <router-link
+                  class="nav-link"
+                  to="/view-radiographs"
+                  @click="closeNavbar"
+                  >Visualizza Radiografie</router-link
                 >
-              </div>
-            </li>
+              </li>
+            </template>
+
+            <template v-else>
+              <li class="nav-item">
+                <router-link
+                  class="nav-link"
+                  to="/register"
+                  @click="closeNavbar"
+                >
+                  Registrati
+                </router-link>
+              </li>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/login" @click="closeNavbar">
+                  Login
+                </router-link>
+              </li>
+            </template>
+          </ul>
+
+          <ul class="navbar-nav">
+            <!-- Contenitore per il dropdown -->
+            <template v-if="isLoggedIn">
+              <li class="nav-item dropdown">
+                <a
+                  class="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  aria-haspopup="true"
+                  aria-expanded="dropdownOpen"
+                  @click="toggleDropdown"
+                >
+                  <i class="fas fa-user"></i>
+                </a>
+                <div
+                  class="dropdown-menu"
+                  :class="{ show: dropdownOpen }"
+                  style="position: absolute; top: 100%; right: 0"
+                >
+                  <router-link
+                    class="dropdown-item"
+                    to="/profile"
+                    @click="closeNavbar"
+                    >Profilo</router-link
+                  >
+                  <router-link
+                    class="dropdown-item"
+                    to="/settings"
+                    @click="closeNavbar"
+                    >Impostazioni</router-link
+                  >
+                  <a class="dropdown-item" href="#" @click.prevent="logout"
+                    >Logout</a
+                  >
+                </div>
+              </li>
+            </template>
           </ul>
         </div>
       </div>
@@ -93,13 +131,22 @@
 </template>
 
 <script>
+import EventBus from "./eventBus";
+
 export default {
   name: "App",
   data() {
     return {
       dropdownOpen: false,
       navbarOpen: false,
+      authToken: null,
+      userRole: null, // Aggiungi questa proprietà
     };
+  },
+  computed: {
+    isLoggedIn() {
+      return !!this.authToken;
+    },
   },
   methods: {
     toggleNavbar() {
@@ -115,38 +162,58 @@ export default {
       }
     },
     toggleDropdown() {
+      console.log(this.dropdownOpen);
       this.dropdownOpen = !this.dropdownOpen;
     },
     logout() {
-      localStorage.clear();
+      console.log("[DEBUG] Executing logout...");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userData"); // Aggiungi questa riga
+      this.authToken = null;
+      this.userRole = null; // Aggiungi questa riga
+      EventBus.emit("auth-changed");
+      alert("Logout avvenuto con successo");
       this.$router.push("/");
     },
     handleLogoClick() {
       const authToken = localStorage.getItem("authToken");
-
       if (authToken) {
         this.$router.push({ name: "WelcomePage" });
       } else {
         this.$router.push("/");
       }
     },
+    handleHomeClick() {
+      this.goToDashboard();
+      this.closeNavbar();
+    },
     goToDashboard() {
-      const authToken = localStorage.getItem("authToken");
       const userData = JSON.parse(localStorage.getItem("userData"));
 
-      if (authToken) {
-        console.log("Informazioni utente loggato:", userData);
-
-        // Controlla il ruolo dell'utente e reindirizza di conseguenza
+      if (this.isLoggedIn) {
         if (userData.role === "doctor") {
           this.$router.push({ name: "DoctorDashboard" });
         } else if (userData.role === "patient") {
           this.$router.push({ name: "PatientDashboard" });
         }
       } else {
-        this.$router.push({ name: "DashboardPage" });
+        this.$router.push("/");
       }
     },
+    updateAuthStatus() {
+      this.authToken = localStorage.getItem("authToken");
+      this.userRole =
+        JSON.parse(localStorage.getItem("userData"))?.role || null; // Aggiorna il ruolo
+      console.log("[DEBUG] updateAuthStatus - authToken:", this.authToken);
+      console.log("[DEBUG] role:", this.userRole);
+    },
+  },
+  mounted() {
+    this.updateAuthStatus(); // Inizializza authToken e userRole
+    EventBus.on("auth-changed", this.updateAuthStatus);
+  },
+  beforeUnmount() {
+    EventBus.off("auth-changed", this.updateAuthStatus);
   },
 };
 </script>
@@ -198,6 +265,10 @@ main {
   color: #ffffff;
 }
 
+.navbar-nav .nav-item {
+  margin-left: 15px; /* Regola questo valore per aumentare o diminuire il distanziamento */
+}
+
 .nav-link {
   font-size: 1.2rem; /* Stile uniformato */
   color: #ffffff;
@@ -236,25 +307,5 @@ main {
 .dropdown-item:hover {
   background-color: #495057;
   color: #ffffff;
-}
-
-.navbar .nav-link i.fas.fa-user {
-  font-size: 1.5rem;
-}
-
-@media (max-width: 991.98px) {
-  .navbar-nav {
-    text-align: center;
-  }
-}
-
-@media (max-width: 767.98px) {
-  .navbar-brand {
-    font-size: 1.5rem;
-  }
-
-  .sidebar {
-    display: none;
-  }
 }
 </style>
