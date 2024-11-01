@@ -204,8 +204,8 @@ export default {
       this.authToken = localStorage.getItem("authToken");
       this.userRole =
         JSON.parse(localStorage.getItem("userData"))?.role || null; // Aggiorna il ruolo
-      console.log("[DEBUG] updateAuthStatus - authToken:", this.authToken);
-      console.log("[DEBUG] role:", this.userRole);
+      //console.log("[DEBUG] updateAuthStatus - authToken:", this.authToken);
+      //console.log("[DEBUG] role:", this.userRole);
     },
   },
   mounted() {

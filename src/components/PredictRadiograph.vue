@@ -3,30 +3,52 @@
     <div class="container mt-5">
       <h5 v-if="showUploadSection"><strong>Carica una radiografia</strong></h5>
       <div v-if="isLoading" class="alert alert-info">Caricamento...</div>
-      <div v-if="patients.length === 0" class="alert alert-warning">
-        NON PUOI PERCHE NON HAI PAZIENTI ASSOCIATI
-      </div>
       <div v-else>
-        <input
-          v-if="showUploadSection"
-          type="file"
-          ref="fileInput"
-          @change="onFileChange"
-          accept="image/*"
-          style="display: none"
-        />
-        <button
-          v-if="showUploadSection"
-          @click="selectFile"
-          class="btn btn-secondary"
-        >
-          Seleziona file
-        </button>
+        <div v-if="patients.length === 0" class="alert alert-warning">
+          NON PUOI PERCHE NON HAI PAZIENTI ASSOCIATI
+        </div>
+        <div v-else>
+          <div v-if="selectedPatient">
+            <input
+              v-if="showUploadSection"
+              type="file"
+              ref="fileInput"
+              @change="onFileChange"
+              accept="image/*"
+              style="display: none"
+            />
+            <button
+              v-if="showUploadSection"
+              @click="selectFile"
+              class="btn btn-secondary"
+            >
+              Seleziona file
+            </button>
+          </div>
+          <div class="select-container mb-4">
+            <select
+              v-if="patients.length > 0 && !selectedPatient"
+              v-model="selectedPatient"
+              @change="onPatientChange"
+              class="form-select custom-select"
+            >
+              <option value="" disabled selected>Seleziona un paziente</option>
+              <option
+                v-for="patient in patients"
+                :key="patient.userId"
+                :value="patient.userId"
+              >
+                {{ patient.name }}
+              </option>
+            </select>
+          </div>
+        </div>
       </div>
-      <div v-if="imagePreview && showUploadSection" class="mt-3">
+
+      <div v-if="imagePreview && selectedPatient" class="mt-3">
         <img :src="imagePreview" alt="Anteprima immagine" class="img-preview" />
       </div>
-      <div v-if="imagePreview">
+      <div v-if="imagePreview && selectedPatient">
         <button
           v-if="showPredictButton"
           @click="submitImage"
@@ -93,7 +115,7 @@ export default {
       showPredictButton: true,
       showUploadSection: true,
       patients: [],
-      selectedPatient: null,
+      selectedPatient: "",
       isLoading: true,
     };
   },
@@ -113,6 +135,7 @@ export default {
       this.showNewPredictionButton = false;
       this.showPredictButton = true;
       this.showUploadSection = true;
+      this.selectedPatient = ""; // Resetta il paziente selezionato
       if (this.$refs.fileInput) {
         this.$refs.fileInput.value = ""; // Imposta il valore dell'input file
       }
@@ -158,7 +181,8 @@ export default {
       }
     },
     onPatientChange() {
-      this.showPredictButton = this.selectedPatient !== null;
+      // Mostra il pulsante di selezione file
+      this.showPredictButton = true; // Mostra il pulsante di predizione
     },
   },
 };
@@ -258,5 +282,31 @@ export default {
   .sidebar {
     display: none;
   }
+}
+
+.select-container {
+  margin-top: 18px; /* Spazio sopra il menu a tendina */
+  margin-bottom: 10px; /* Spazio sotto il menu a tendina */
+}
+
+.form-select {
+  display: block; /* Assicurati che il selettore occupi l'intera larghezza */
+  width: 100%; /* Fa sì che il selettore si espanda */
+  padding: 10px; /* Padding interno per il selettore */
+  border: 1px solid #ced4da; /* Colore del bordo */
+  border-radius: 5px; /* Angoli arrotondati */
+  background-color: #fff; /* Sfondo bianco */
+  transition: border-color 0.2s; /* Transizione per il cambio del colore del bordo */
+}
+
+.form-select:focus {
+  border-color: #007bff; /* Colore del bordo quando in focus */
+  outline: none; /* Rimuove l'outline predefinito */
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Ombra del box quando in focus */
+}
+
+.custom-select {
+  max-width: 30%; /* Imposta la larghezza massima desiderata */
+  margin: 0 auto; /* Centra il menu a tendina */
 }
 </style>
