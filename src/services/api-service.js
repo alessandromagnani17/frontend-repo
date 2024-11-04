@@ -75,3 +75,13 @@ export const getRadiographs = async (patientId) => {
     throw error;
   }
 };
+
+export const loadRadiographiesForPatient = async (patientId) => {
+  try {
+    const response = await axios.get(`${API_URL}/get_radiographs/${patientId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Errore nel recupero delle radiografie:", error);
+    throw error;
+  }
+};

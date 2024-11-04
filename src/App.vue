@@ -140,7 +140,7 @@ export default {
       dropdownOpen: false,
       navbarOpen: false,
       authToken: null,
-      userRole: null, // Aggiungi questa proprietà
+      userRole: null,
     };
   },
   computed: {
@@ -168,9 +168,9 @@ export default {
     logout() {
       console.log("[DEBUG] Executing logout...");
       localStorage.removeItem("authToken");
-      localStorage.removeItem("userData"); // Aggiungi questa riga
+      localStorage.removeItem("userData");
       this.authToken = null;
-      this.userRole = null; // Aggiungi questa riga
+      this.userRole = null;
       EventBus.emit("auth-changed");
       alert("Logout avvenuto con successo");
       this.$router.push("/");
@@ -203,7 +203,7 @@ export default {
     updateAuthStatus() {
       this.authToken = localStorage.getItem("authToken");
       this.userRole =
-        JSON.parse(localStorage.getItem("userData"))?.role || null; // Aggiorna il ruolo
+        JSON.parse(localStorage.getItem("userData"))?.role || null;
       //console.log("[DEBUG] updateAuthStatus - authToken:", this.authToken);
       //console.log("[DEBUG] role:", this.userRole);
     },
