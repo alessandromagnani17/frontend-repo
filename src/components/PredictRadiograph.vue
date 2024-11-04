@@ -5,9 +5,36 @@
       <div v-if="isLoading" class="alert alert-info">Caricamento...</div>
       <div v-else>
         <div v-if="patients.length === 0" class="alert alert-warning">
-          NON PUOI PERCHE NON HAI PAZIENTI ASSOCIATI
+          Non hai ancora nessun paziente associato.
         </div>
         <div v-else>
+          <div class="select-container mb-4">
+            <select
+              v-if="patients.length > 0 && !selectedPatient"
+              v-model="selectedPatient"
+              @change="onPatientChange"
+              class="form-select custom-select"
+            >
+              <option value="" disabled selected>Seleziona un paziente</option>
+              <option
+                v-for="patient in patients"
+                :key="patient.userId"
+                :value="patient.userId"
+              >
+                {{ patient.name }} {{ patient.family_name }} (ID:
+                {{ patient.userId }})
+              </option>
+            </select>
+          </div>
+          <div v-if="selectedPatientName && showMainImagePreview" class="mt-2">
+            <div>
+              Utente selezionato: <strong>{{ selectedPatientName }}</strong>
+            </div>
+            <button @click="changePatient" class="btn btn-secondary mt-2">
+              Cambia paziente
+            </button>
+          </div>
+          <div><h5></h5></div>
           <div v-if="selectedPatient">
             <input
               v-if="showUploadSection"
@@ -24,30 +51,24 @@
             >
               Seleziona file
             </button>
-          </div>
-          <div class="select-container mb-4">
-            <select
-              v-if="patients.length > 0 && !selectedPatient"
-              v-model="selectedPatient"
-              @change="onPatientChange"
-              class="form-select custom-select"
+            <div
+              v-if="imagePreview && selectedPatient && showMainImagePreview"
+              class="mt-3"
             >
-              <option value="" disabled selected>Seleziona un paziente</option>
-              <option
-                v-for="patient in patients"
-                :key="patient.userId"
-                :value="patient.userId"
-              >
-                {{ patient.name }}
-              </option>
-            </select>
+              <img
+                :src="imagePreview"
+                alt="Anteprima immagine"
+                class="img-preview"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      <div v-if="imagePreview && selectedPatient" class="mt-3">
-        <img :src="imagePreview" alt="Anteprima immagine" class="img-preview" />
+      <div v-if="!showMainImagePreview" class="mt-3">
+        <h2 class="mb-4">Risultati della predizione</h2>
       </div>
+
       <div v-if="imagePreview && selectedPatient">
         <button
           v-if="showPredictButton"
@@ -116,7 +137,9 @@ export default {
       showUploadSection: true,
       patients: [],
       selectedPatient: "",
+      selectedPatientName: "",
       isLoading: true,
+      showMainImagePreview: true,
     };
   },
   async created() {
@@ -135,9 +158,11 @@ export default {
       this.showNewPredictionButton = false;
       this.showPredictButton = true;
       this.showUploadSection = true;
-      this.selectedPatient = ""; // Resetta il paziente selezionato
+      this.showMainImagePreview = true;
+      this.selectedPatient = "";
+      this.selectedPatientName = "";
       if (this.$refs.fileInput) {
-        this.$refs.fileInput.value = ""; // Imposta il valore dell'input file
+        this.$refs.fileInput.value = "";
       }
     },
     selectFile() {
@@ -176,13 +201,31 @@ export default {
         this.showNewPredictionButton = true;
         this.showPredictButton = false;
         this.showUploadSection = false;
+        this.showMainImagePreview = false;
       } catch (error) {
         console.error("Error predicting image:", error);
       }
     },
     onPatientChange() {
-      // Mostra il pulsante di selezione file
-      this.showPredictButton = true; // Mostra il pulsante di predizione
+      const patient = this.patients.find(
+        (p) => p.userId === this.selectedPatient
+      );
+      this.selectedPatientName = patient
+        ? `${patient.name} ${patient.family_name} (ID: ${patient.userId})`
+        : "";
+      this.showPredictButton = true;
+    },
+    changePatient() {
+      this.selectedPatient = "";
+      this.selectedPatientName = "";
+      this.selectedFile = null;
+      this.selectedFileName = null;
+      this.imagePreview = null;
+      if (this.$refs.fileInput) {
+        this.$refs.fileInput.value = "";
+      }
+      this.showPredictButton = false;
+      this.showUploadSection = true;
     },
   },
 };
@@ -306,7 +349,7 @@ export default {
 }
 
 .custom-select {
-  max-width: 30%; /* Imposta la larghezza massima desiderata */
+  max-width: 80%; /* Imposta la larghezza massima desiderata */
   margin: 0 auto; /* Centra il menu a tendina */
 }
 </style>

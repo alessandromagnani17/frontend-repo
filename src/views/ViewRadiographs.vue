@@ -1,4 +1,9 @@
 <template>
+  <div class="welcome">
+    <div class="container mt-5">
+      <h5><strong>Visualizza una radiografia</strong></h5>
+    </div>
+  </div>
   <div class="radiographs-view">
     <h2>Le Tue Radiografie</h2>
     <div class="cards-container">
