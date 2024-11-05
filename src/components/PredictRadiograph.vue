@@ -26,11 +26,23 @@
               </option>
             </select>
           </div>
-          <div v-if="selectedPatientName && showMainImagePreview" class="mt-2">
+          <div
+            v-if="selectedPatientInfo.name.length > 0 && showMainImagePreview"
+            class="mt-2"
+          >
             <div>
-              Utente selezionato: <strong>{{ selectedPatientName }}</strong>
+              Utente selezionato:
+              <strong
+                >{{ selectedPatientInfo.name }}
+                {{ selectedPatientInfo.surname }} <br />
+                (ID: {{ selectedPatientInfo.userId }})</strong
+              >
             </div>
-            <button @click="changePatient" class="btn btn-secondary mt-2">
+            <button
+              @click="changePatient"
+              class="btn btn-secondary mt-2"
+              style="margin-bottom: 20px"
+            >
               Cambia paziente
             </button>
           </div>
@@ -61,6 +73,18 @@
                 class="img-preview"
               />
             </div>
+            <div v-if="showKneeSide" class="button-cover">
+              <div class="buttonSide r" id="button-1">
+                <input
+                  type="checkbox"
+                  v-model="selectedSide"
+                  @change="updateSelectedSide"
+                  class="checkbox"
+                />
+                <div class="knobs"></div>
+                <div class="layer"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -79,6 +103,15 @@
         </button>
       </div>
       <div v-if="predictedClass !== null" class="mt-4">
+        <div class="card prediction-card mb-3">
+          <div class="card-body">
+            <h5 class="card-title">
+              Utente: {{ selectedPatientInfo.name }}
+              {{ selectedPatientInfo.surname }} <br />
+              (ID: {{ selectedPatientInfo.userId }})
+            </h5>
+          </div>
+        </div>
         <div class="row">
           <div class="col-md-6 col-12">
             <div class="card">
@@ -107,7 +140,11 @@
         </div>
         <div class="card prediction-card mb-3">
           <div class="card-body">
-            <h5 class="card-title">{{ predictedClass }}</h5>
+            <h5 class="card-title">
+              {{ predictedClass }} ({{
+                selectedSide ? "Ginocchio destro" : "Ginocchio sinistro"
+              }})
+            </h5>
           </div>
         </div>
         <div v-if="showNewPredictionButton" class="mt-4">
@@ -137,9 +174,11 @@ export default {
       showUploadSection: true,
       patients: [],
       selectedPatient: "",
-      selectedPatientName: "",
+      selectedPatientInfo: { name: "", surname: "", userId: "" },
       isLoading: true,
       showMainImagePreview: true,
+      selectedSide: false, // False = Left ||| True = Right
+      showKneeSide: false,
     };
   },
   async created() {
@@ -160,7 +199,9 @@ export default {
       this.showUploadSection = true;
       this.showMainImagePreview = true;
       this.selectedPatient = "";
-      this.selectedPatientName = "";
+      this.selectedPatientInfo = { name: "", surname: "", userId: "" };
+      this.showKneeSide = false;
+      this.selectedSide = false;
       if (this.$refs.fileInput) {
         this.$refs.fileInput.value = "";
       }
@@ -169,6 +210,7 @@ export default {
       this.$refs.fileInput.click();
     },
     onFileChange(event) {
+      this.showKneeSide = true;
       this.selectedFile = event.target.files[0];
       this.selectedFileName = this.selectedFile.name;
       this.imagePreview = URL.createObjectURL(this.selectedFile);
@@ -180,9 +222,13 @@ export default {
       formData.append("file", this.selectedFile);
 
       const userData = JSON.parse(localStorage.getItem("userData"));
-      const userUid = userData.uid;
-      formData.append("userUID", userUid);
+      formData.append("userData", JSON.stringify(userData));
       formData.append("selectedPatientID", this.selectedPatient);
+      if (this.selectedSide) {
+        formData.append("selectedSide", "Right");
+      } else {
+        formData.append("selectedSide", "Left");
+      }
 
       try {
         const response = await axios.post(
@@ -202,6 +248,7 @@ export default {
         this.showPredictButton = false;
         this.showUploadSection = false;
         this.showMainImagePreview = false;
+        this.showKneeSide = false;
       } catch (error) {
         console.error("Error predicting image:", error);
       }
@@ -210,14 +257,20 @@ export default {
       const patient = this.patients.find(
         (p) => p.userId === this.selectedPatient
       );
-      this.selectedPatientName = patient
-        ? `${patient.name} ${patient.family_name} (ID: ${patient.userId})`
-        : "";
+      this.selectedPatientInfo = patient
+        ? {
+            name: patient.name,
+            surname: patient.family_name,
+            userId: patient.userId,
+          }
+        : { name: "", surname: "", userId: "" }; // Se non trovato, resetta a valori vuoti
+
       this.showPredictButton = true;
+      this.showKneeSide = false;
     },
     changePatient() {
       this.selectedPatient = "";
-      this.selectedPatientName = "";
+      this.selectedPatientInfo = { name: "", surname: "", userId: "" };
       this.selectedFile = null;
       this.selectedFileName = null;
       this.imagePreview = null;
@@ -351,5 +404,80 @@ export default {
 .custom-select {
   max-width: 80%; /* Imposta la larghezza massima desiderata */
   margin: 0 auto; /* Centra il menu a tendina */
+}
+
+.button-cover {
+  height: 85%;
+  width: 40%;
+  margin: 20px auto; /* Centra orizzontalmente */
+  background-color: #fff;
+  display: flex; /* Attiva Flexbox */
+  justify-content: center; /* Centra orizzontalmente */
+  align-items: center; /* Centra verticalmente */
+}
+
+.buttonSide {
+  position: relative;
+  top: 50%;
+  width: 100%;
+  height: 36px;
+  margin: 0;
+  overflow: hidden;
+}
+
+.checkbox {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.knobs {
+  z-index: 2;
+}
+
+.layer {
+  width: 100%;
+  background-color: #ebf7fc;
+  transition: 0.3s ease all;
+  z-index: 1;
+}
+
+/* Button 1 */
+#button-1 .knobs:before {
+  content: "Left";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 60%;
+  height: 30px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1;
+  padding: 9px 4px;
+  background-color: #03a9f4;
+  transition: 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15) all;
+}
+
+#button-1 .checkbox:checked + .knobs:before {
+  content: "Right";
+  left: 95px;
+  background-color: #f44336;
+}
+
+#button-1 .checkbox:checked ~ .layer {
+  background-color: #fcebeb;
+}
+
+#button-1 .knobs,
+#button-1 .knobs:before,
+#button-1 .layer {
+  transition: 0.3s ease all;
 }
 </style>
