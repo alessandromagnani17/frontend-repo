@@ -207,7 +207,8 @@ export default {
     };
 
     // Funzione per creare un account (stub)
-    const createAccount = () => {
+    const createAccount = (role) => {
+      localStorage.setItem("userRole", role);
       router.push({ name: "UserRegister" });
     };
 
@@ -246,7 +247,6 @@ export default {
     };
 
     const onSubmit = async () => {
-      console.log("Attempting login...");
       if (!validateForm()) return;
 
       loading.value = true;
@@ -254,8 +254,6 @@ export default {
 
       try {
         if (!(await checkEmailVerification())) return;
-
-        console.log("Proseguo...");
 
         const user = await signInUser();
         if (!user) return; // Exit if sign-in failed
@@ -283,7 +281,6 @@ export default {
         );
         return true;
       } catch (error) {
-        console.log("Entro errori");
         if (error.response) {
           switch (error.response.status) {
             case 403:
@@ -320,7 +317,6 @@ export default {
         );
 
         const user = userCredential.user;
-        console.log("Login successful:", user);
 
         return user; // Return user object
       } catch (error) {
@@ -346,7 +342,6 @@ export default {
         const response = await axios.post("http://127.0.0.1:5000/login", {
           idToken: token,
         });
-        console.log("Risposta server --> " + response.data.message);
         storeUserData(response.data.user, token);
         router.push({ name: "WelcomePage" });
       } catch (error) {
@@ -396,9 +391,6 @@ export default {
 
     // Funzione per gestire credenziali non valide
     const handleInvalidCredential = async () => {
-      console.log(
-        "Inviando l'email per decrementare i tentativi..." + form.value.email
-      );
       try {
         const decrementResponse = await axios.post(
           "http://127.0.0.1:5000/decrement-attempts",

@@ -397,12 +397,13 @@ export default {
   },
   created() {
     this.role = localStorage.getItem("userRole") || "";
+    this.form.role = this.role;
     this.isDoctorRole = this.role === "doctor"; // Imposta isDoctorRole in base al ruolo
 
     if (this.isDoctorRole) {
-      this.form.role = "doctor"; // Imposta il role a 'doctor' se l'utente è un dottore
+      this.form.role = "doctor";
     } else {
-      this.form.role = "patient"; // Imposta il role a 'patient' se è un paziente
+      this.form.role = "patient";
     }
 
     // Aspetta che entrambe le funzioni siano completate

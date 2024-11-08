@@ -167,12 +167,10 @@ export default {
     },
     logout() {
       console.log("[DEBUG] Executing logout...");
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("userData");
+      localStorage.clear();
       this.authToken = null;
       this.userRole = null;
       EventBus.emit("auth-changed");
-      alert("Logout avvenuto con successo");
       this.$router.push("/");
     },
     handleLogoClick() {

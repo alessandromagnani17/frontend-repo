@@ -7,8 +7,8 @@
         <div v-if="patients.length > 0">
           <div class="select-container mb-4">
             <select
-              v-if="patients.length > 0 && !selectedPatient"
-              v-model="selectedPatient"
+              v-if="patients.length > 0 && !selectedPatientId"
+              v-model="selectedPatientId"
               @change="onPatientChange"
               class="form-select custom-select"
             >
@@ -23,21 +23,36 @@
               </option>
             </select>
           </div>
-          <div v-if="selectedPatient" class="mt-2">
+          <div v-if="selectedPatientId" class="mt-2">
             <div>
-              Utente selezionato: <strong>{{ selectedPatient }}</strong>
+              Utente selezionato:
+              <strong
+                >{{ selectedPatientName }} {{ selectedPatientSurname }} (ID:
+                {{ selectedPatientId }})</strong
+              >
             </div>
             <button @click="changePatient" class="btn btn-secondary mt-2">
               Cambia paziente
             </button>
           </div>
+          <div v-if="isLoadingRadiographs" class="alert alert-info mt-3">
+            Caricamento delle radiografie...
+          </div>
           <div
             class="row mt-5"
-            v-if="userRadiographs.length > 0 && selectedPatient"
+            v-if="userRadiographs.length > 0 && selectedPatientId"
           >
             <div
-              v-for="radiograph in userRadiographs"
-              :key="radiograph.id"
+              v-for="(radiograph, index) in userRadiographs"
+              :key="radiograph.radiography_id"
+              @click="
+                goToRadiographDetail(
+                  index,
+                  radiograph.original_image,
+                  radiograph.gradcam_image
+                )
+              "
+              style="cursor: pointer"
               class="card"
             >
               <img
@@ -46,9 +61,16 @@
                 alt="Radiografia"
               />
               <div class="card-body">
-                <h5 class="card-title">Titolo</h5>
-                <p class="card-text">Descrizione</p>
+                <h5 class="card-title">Radiografia {{ index + 1 }}</h5>
               </div>
+            </div>
+          </div>
+          <div v-else>
+            <div v-if="errorNoRadiographies" class="alert alert-danger mt-3">
+              <p>
+                L'utente {{ selectedPatientName }}
+                {{ selectedPatientSurname }} non ha radiografie.
+              </p>
             </div>
           </div>
         </div>
@@ -74,10 +96,14 @@ export default {
   data() {
     return {
       patients: [],
-      selectedPatient: "",
+      selectedPatientName: "",
+      selectedPatientSurname: "",
+      selectedPatientId: "",
       role: "",
       userRadiographs: [],
       isLoading: true,
+      isLoadingRadiographs: false,
+      errorNoRadiographies: false,
     };
   },
   async created() {
@@ -88,28 +114,85 @@ export default {
     if (this.role === "doctor") {
       this.patients = await getPatientsFromDoctor(userUid);
     }
+    const id = this.$route.query.patient_id;
+    if (id) {
+      this.selectedPatientId = id;
+      this.isLoadingRadiographs = true;
+      const patient = this.patients.find(
+        (p) => p.userId === this.selectedPatientId
+      );
+
+      if (patient) {
+        this.selectedPatientName = patient.name;
+        this.selectedPatientSurname = patient.family_name;
+        this.selectedPatientId = patient.userId;
+      }
+
+      this.userRadiographs = await loadRadiographiesForPatient(
+        this.selectedPatientId
+      );
+
+      if (this.userRadiographs.length == 0) {
+        this.errorNoRadiographies = true;
+      } else {
+        this.errorNoRadiographies = false;
+      }
+
+      this.isLoadingRadiographs = false;
+    }
     this.isLoading = false;
   },
   methods: {
     async onPatientChange() {
+      this.userRadiographs = [];
+      this.isLoadingRadiographs = true;
       const patient = this.patients.find(
-        (p) => p.userId === this.selectedPatient
+        (p) => p.userId === this.selectedPatientId
       );
-      this.selectedPatient = patient
-        ? `${patient.name} ${patient.family_name} (ID: ${patient.userId})`
-        : "";
 
-      this.userRadiographs = await loadRadiographiesForPatient(patient.userId);
-      this.userRadiographs.forEach((radiograph, index) => {
-        console.log(`Radiografia ${index + 1}:`);
-        for (const [key, value] of Object.entries(radiograph)) {
-          console.log(`  ${key}: ${value}`);
-        }
+      if (patient) {
+        this.selectedPatientName = patient.name;
+        this.selectedPatientSurname = patient.family_name;
+        this.selectedPatientId = patient.userId;
+      }
+
+      this.userRadiographs = await loadRadiographiesForPatient(
+        this.selectedPatientId
+      );
+
+      if (this.userRadiographs.length == 0) {
+        this.errorNoRadiographies = true;
+      } else {
+        this.errorNoRadiographies = false;
+      }
+
+      this.isLoadingRadiographs = false;
+      this.$router.push({
+        name: "ViewRadiographs",
+        query: {
+          patient_id: this.selectedPatientId,
+        },
       });
     },
     changePatient() {
-      this.selectedPatient = "";
+      this.selectedPatientId = "";
+      this.selectedPatientName = "";
+      this.selectedPatientSurname = "";
       this.userRadiographies = [];
+      this.errorNoRadiographies = false;
+      this.isLoadingRadiographs = false;
+    },
+    goToRadiographDetail(index, or, gd) {
+      localStorage.setItem("selected_original_img", or);
+      localStorage.setItem("selected_gradcam_img", gd);
+      const idx = index + 1;
+      this.$router.push({
+        name: "RadiographyDetail",
+        query: {
+          patient_id: this.selectedPatientId,
+          index: idx,
+        },
+      });
     },
   },
 };
@@ -153,6 +236,13 @@ export default {
   flex: 1 1 45%; /* Permetti alle card di occupare il 45% della larghezza */
   margin: 10px; /* Margine tra le card */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: scale(1.03); /* Leggero ingrandimento quando si passa sopra */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Aggiunge un'ombra per maggiore enfasi */
 }
 
 /* Stili per la card della predizione */
