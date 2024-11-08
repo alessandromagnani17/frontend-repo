@@ -83,23 +83,25 @@
             </h5>
           </div>
         </div>
-        <h5><strong>Informazioni caricamento</strong></h5>
-        <table class="table table-bordered mt-3">
-          <tbody>
-            <tr>
-              <th>Dottore</th>
-              <td>{{ radiographyInfo.doctorLoaded }}</td>
-            </tr>
-            <tr>
-              <th>Uid dottore</th>
-              <td>{{ radiographyInfo.doctorUid }}</td>
-            </tr>
-            <tr>
-              <th>ID dottore</th>
-              <td>{{ radiographyInfo.doctorID }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div v-if="userRole === 'doctor'">
+          <h5><strong>Informazioni caricamento</strong></h5>
+          <table class="table table-bordered mt-3">
+            <tbody>
+              <tr>
+                <th>Dottore</th>
+                <td>{{ radiographyInfo.doctorLoaded }}</td>
+              </tr>
+              <tr>
+                <th>Uid dottore</th>
+                <td>{{ radiographyInfo.doctorUid }}</td>
+              </tr>
+              <tr>
+                <th>ID dottore</th>
+                <td>{{ radiographyInfo.doctorID }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <button @click="goBack" class="btn btn-primary mt-3">
           Torna alla lista delle radiografie
         </button>
@@ -115,6 +117,7 @@ export default {
   data() {
     return {
       patient_id: "",
+      userRole: "",
       index: "",
       original_image_url: "",
       gradcam_image_url: "",
@@ -150,6 +153,8 @@ export default {
     this.radiographyInfo = radiographyInfoJson;
     this.original_image_url = localStorage.getItem("selected_original_img");
     this.gradcam_image_url = localStorage.getItem("selected_gradcam_img");
+    const userData = JSON.parse(localStorage.getItem("userData"));
+    this.userRole = userData?.role || null;
     this.isLoading = false;
   },
   methods: {

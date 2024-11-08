@@ -52,7 +52,7 @@
               <li class="nav-item">
                 <router-link
                   class="nav-link"
-                  to="/view-radiographs"
+                  :to="viewRadiographsRoute"
                   @click="closeNavbar"
                   >Visualizza Radiografie</router-link
                 >
@@ -141,11 +141,23 @@ export default {
       navbarOpen: false,
       authToken: null,
       userRole: null,
+      userDataUid: null,
+      userDataName: null,
+      userDataSurname: null,
     };
   },
   computed: {
     isLoggedIn() {
       return !!this.authToken;
+    },
+    viewRadiographsRoute() {
+      if (this.userRole === "patient") {
+        localStorage.setItem("Name", this.userDataName);
+        localStorage.setItem("Surname", this.userDataSurname);
+        return { path: "/view-radiographs", query: { uid: this.userDataUid } };
+      } else {
+        return { path: "/view-radiographs" };
+      }
     },
   },
   methods: {
@@ -170,6 +182,7 @@ export default {
       localStorage.clear();
       this.authToken = null;
       this.userRole = null;
+      this.userDataUid = null;
       EventBus.emit("auth-changed");
       this.$router.push("/");
     },
@@ -200,8 +213,11 @@ export default {
     },
     updateAuthStatus() {
       this.authToken = localStorage.getItem("authToken");
-      this.userRole =
-        JSON.parse(localStorage.getItem("userData"))?.role || null;
+      const userData = JSON.parse(localStorage.getItem("userData"));
+      this.userRole = userData?.role || null;
+      this.userDataUid = userData?.uid || null;
+      this.userDataName = userData?.name || null;
+      this.userDataSurname = userData?.family_name || null;
       //console.log("[DEBUG] updateAuthStatus - authToken:", this.authToken);
       //console.log("[DEBUG] role:", this.userRole);
     },

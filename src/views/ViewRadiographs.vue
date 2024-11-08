@@ -1,85 +1,88 @@
 <template>
   <div class="welcome">
     <div class="container mt-5">
-      <h5><strong>Visualizza una radiografia</strong></h5>
+      <h5><strong>Visualizza radiografie</strong></h5>
       <div v-if="isLoading" class="alert alert-info">Caricamento...</div>
-      <div v-else-if="role === 'doctor'">
-        <div v-if="patients.length > 0">
-          <div class="select-container mb-4">
-            <select
-              v-if="patients.length > 0 && !selectedPatientId"
-              v-model="selectedPatientId"
-              @change="onPatientChange"
-              class="form-select custom-select"
+      <div v-else-if="role === 'doctor' || role === 'patient'">
+        <div v-if="role === 'doctor'" class="select-container mb-4">
+          <select
+            v-if="patients.length > 0 && !selectedPatientId"
+            v-model="selectedPatientId"
+            @change="onPatientChange"
+            class="form-select custom-select"
+          >
+            <option value="" disabled selected>Seleziona un paziente</option>
+            <option
+              v-for="patient in patients"
+              :key="patient.userId"
+              :value="patient.userId"
             >
-              <option value="" disabled selected>Seleziona un paziente</option>
-              <option
-                v-for="patient in patients"
-                :key="patient.userId"
-                :value="patient.userId"
-              >
-                {{ patient.name }} {{ patient.family_name }} (ID:
-                {{ patient.userId }})
-              </option>
-            </select>
+              {{ patient.name }} {{ patient.family_name }} (ID:
+              {{ patient.userId }})
+            </option>
+          </select>
+        </div>
+        <div v-if="selectedPatientId" class="mt-2">
+          <div v-if="role === 'doctor'">
+            Utente selezionato:
+            <strong
+              >{{ selectedPatientName }} {{ selectedPatientSurname }} (ID:
+              {{ selectedPatientId }})</strong
+            >
           </div>
-          <div v-if="selectedPatientId" class="mt-2">
-            <div>
-              Utente selezionato:
-              <strong
-                >{{ selectedPatientName }} {{ selectedPatientSurname }} (ID:
-                {{ selectedPatientId }})</strong
-              >
-            </div>
+          <div v-else>
+            Benvenuto
+            <strong
+              >{{ selectedPatientName }} {{ selectedPatientSurname }}</strong
+            >
+          </div>
+          <div v-if="role === 'doctor'">
             <button @click="changePatient" class="btn btn-secondary mt-2">
               Cambia paziente
             </button>
           </div>
-          <div v-if="isLoadingRadiographs" class="alert alert-info mt-3">
-            Caricamento delle radiografie...
-          </div>
+        </div>
+        <div v-if="isLoadingRadiographs" class="alert alert-info mt-3">
+          Caricamento delle radiografie...
+        </div>
+        <div
+          class="row mt-5"
+          v-if="userRadiographs.length > 0 && selectedPatientId"
+        >
           <div
-            class="row mt-5"
-            v-if="userRadiographs.length > 0 && selectedPatientId"
+            v-for="(radiograph, index) in userRadiographs"
+            :key="radiograph.radiography_id"
+            @click="
+              goToRadiographDetail(
+                index,
+                radiograph.original_image,
+                radiograph.gradcam_image
+              )
+            "
+            style="cursor: pointer"
+            class="card"
           >
-            <div
-              v-for="(radiograph, index) in userRadiographs"
-              :key="radiograph.radiography_id"
-              @click="
-                goToRadiographDetail(
-                  index,
-                  radiograph.original_image,
-                  radiograph.gradcam_image
-                )
-              "
-              style="cursor: pointer"
-              class="card"
-            >
-              <img
-                :src="radiograph.original_image"
-                class="card-img-top"
-                alt="Radiografia"
-              />
-              <div class="card-body">
-                <h5 class="card-title">Radiografia {{ index + 1 }}</h5>
-              </div>
-            </div>
-          </div>
-          <div v-else>
-            <div v-if="errorNoRadiographies" class="alert alert-danger mt-3">
-              <p>
-                L'utente {{ selectedPatientName }}
-                {{ selectedPatientSurname }} non ha radiografie.
-              </p>
+            <img
+              :src="radiograph.original_image"
+              class="card-img-top"
+              alt="Radiografia"
+            />
+            <div class="card-body">
+              <h5 class="card-title">Radiografia {{ index + 1 }}</h5>
             </div>
           </div>
         </div>
         <div v-else>
+          <div v-if="errorNoRadiographies" class="alert alert-danger mt-3">
+            <p>
+              L'utente {{ selectedPatientName }}
+              {{ selectedPatientSurname }} non ha radiografie.
+            </p>
+          </div>
+        </div>
+        <div v-if="patients.length == 0 && role === 'doctor'">
           <p>NON hai pazienti.</p>
         </div>
-      </div>
-      <div v-else-if="role === 'patient'">
-        <p>You can only see your own radiographs.</p>
       </div>
       <div v-else>
         <p>You do not have permission to view radiographs.</p>
@@ -109,10 +112,26 @@ export default {
   async created() {
     const userDataString = localStorage.getItem("userData");
     const userData = JSON.parse(userDataString);
-    const userUid = userData.doctorID;
     this.role = userData.role;
     if (this.role === "doctor") {
-      this.patients = await getPatientsFromDoctor(userUid);
+      this.patients = await getPatientsFromDoctor(userData.doctorID);
+    } else if (this.role === "patient") {
+      this.selectedPatientId = userData.uid;
+      this.selectedPatientName = localStorage.getItem("Name");
+      this.selectedPatientSurname = localStorage.getItem("Surname");
+      this.isLoadingRadiographs = true;
+
+      this.userRadiographs = await loadRadiographiesForPatient(
+        this.selectedPatientId
+      );
+
+      if (this.userRadiographs.length == 0) {
+        this.errorNoRadiographies = true;
+      } else {
+        this.errorNoRadiographies = false;
+      }
+
+      this.isLoadingRadiographs = false;
     }
     const id = this.$route.query.patient_id;
     if (id) {
@@ -181,6 +200,7 @@ export default {
       this.userRadiographies = [];
       this.errorNoRadiographies = false;
       this.isLoadingRadiographs = false;
+      this.$router.push({ name: "ViewRadiographs" });
     },
     goToRadiographDetail(index, or, gd) {
       localStorage.setItem("selected_original_img", or);
