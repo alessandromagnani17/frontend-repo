@@ -1,10 +1,17 @@
 <template>
   <div class="welcome">
     <div class="container mt-5">
-      <h5 v-if="showUploadSection"><strong>Carica una radiografia</strong></h5>
-      <div v-if="isLoading" class="alert alert-info">Caricamento...</div>
+      <h5 v-if="showUploadSection" class="carica-radiografia">
+        <strong>Carica una radiografia</strong>
+      </h5>
+      <div v-if="isLoading" class="alert alert-info small-text">
+        Caricamento...
+      </div>
       <div v-else>
-        <div v-if="patients.length === 0" class="alert alert-warning">
+        <div
+          v-if="patients.length === 0"
+          class="alert alert-warning small-text"
+        >
           Non hai ancora nessun paziente associato.
         </div>
         <div v-else>
@@ -13,7 +20,7 @@
               v-if="patients.length > 0 && !selectedPatient"
               v-model="selectedPatient"
               @change="onPatientChange"
-              class="form-select custom-select"
+              class="form-select custom-select small-text"
             >
               <option value="" disabled selected>Seleziona un paziente</option>
               <option
@@ -30,7 +37,7 @@
             v-if="selectedPatientInfo.name.length > 0 && showMainImagePreview"
             class="mt-2"
           >
-            <div>
+            <div class="small-text">
               Utente selezionato:
               <strong
                 >{{ selectedPatientInfo.name }}
@@ -40,8 +47,8 @@
             </div>
             <button
               @click="changePatient"
-              class="btn btn-secondary mt-2"
-              style="margin-bottom: 20px"
+              class="btn-change-patient"
+              style="margin-bottom: 5px"
             >
               Cambia paziente
             </button>
@@ -59,7 +66,7 @@
             <button
               v-if="showUploadSection"
               @click="selectFile"
-              class="btn btn-secondary"
+              class="btn-upload"
             >
               Seleziona file
             </button>
@@ -74,7 +81,11 @@
               />
             </div>
             <div v-if="showKneeSide" class="button-cover">
-              <div class="buttonSide r" id="button-1">
+              <div
+                class="buttonSide r"
+                id="button-1"
+                :class="{ active: selectedSide, inactive: !selectedSide }"
+              >
                 <input
                   type="checkbox"
                   v-model="selectedSide"
@@ -90,14 +101,14 @@
       </div>
 
       <div v-if="!showMainImagePreview" class="mt-3">
-        <h2 class="mb-4">Risultati della predizione</h2>
+        <h2 class="mb-4 small-text">Risultati della predizione</h2>
       </div>
 
       <div v-if="imagePreview && selectedPatient">
         <button
           v-if="showPredictButton"
           @click="submitImage"
-          class="btn btn-primary mt-5"
+          class="btn-upload mt-5"
         >
           Predici osteoartrite
         </button>
@@ -105,7 +116,7 @@
       <div v-if="predictedClass !== null" class="mt-4">
         <div class="card prediction-card mb-3">
           <div class="card-body">
-            <h5 class="card-title">
+            <h5 class="card-title small-text">
               Utente: {{ selectedPatientInfo.name }}
               {{ selectedPatientInfo.surname }} <br />
               (ID: {{ selectedPatientInfo.userId }})
@@ -121,7 +132,7 @@
                 alt="Anteprima immagine"
               />
               <div class="card-body">
-                <h5 class="card-title">Radiografia Originale</h5>
+                <h5 class="card-title small-text">Radiografia Originale</h5>
               </div>
             </div>
           </div>
@@ -133,14 +144,14 @@
                 alt="Grad-CAM Image"
               />
               <div class="card-body">
-                <h5 class="card-title">Applicazione Grad-CAM</h5>
+                <h5 class="card-title small-text">Applicazione Grad-CAM</h5>
               </div>
             </div>
           </div>
         </div>
         <div class="card prediction-card mb-3">
           <div class="card-body">
-            <h5 class="card-title">
+            <h5 class="card-title small-text">
               {{ predictedClass }} ({{
                 selectedSide ? "Ginocchio destro" : "Ginocchio sinistro"
               }})
@@ -148,7 +159,7 @@
           </div>
         </div>
         <div v-if="showNewPredictionButton" class="mt-4">
-          <button @click="resetPrediction" class="btn btn-secondary">
+          <button @click="resetPrediction" class="btn-upload">
             Esegui nuova predizione
           </button>
         </div>
@@ -205,6 +216,9 @@ export default {
       if (this.$refs.fileInput) {
         this.$refs.fileInput.value = "";
       }
+    },
+    setSide(side) {
+      this.selectedSide = side;
     },
     selectFile() {
       this.$refs.fileInput.click();
@@ -294,12 +308,12 @@ export default {
 }
 
 .container {
-  max-width: 90%; /* Modifica qui per utilizzare una percentuale */
-  padding: 5%; /* Usa percentuali per il padding */
+  max-width: 90%;
+  padding: 5%;
   border-radius: 15px;
   background: #ffffff;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-  margin-top: 10%; /* Usa percentuali per il margine superiore */
+  margin-top: 10%;
   height: auto;
   text-align: center;
   flex-grow: 1;
@@ -307,128 +321,101 @@ export default {
 
 .img-preview {
   max-width: 100%;
-  max-height: 50vh; /* Modifica per utilizzare una percentuale dell'altezza della finestra */
+  max-height: 50vh;
   margin-top: 15px;
 }
 
 .row {
-  display: flex; /* Usa Flexbox per le card */
-  flex-wrap: wrap; /* Permetti alle card di andare a capo se necessario */
-  margin-bottom: 20px; /* Margine inferiore per la separazione */
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
   height: 10%;
 }
 
 .card {
-  flex: 1 1 45%; /* Permetti alle card di occupare il 45% della larghezza */
-  margin: 10px; /* Margine tra le card */
+  flex: 1 1 45%;
+  margin: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Stili per la card della predizione */
-.card.prediction-card {
-  margin-top: 20px; /* Margine superiore per separarla dalle altre card */
 }
 
 .card-img-top {
   border-radius: 0.5rem;
-  max-height: 50vh; /* Limita l'altezza in percentuale */
-  object-fit: cover; /* Mantieni le proporzioni dell'immagine */
+  max-height: 50vh;
+  object-fit: cover;
 }
 
 .card-body {
   text-align: center;
 }
 
-.btn-primary {
+.btn-upload {
   background-color: #007bff;
+  color: white;
+  padding: 8px;
   border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 40%;
+  min-width: 150px;
+  font-size: 13px; /* Ridimensionato il testo */
+  transition: background-color 0.3s ease;
+  text-align: center;
 }
 
-.btn-primary:hover {
+.btn-upload:hover {
   background-color: #0056b3;
 }
 
-.sidebar {
-  top: 0;
-  width: 250px;
-  height: 100vh;
-  padding: 20px;
-  background: linear-gradient(180deg, #212529, #343a40);
-  margin-right: 20px;
+.small-text {
+  font-size: 13px;
 }
-
-.sidebar .nav-link {
-  color: #cfd2d6;
-}
-
-.sidebar .nav-link:hover {
-  background-color: #495057;
-  border-radius: 5px;
-}
-
-.nav-link {
-  padding: 10px 15px;
-}
-
-@media (max-width: 767.98px) {
-  .navbar-brand {
-    font-size: 1.5rem;
-  }
-
-  .sidebar {
-    display: none;
-  }
-}
-
 
 .select-container {
-  margin-top: 18px; /* Spazio sopra il menu a tendina */
-  margin-bottom: 10px; /* Spazio sotto il menu a tendina */
+  margin-top: 18px;
+  margin-bottom: 10px;
 }
 
 .form-select {
-  display: block; /* Assicurati che il selettore occupi l'intera larghezza */
-  width: 100%; /* Fa sì che il selettore si espanda */
-  padding: 10px; /* Padding interno per il selettore */
-  border: 1px solid #ced4da; /* Colore del bordo */
-  border-radius: 5px; /* Angoli arrotondati */
-  background-color: #fff; /* Sfondo bianco */
-  transition: border-color 0.2s; /* Transizione per il cambio del colore del bordo */
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  background-color: #fff;
+  transition: border-color 0.2s;
 }
 
 .form-select:focus {
-  border-color: #007bff; /* Colore del bordo quando in focus */
-  outline: none; /* Rimuove l'outline predefinito */
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Ombra del box quando in focus */
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .custom-select {
-  max-width: 80%; /* Imposta la larghezza massima desiderata */
-  margin: 0 auto; /* Centra il menu a tendina */
+  max-width: 80%;
+  margin: 0 auto;
 }
 
 .button-cover {
   height: 85%;
-  width: 40%;
-  margin: 20px auto; /* Centra orizzontalmente */
+  width: 35%; /* Puoi regolare la larghezza come desideri */
+  margin: 20px auto; /* Centrato orizzontalmente */
   background-color: #fff;
-  display: flex; /* Attiva Flexbox */
-  justify-content: center; /* Centra orizzontalmente */
-  align-items: center; /* Centra verticalmente */
+  display: block; /* Non usare flexbox qui, ma blocco per evitare allineamenti strani */
 }
 
 .buttonSide {
   position: relative;
   top: 50%;
-  width: 100%;
+  width: 100%; /* Mantieni la larghezza al 100% del contenitore */
   height: 36px;
-  margin: 0;
+  margin: 0 auto; /* Questo forza il centramento orizzontale */
   overflow: hidden;
 }
 
 .checkbox {
   position: relative;
-  width: 100%;
+  width: 100%; /* Imposta la larghezza del checkbox a 100% */
   height: 100%;
   padding: 0;
   margin: 0;
@@ -448,37 +435,99 @@ export default {
   z-index: 1;
 }
 
-/* Button 1 */
-#button-1 .knobs:before {
-  content: "Left";
+#button-1 {
+  position: relative;
+  width: 100%;
+  height: 36px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+#button-1 .checkbox {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 3;
+}
+
+#button-1 .knobs:before,
+#button-1 .knobs:after {
   position: absolute;
   top: 4px;
-  left: 4px;
   width: 60%;
   height: 30px;
-  color: #fff;
-  font-size: 20px;
+  color: white;
+  font-size: 14px;
   font-weight: bold;
   text-align: center;
   line-height: 1;
   padding: 9px 4px;
-  background-color: #03a9f4;
-  transition: 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15) all;
+  border-radius: 5px;
+  transition: 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15) all, opacity 0.3s ease,
+    z-index 0.3s ease;
 }
 
-#button-1 .checkbox:checked + .knobs:before {
+#button-1 .knobs:before {
+  content: "Left";
+  left: 4px;
+  background-color: #03a9f4;
+  opacity: 1;
+  z-index: 2; /* Priorità inferiore di default */
+}
+
+#button-1 .knobs:after {
   content: "Right";
   left: 95px;
   background-color: #f44336;
+  opacity: 0.5;
+  z-index: 1; /* Priorità inferiore di default */
+}
+
+#button-1 .checkbox:checked + .knobs:before {
+  left: 95px;
+  opacity: 0.5;
+  z-index: 1; /* L'elemento sbiadito va sotto */
+}
+
+#button-1 .checkbox:checked + .knobs:after {
+  left: 4px;
+  opacity: 1;
+  z-index: 2; /* L'elemento visibile va sopra */
+}
+
+#button-1 .layer {
+  width: 100%;
+  background-color: #ebf7fc;
+  transition: background-color 0.3s ease;
 }
 
 #button-1 .checkbox:checked ~ .layer {
   background-color: #fcebeb;
 }
 
-#button-1 .knobs,
-#button-1 .knobs:before,
-#button-1 .layer {
-  transition: 0.3s ease all;
+h5.carica-radiografia {
+  font-size: 18px; /* Stessa dimensione del testo di "Elenco Pazienti" */
+  font-family: inherit; /* Assicura che usi lo stesso font ereditato dal contesto */
+  font-weight: normal; /* Mantenere il peso del font uguale */
+  margin-bottom: 20px; /* Margine inferiore uguale per allineamento */
+}
+
+.btn-change-patient {
+  background: #d9d9d9; /* Colore grigio chiaro */
+  color: black; /* Colore del testo */
+  width: 40%; /* Larghezza al 100% */
+  margin-top: 15px; /* Spazio sopra il pulsante */
+  padding: 0.4rem; /* Ridotto per i pulsanti, più corto verticalmente */
+  font-size: 13px; /* Dimensione del testo più piccola */
+  border: none; /* Nessun bordo */
+  border-radius: 5px; /* Angoli arrotondati */
+  cursor: pointer; /* Puntatore del mouse per il clic */
+  transition: background-color 0.3s ease; /* Transizione al passaggio del mouse */
+}
+
+.btn-change-patient:hover {
+  background-color: #bfbfbf; /* Colore grigio più scuro al passaggio del mouse */
 }
 </style>
