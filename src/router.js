@@ -12,7 +12,6 @@ import RadiographyDetail from "./components/RadiographyDetail.vue";
 import ProfilePage from "./views/ProfilePage.vue";
 import SettingsPage from "./views/SettingsPage.vue";
 import ViewRadiographs from "./views/ViewRadiographs.vue";
-import ManagePatients from "./views/ManagePatients.vue";
 
 const routes = [
   {
@@ -60,12 +59,6 @@ const routes = [
     path: "/view-radiographs",
     name: "ViewRadiographs",
     component: ViewRadiographs,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/manage-patients",
-    name: "ManagePatients",
-    component: ManagePatients,
     meta: { requiresAuth: true },
   },
   {
