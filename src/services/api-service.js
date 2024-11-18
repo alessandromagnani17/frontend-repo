@@ -75,3 +75,25 @@ export const getRadiographs = async (patientId) => {
     throw error;
   }
 };
+
+export const loadRadiographiesForPatient = async (patientId) => {
+  try {
+    const response = await axios.get(`${API_URL}/get_radiographs/${patientId}`);
+    return response.data;
+  } catch (error) {
+    console.log("Errore nel recuperosdds delle radiografie:", error);
+    throw error;
+  }
+};
+
+// Funzione per ottenere le informazioni della radiografia da un file info.txt
+export const getRadiographyInformation = async (uid, idx) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/get_radiographs_info/${uid}/${idx}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Errore nel recupero delle radiografie:", error);
+  }
+};

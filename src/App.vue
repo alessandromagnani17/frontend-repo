@@ -52,7 +52,7 @@
               <li class="nav-item">
                 <router-link
                   class="nav-link"
-                  to="/view-radiographs"
+                  :to="viewRadiographsRoute"
                   @click="closeNavbar"
                   >Visualizza Radiografie</router-link
                 >
@@ -140,12 +140,24 @@ export default {
       dropdownOpen: false,
       navbarOpen: false,
       authToken: null,
-      userRole: null, // Aggiungi questa proprietà
+      userRole: null,
+      userDataUid: null,
+      userDataName: null,
+      userDataSurname: null,
     };
   },
   computed: {
     isLoggedIn() {
       return !!this.authToken;
+    },
+    viewRadiographsRoute() {
+      if (this.userRole === "patient") {
+        localStorage.setItem("Name", this.userDataName);
+        localStorage.setItem("Surname", this.userDataSurname);
+        return { path: "/view-radiographs", query: { uid: this.userDataUid } };
+      } else {
+        return { path: "/view-radiographs" };
+      }
     },
   },
   methods: {
@@ -167,12 +179,11 @@ export default {
     },
     logout() {
       console.log("[DEBUG] Executing logout...");
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("userData"); // Aggiungi questa riga
+      localStorage.clear();
       this.authToken = null;
-      this.userRole = null; // Aggiungi questa riga
+      this.userRole = null;
+      this.userDataUid = null;
       EventBus.emit("auth-changed");
-      alert("Logout avvenuto con successo");
       this.$router.push("/");
     },
     handleLogoClick() {
@@ -202,10 +213,13 @@ export default {
     },
     updateAuthStatus() {
       this.authToken = localStorage.getItem("authToken");
-      this.userRole =
-        JSON.parse(localStorage.getItem("userData"))?.role || null; // Aggiorna il ruolo
-      console.log("[DEBUG] updateAuthStatus - authToken:", this.authToken);
-      console.log("[DEBUG] role:", this.userRole);
+      const userData = JSON.parse(localStorage.getItem("userData"));
+      this.userRole = userData?.role || null;
+      this.userDataUid = userData?.uid || null;
+      this.userDataName = userData?.name || null;
+      this.userDataSurname = userData?.family_name || null;
+      //console.log("[DEBUG] updateAuthStatus - authToken:", this.authToken);
+      //console.log("[DEBUG] role:", this.userRole);
     },
   },
   mounted() {
