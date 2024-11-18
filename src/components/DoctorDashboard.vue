@@ -88,7 +88,6 @@ export default {
       }
     });
 
-    console.log("PAZIENTI FRONTENDDOO: ", patients);
     const selectPatient = async (patient) => {
       selectedPatient.value = patient;
       selectedPatientRadiographs.value = []; // Svuota le radiografie precedenti
