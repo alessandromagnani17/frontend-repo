@@ -24,22 +24,7 @@
           :class="{ show: navbarOpen }"
         >
           <ul class="navbar-nav me-auto">
-            <!-- Utilizza me-auto per spingere a destra -->
-            <li class="nav-item">
-              <a class="nav-link" href="#" @click.prevent="handleHomeClick"
-                >Home</a
-              >
-            </li>
-
             <template v-if="isLoggedIn">
-              <li v-if="userRole === 'doctor'" class="nav-item">
-                <router-link
-                  class="nav-link"
-                  to="/manage-patients"
-                  @click="closeNavbar"
-                  >Gestisci Pazienti</router-link
-                >
-              </li>
               <li v-if="userRole === 'doctor'" class="nav-item">
                 <router-link
                   class="nav-link"
@@ -187,14 +172,6 @@ export default {
       this.$router.push("/");
     },
     handleLogoClick() {
-      const authToken = localStorage.getItem("authToken");
-      if (authToken) {
-        this.$router.push({ name: "WelcomePage" });
-      } else {
-        this.$router.push("/");
-      }
-    },
-    handleHomeClick() {
       this.goToDashboard();
       this.closeNavbar();
     },
