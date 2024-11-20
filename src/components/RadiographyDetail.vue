@@ -1,7 +1,12 @@
 <template>
   <div class="welcome">
     <div class="container mt-5">
-      <div v-if="isLoading" class="alert alert-info">
+      <div class="header">
+        <button class="back-button" @click="goBack">
+          <img src="@/assets/back-icon.svg" alt="Indietro" class="back-icon" />
+        </button>
+      </div>
+      <div v-if="isLoading" class="alert alert-info small-text">
         Caricamento delle informazioni...
       </div>
       <div v-else>
@@ -102,9 +107,6 @@
             </tbody>
           </table>
         </div>
-        <button @click="goBack" class="btn btn-primary mt-3">
-          Torna alla lista delle radiografie
-        </button>
       </div>
     </div>
   </div>
@@ -183,7 +185,7 @@ export default {
 }
 
 .container {
-  max-width: 90%; /* Modifica qui per utilizzare una percentuale */
+  max-width: 80%; /* Modifica qui per utilizzare una percentuale */
   padding: 5%; /* Usa percentuali per il padding */
   border-radius: 15px;
   background: #ffffff;
@@ -199,5 +201,68 @@ export default {
   flex-wrap: wrap; /* Permetti alle card di andare a capo se necessario */
   margin-bottom: 20px; /* Margine inferiore per la separazione */
   height: 10%;
+}
+
+table,
+th,
+td {
+  font-size: 13px; /* Riduzione della dimensione del testo nelle tabelle */
+}
+
+th {
+  font-weight: bold; /* Rende il testo nei titoli delle celle in grassetto */
+}
+
+.card-body {
+  font-size: 13px; /* Riduzione della dimensione del testo nel corpo della card */
+}
+
+.card-title {
+  font-size: 14px; /* Riduzione della dimensione del titolo nella card */
+}
+
+button {
+  font-size: 13px; /* Riduzione della dimensione del testo nel pulsante */
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+  padding: 8px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 45%;
+  min-width: 150px;
+  font-size: 13px;
+  transition: background-color 0.3s ease;
+  text-align: center;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.back-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  margin-left: -10px;
+}
+
+.back-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.small-text {
+  font-size: 13px;
 }
 </style>
