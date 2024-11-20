@@ -38,13 +38,6 @@
           <p><strong>Indirizzo:</strong> {{ selectedPatient.address }}</p>
         </div>
 
-        <div class="upload-section">
-          <UploadRadiograph
-            @uploadSuccess="handleUploadSuccess"
-            :patientId="selectedPatient.userId"
-          />
-        </div>
-
         <div class="radiographs-section">
           <PatientRadiographs
             :radiographs="selectedPatientRadiographs"
@@ -59,14 +52,12 @@
 
 <script>
 import PatientRadiographs from "./PatientRadiographs.vue";
-import UploadRadiograph from "./UploadRadiographs.vue";
 import { ref, onMounted } from "vue";
 import { getPatientsFromDoctor, getRadiographs } from "../services/api-service";
 
 export default {
   components: {
     PatientRadiographs,
-    UploadRadiograph,
   },
   setup() {
     const patients = ref([]);
@@ -111,14 +102,9 @@ export default {
       }
     };
 
-    const handleUploadSuccess = () => {
-      selectPatient(selectedPatient.value);
-    };
-
     return {
       patients,
       selectPatient,
-      handleUploadSuccess,
       selectedPatient,
       selectedPatientRadiographs,
     };
@@ -192,11 +178,6 @@ h2 {
 .patient-details p {
   font-size: 14px;
   margin-bottom: 10px;
-}
-
-.upload-section,
-.radiographs-section {
-  margin-top: 30px;
 }
 
 .btn-next {
