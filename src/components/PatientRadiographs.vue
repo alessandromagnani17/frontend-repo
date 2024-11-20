@@ -1,5 +1,8 @@
 <template>
   <div class="radiograph-list">
+    <div class="line-container">
+      <div class="line"></div>
+    </div>
     <h2>Radiografie di {{ patientName }}</h2>
     <ul v-if="radiographs.length">
       <li
@@ -125,13 +128,22 @@ export default {
         );
 
         if (response.ok) {
-          this.radiographs = await response.json();
+          const data = await response.json();
+          console.log("[DEBUG] Radiografie ricevute dal backend:", data);
+          this.radiographs = data;
         } else {
           this.errorMessage = "Errore nel recupero delle radiografie.";
+          console.error(
+            "[ERROR] Errore nella risposta del server:",
+            response.status
+          );
         }
       } catch (error) {
         this.errorMessage = "Errore di connessione al server.";
-        console.error("Errore:", error);
+        console.error(
+          "[ERROR] Errore durante la connessione al server:",
+          error
+        );
       }
     },
 
@@ -209,9 +221,23 @@ export default {
   margin: 20px auto;
 }
 
+.line-container {
+  display: flex;
+  align-items: center;
+  margin: 2rem 0;
+}
+
+.line {
+  width: 90%;
+  height: 1px;
+  background-color: #ccc;
+  margin: 0 auto;
+}
+
 h2 {
   font-size: 18px;
   color: #333;
+  margin-top: 30px;
   margin-bottom: 15px;
 }
 
@@ -304,22 +330,25 @@ li.radiograph-item {
 
 .modal-content {
   position: relative;
-  max-width: 80%;
-  max-height: 80%;
+  width: auto;
+  max-width: 90vmin; /* Adatta la dimensione al lato più piccolo del viewport */
+  max-height: 90vmin; /* Stessa dimensione del contenitore dell'immagine */
   background: white;
   border-radius: 6px;
-  padding: 20px;
-  text-align: center;
+  padding: 0; /* Rimuove lo spazio interno */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .modal-image {
-  width: 92%;
-  max-height: 80vh;
+  height: auto; /* Calcola l'altezza automaticamente */
+  width: 80vmin; /* Usa il lato minore tra altezza e larghezza della finestra */
+  max-width: 100%; /* Non supera la larghezza disponibile */
+  max-height: 100%; /* Non supera l'altezza disponibile */
   display: block;
   margin: 0 auto;
+  object-fit: cover; /* Assicura il mantenimento delle proporzioni */
 }
 
 .close-button {
