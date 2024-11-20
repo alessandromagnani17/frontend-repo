@@ -1,15 +1,24 @@
 <template>
   <div class="welcome">
     <div class="container mt-5">
-      <h5><strong>Visualizza radiografie</strong></h5>
-      <div v-if="isLoading" class="alert alert-info">Caricamento...</div>
+      <h5 class="visualizza-radiografia">
+        <strong>Visualizza radiografie</strong>
+      </h5>
+
+      <!-- Messaggio di caricamento -->
+      <div v-if="isLoading" class="alert alert-info small-text">
+        Caricamento...
+      </div>
+
+      <!-- Contenuto per il ruolo di 'doctor' o 'patient' -->
       <div v-else-if="role === 'doctor' || role === 'patient'">
+        <!-- Sezione per il selettore di pazienti per il medico -->
         <div v-if="role === 'doctor'" class="select-container mb-4">
           <select
             v-if="patients.length > 0 && !selectedPatientId"
             v-model="selectedPatientId"
             @change="onPatientChange"
-            class="form-select custom-select"
+            class="form-select custom-select small-text"
           >
             <option value="" disabled selected>Seleziona un paziente</option>
             <option
@@ -22,70 +31,92 @@
             </option>
           </select>
         </div>
+
+        <!-- Sezione per il paziente selezionato -->
         <div v-if="selectedPatientId" class="mt-2">
-          <div v-if="role === 'doctor'">
-            Utente selezionato:
-            <strong
-              >{{ selectedPatientName }} {{ selectedPatientSurname }} (ID:
-              {{ selectedPatientId }})</strong
-            >
+          <div
+            v-if="role === 'doctor' && selectedPatientId"
+            class="patient-info-container small-text"
+          >
+            <span>
+              Utente selezionato:
+              <strong>
+                {{ selectedPatientName }} {{ selectedPatientSurname }} <br />
+              </strong>
+              (ID: {{ selectedPatientId }})
+            </span>
+            <span class="change-text" @click="changePatient">Cambia</span>
           </div>
           <div v-else>
             Benvenuto
-            <strong
-              >{{ selectedPatientName }} {{ selectedPatientSurname }}</strong
-            >
+            <strong class="small-text">
+              {{ selectedPatientName }} {{ selectedPatientSurname }}
+            </strong>
           </div>
-          <div v-if="role === 'doctor'">
-            <button @click="changePatient" class="btn btn-secondary mt-2">
-              Cambia paziente
-            </button>
-          </div>
-        </div>
-        <div v-if="isLoadingRadiographs" class="alert alert-info mt-3">
-          Caricamento delle radiografie...
-        </div>
-        <div
-          class="row mt-5"
-          v-if="userRadiographs.length > 0 && selectedPatientId"
-        >
+
+          <!-- Messaggio di x delle radiografie -->
           <div
-            v-for="(radiograph, index) in userRadiographs"
-            :key="radiograph.radiography_id"
-            @click="
-              goToRadiographDetail(
-                index,
-                radiograph.original_image,
-                radiograph.gradcam_image
-              )
-            "
-            style="cursor: pointer"
-            class="card"
+            v-if="isLoadingRadiographs"
+            class="alert alert-info mt-3 small-text"
           >
-            <img
-              :src="radiograph.original_image"
-              class="card-img-top"
-              alt="Radiografia"
-            />
-            <div class="card-body">
-              <h5 class="card-title">Radiografia {{ index + 1 }}</h5>
+            Caricamento delle radiografie...
+          </div>
+
+          <!-- Sezione per visualizzare le radiografie -->
+          <div
+            class="row mt-5"
+            v-if="userRadiographs.length > 0 && selectedPatientId"
+          >
+            <div
+              v-for="(radiograph, index) in userRadiographs"
+              :key="radiograph.radiography_id"
+              @click="
+                goToRadiographDetail(
+                  index,
+                  radiograph.original_image,
+                  radiograph.gradcam_image
+                )
+              "
+              class="card"
+            >
+              <img
+                :src="radiograph.original_image"
+                class="card-img-top"
+                alt="Radiografia"
+              />
+              <div class="card-body">
+                <h5 class="card-title small-text">
+                  Radiografia {{ index + 1 }}
+                </h5>
+              </div>
+            </div>
+          </div>
+
+          <!-- Messaggio di errore nel caso non ci siano radiografie -->
+          <div v-else>
+            <div v-if="errorNoRadiographies" class="alert alert-danger mt-3">
+              <p>
+                L'utente {{ selectedPatientName }}
+                {{ selectedPatientSurname }} non ha radiografie.
+              </p>
             </div>
           </div>
         </div>
-        <div v-else>
-          <div v-if="errorNoRadiographies" class="alert alert-danger mt-3">
-            <p>
-              L'utente {{ selectedPatientName }}
-              {{ selectedPatientSurname }} non ha radiografie.
-            </p>
-          </div>
-        </div>
-        <div v-if="patients.length == 0 && role === 'doctor'">
+
+        <!-- Sezione per mostrare se non ci sono pazienti per il medico -->
+        <div
+          v-if="patients.length == 0 && role === 'doctor'"
+          class="text-danger"
+        >
           <p>NON hai pazienti.</p>
         </div>
       </div>
+
+      <!-- Messaggio per utenti senza permessi -->
       <div v-else>
-        <p>You do not have permission to view radiographs.</p>
+        <p class="text-muted">
+          You do not have permission to view radiographs.
+        </p>
       </div>
     </div>
   </div>
@@ -228,7 +259,7 @@ export default {
 }
 
 .container {
-  max-width: 90%; /* Modifica qui per utilizzare una percentuale */
+  max-width: 80%; /* Modifica qui per utilizzare una percentuale */
   padding: 5%; /* Usa percentuali per il padding */
   border-radius: 15px;
   background: #ffffff;
@@ -241,7 +272,7 @@ export default {
 
 .img-preview {
   max-width: 100%;
-  max-height: 50vh; /* Modifica per utilizzare una percentuale dell'altezza della finestra */
+  max-height: 50vh;
   margin-top: 15px;
 }
 
@@ -272,21 +303,31 @@ export default {
 
 .card-img-top {
   border-radius: 0.5rem;
-  max-height: 50vh; /* Limita l'altezza in percentuale */
+  max-height: 50vh;
   object-fit: cover; /* Mantieni le proporzioni dell'immagine */
 }
 
 .card-body {
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
 
-.btn-primary {
-  background-color: #007bff;
-  border: none;
+.patient-info-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3vw;
+  width: 100%;
 }
 
-.btn-primary:hover {
-  background-color: #0056b3;
+.change-text {
+  font-size: 14px;
+  color: black;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .sidebar {
@@ -313,7 +354,7 @@ export default {
 
 @media (max-width: 767.98px) {
   .navbar-brand {
-    font-size: 1.5rem;
+    font-size: 1.2rem; /* Ridotto per i dispositivi più piccoli */
   }
 
   .sidebar {
@@ -322,24 +363,24 @@ export default {
 }
 
 .select-container {
-  margin-top: 18px; /* Spazio sopra il menu a tendina */
+  margin-top: 15px; /* Spazio sopra il menu a tendina */
   margin-bottom: 10px; /* Spazio sotto il menu a tendina */
 }
 
 .form-select {
-  display: block; /* Assicurati che il selettore occupi l'intera larghezza */
-  width: 100%; /* Fa sì che il selettore si espanda */
-  padding: 10px; /* Padding interno per il selettore */
-  border: 1px solid #ced4da; /* Colore del bordo */
-  border-radius: 5px; /* Angoli arrotondati */
-  background-color: #fff; /* Sfondo bianco */
-  transition: border-color 0.2s; /* Transizione per il cambio del colore del bordo */
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  background-color: #fff;
+  transition: border-color 0.2s;
 }
 
 .form-select:focus {
-  border-color: #007bff; /* Colore del bordo quando in focus */
-  outline: none; /* Rimuove l'outline predefinito */
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Ombra del box quando in focus */
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .custom-select {
@@ -361,5 +402,40 @@ export default {
 
 .row {
   justify-content: flex-start; /* Assicura che le immagini siano allineate a sinistra */
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+  padding: 8px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 40%;
+  min-width: 150px;
+  font-size: 13px;
+  transition: background-color 0.3s ease;
+  text-align: center;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+h5.visualizza-radiografia {
+  font-size: 18px; /* Stessa dimensione del testo di "Elenco Pazienti" */
+  font-family: inherit; /* Assicura che usi lo stesso font ereditato dal contesto */
+  font-weight: normal; /* Mantenere il peso del font uguale */
+  margin-bottom: 20px; /* Margine inferiore uguale per allineamento */
+}
+
+.small-text {
+  font-size: 13px;
+}
+
+/* Applica una riduzione globale della dimensione del testo per tutto il corpo della pagina */
+body {
+  font-size: 13px; /* Ridotto la dimensione del testo per tutto il corpo */
+  line-height: 1.4; /* Aumentato l'interlinea per una lettura più facile */
 }
 </style>
