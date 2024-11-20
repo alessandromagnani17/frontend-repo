@@ -37,21 +37,18 @@
             v-if="selectedPatientInfo.name.length > 0 && showMainImagePreview"
             class="mt-2"
           >
-            <div class="small-text">
-              Utente selezionato:
-              <strong
-                >{{ selectedPatientInfo.name }}
-                {{ selectedPatientInfo.surname }} <br />
-                (ID: {{ selectedPatientInfo.userId }})</strong
-              >
+            <div class="patient-info-container small-text">
+              <span>
+                Utente selezionato:
+                <strong>
+                  {{ selectedPatientInfo.name }}
+                  {{ selectedPatientInfo.surname }} <br />
+                </strong>
+                (ID: {{ selectedPatientInfo.userId }})
+              </span>
+              <!-- Pulsante Cambia -->
+              <span class="change-text" @click="changePatient">Cambia</span>
             </div>
-            <button
-              @click="changePatient"
-              class="btn-change-patient"
-              style="margin-bottom: 5px"
-            >
-              Cambia paziente
-            </button>
           </div>
           <div><h5></h5></div>
           <div v-if="selectedPatient">
@@ -99,9 +96,8 @@
           </div>
         </div>
       </div>
-
       <div v-if="!showMainImagePreview" class="mt-3">
-        <h2 class="mb-4 small-text">Risultati della predizione</h2>
+        <h2 class="mb-4">Risultati della predizione</h2>
       </div>
 
       <div v-if="imagePreview && selectedPatient">
@@ -308,7 +304,7 @@ export default {
 }
 
 .container {
-  max-width: 90%;
+  max-width: 80%;
   padding: 5%;
   border-radius: 15px;
   background: #ffffff;
@@ -346,6 +342,25 @@ export default {
 
 .card-body {
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.patient-info-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3vw;
+  width: 100%;
+}
+
+.change-text {
+  font-size: 14px;
+  color: black;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .btn-upload {
@@ -357,9 +372,10 @@ export default {
   cursor: pointer;
   width: 40%;
   min-width: 150px;
-  font-size: 13px; /* Ridimensionato il testo */
+  font-size: 13px;
   transition: background-color 0.3s ease;
   text-align: center;
+  margin-top: 10px;
 }
 
 .btn-upload:hover {
@@ -398,7 +414,7 @@ export default {
 
 .button-cover {
   height: 85%;
-  width: 35%; /* Puoi regolare la larghezza come desideri */
+  width: 40%; /* Puoi regolare la larghezza come desideri */
   margin: 20px auto; /* Centrato orizzontalmente */
   background-color: #fff;
   display: block; /* Non usare flexbox qui, ma blocco per evitare allineamenti strani */
