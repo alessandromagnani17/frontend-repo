@@ -1,9 +1,9 @@
 <template>
   <div class="welcome">
     <div class="container mt-5">
-      <h5 v-if="showUploadSection" class="carica-radiografia">
-        <strong>Carica una radiografia</strong>
-      </h5>
+      <h1 v-if="showUploadSection" class="carica-radiografia">
+        Carica una radiografia
+      </h1>
       <div v-if="isLoading" class="alert alert-info small-text">
         Caricamento...
       </div>
@@ -63,13 +63,13 @@
             <button
               v-if="showUploadSection"
               @click="selectFile"
-              class="btn-upload"
+              class="btn btn-light btn-select"
             >
               Seleziona file
             </button>
             <div
               v-if="imagePreview && selectedPatient && showMainImagePreview"
-              class="mt-3"
+              class="mt-3 img-preview-container"
             >
               <img
                 :src="imagePreview"
@@ -97,14 +97,14 @@
         </div>
       </div>
       <div v-if="!showMainImagePreview" class="mt-3">
-        <h2 class="mb-4">Risultati della predizione</h2>
+        <h1>Risultati della predizione</h1>
       </div>
 
       <div v-if="imagePreview && selectedPatient">
         <button
           v-if="showPredictButton"
           @click="submitImage"
-          class="btn-upload mt-5"
+          class="btn-upload"
         >
           Predici osteoartrite
         </button>
@@ -154,6 +154,34 @@
             </h5>
           </div>
         </div>
+
+        <!-- Linea e scritta sopra il pulsante "Esegui nuova predizione" -->
+        <div class="line-container">
+          <div class="line"></div>
+        </div>
+        <div class="mt-3">
+          <h5>Valuta la predizione</h5>
+        </div>
+
+        <!-- Stelle -->
+        <transition name="fade-out-stars" @after-leave="showThankYou">
+          <div class="stars" v-if="!starsHidden">
+            <img
+              v-for="index in 5"
+              :key="index"
+              :src="getStarImage(index)"
+              @click="handleStarClick(index)"
+              alt="Star"
+              class="star"
+            />
+          </div>
+        </transition>
+        <!-- Messaggio di ringraziamento -->
+        <transition name="fade-in-thank-you">
+          <div v-if="showThankYouMessage" class="small-text mt-2">
+            Grazie per la recensione!
+          </div>
+        </transition>
         <div v-if="showNewPredictionButton" class="mt-4">
           <button @click="resetPrediction" class="btn-upload">
             Esegui nuova predizione
@@ -186,6 +214,11 @@ export default {
       showMainImagePreview: true,
       selectedSide: false, // False = Left ||| True = Right
       showKneeSide: false,
+      selectedRating: 0,
+      starEmpty: require("@/assets/star-empty.svg"),
+      starFilled: require("@/assets/star-filled.svg"),
+      showThankYouMessage: false,
+      starsHidden: false,
     };
   },
   async created() {
@@ -290,6 +323,43 @@ export default {
       this.showPredictButton = false;
       this.showUploadSection = true;
     },
+    handleStarClick(index) {
+      this.selectedRating = index; // Imposta il rating selezionato
+
+      if (index === 5) {
+        // Carica la radiografia nella cartella "dataset"
+        const formData = new FormData();
+        formData.append("file", this.selectedFile);
+        formData.append("patientID", this.selectedPatient);
+        formData.append("side", this.selectedSide ? "Right" : "Left");
+
+        axios
+          .post("http://127.0.0.1:5000/upload-to-dataset", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          })
+          .then(() => {
+            console.log("File caricato con successo nella cartella dataset.");
+          })
+          .catch((error) => {
+            console.error("Errore durante il caricamento del file:", error);
+          });
+      }
+
+      // Nascondi le stelline con l'animazione
+      setTimeout(() => {
+        this.starsHidden = true;
+      }, 300);
+    },
+    showThankYou() {
+      this.showThankYouMessage = true;
+    },
+    // Funzione per ottenere l'immagine corretta in base al rating
+    getStarImage(index) {
+      // Se l'indice della stellina è minore o uguale al rating, è piena
+      return index <= this.selectedRating ? this.starFilled : this.starEmpty;
+    },
   },
 };
 </script>
@@ -315,10 +385,41 @@ export default {
   flex-grow: 1;
 }
 
+h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.img-preview-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 .img-preview {
+  width: 50vw;
   max-width: 100%;
+  height: auto;
   max-height: 50vh;
+  object-fit: contain;
   margin-top: 15px;
+}
+
+/* Media Query per schermi più piccoli */
+@media (max-width: 767px) {
+  .img-preview {
+    width: 60vw;
+    max-height: 50vh;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  .img-preview-container {
+    padding: 10px;
+  }
 }
 
 .row {
@@ -363,6 +464,15 @@ export default {
   cursor: pointer;
 }
 
+.btn-select {
+  background: #d9d9d9;
+  color: black;
+  width: 40%;
+  margin-top: 10px;
+  padding: 0.4rem;
+  font-size: 13px;
+}
+
 .btn-upload {
   background-color: #007bff;
   color: white;
@@ -375,7 +485,6 @@ export default {
   font-size: 13px;
   transition: background-color 0.3s ease;
   text-align: center;
-  margin-top: 10px;
 }
 
 .btn-upload:hover {
@@ -415,7 +524,8 @@ export default {
 .button-cover {
   height: 85%;
   width: 40%; /* Puoi regolare la larghezza come desideri */
-  margin: 20px auto; /* Centrato orizzontalmente */
+  margin: 0px auto; /* Centrato orizzontalmente */
+  margin-top: 20px;
   background-color: #fff;
   display: block; /* Non usare flexbox qui, ma blocco per evitare allineamenti strani */
 }
@@ -431,10 +541,11 @@ export default {
 
 .checkbox {
   position: relative;
-  width: 100%; /* Imposta la larghezza del checkbox a 100% */
-  height: 100%;
+  width: 350%; /* Imposta la larghezza del checkbox a 100% */
+  height: 60%;
   padding: 0;
-  margin: 0;
+  margin-bottom: 4vh;
+  margin-left: 5vh;
   opacity: 0;
   cursor: pointer;
   z-index: 3;
@@ -452,27 +563,19 @@ export default {
 }
 
 #button-1 {
-  position: relative;
-  width: 100%;
-  height: 36px;
-  margin: 0 auto;
-  overflow: hidden;
+  position: relative; /* Posizione relativa per il contenitore */
+  width: 100%; /* Si adatta alla larghezza del contenitore */
+  height: 100px; /* Imposta l'altezza del container */
+  display: flex;
+  justify-content: center; /* Centra orizzontalmente i pulsanti */
+  align-items: center; /* Centra verticalmente i pulsanti */
 }
 
-#button-1 .checkbox {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-  z-index: 3;
-}
-
+/* Stili esistenti per i pulsanti Left/Right */
 #button-1 .knobs:before,
 #button-1 .knobs:after {
   position: absolute;
-  top: 4px;
-  width: 60%;
+  width: 60%; /* Inizialmente i pulsanti avranno una larghezza più ampia */
   height: 30px;
   color: white;
   font-size: 14px;
@@ -482,35 +585,46 @@ export default {
   padding: 9px 4px;
   border-radius: 5px;
   transition: 0.3s cubic-bezier(0.18, 0.89, 0.35, 1.15) all, opacity 0.3s ease,
-    z-index 0.3s ease;
+    z-index 0.3s ease, transform 0.3s ease;
+  left: 50%; /* Allinea al centro orizzontale */
+  transform: translateX(-50%); /* Centra perfettamente al centro */
 }
 
 #button-1 .knobs:before {
   content: "Left";
-  left: 4px;
+  top: 0; /* Pulsante Left in cima */
   background-color: #03a9f4;
   opacity: 1;
-  z-index: 2; /* Priorità inferiore di default */
+  z-index: 2; /* Priorità superiore */
+  transform: scale(1); /* Pulsante Left alla dimensione normale */
+  left: 50%;
+  transform: translateX(-50%); /* Centra entrambi i pulsanti */
 }
 
 #button-1 .knobs:after {
   content: "Right";
-  left: 95px;
+  top: 30px; /* Pulsante Right sotto */
   background-color: #f44336;
   opacity: 0.5;
-  z-index: 1; /* Priorità inferiore di default */
+  z-index: 1; /* Priorità inferiore */
+  transform: scale(0.8); /* Pulsante Right non selezionato più piccolo */
+  left: 50%; /* Allinea al centro orizzontale */
+  transform: translateX(-50%) scale(0.8); /* Centra e scala il pulsante */
 }
 
+/* Quando il checkbox è selezionato, cambia la posizione e la dimensione */
 #button-1 .checkbox:checked + .knobs:before {
-  left: 95px;
+  top: 30px; /* Quando selezionato, si sposta in basso */
   opacity: 0.5;
-  z-index: 1; /* L'elemento sbiadito va sotto */
+  z-index: 1;
+  transform: translateX(-50%) scale(0.8); /* Il pulsante Left diventa più piccolo */
 }
 
 #button-1 .checkbox:checked + .knobs:after {
-  left: 4px;
+  top: 0; /* Quando selezionato, il pulsante Right va sopra */
   opacity: 1;
-  z-index: 2; /* L'elemento visibile va sopra */
+  z-index: 2;
+  transform: translateX(-50%) scale(1); /* Il pulsante Right diventa più grande */
 }
 
 #button-1 .layer {
@@ -521,6 +635,98 @@ export default {
 
 #button-1 .checkbox:checked ~ .layer {
   background-color: #fcebeb;
+}
+
+/* Media Queries per schermi più piccoli */
+@media (max-width: 767px) {
+  #button-1 .knobs:before,
+  #button-1 .knobs:after {
+    width: 80%; /* Più larghi su schermi piccoli per una buona visibilità */
+    font-size: 12px; /* Ridurre la dimensione del font */
+    padding: 6px 3px; /* Ridurre il padding per schermi stretti */
+  }
+
+  /* Posizionamento dei pulsanti su schermi piccoli */
+  #button-1 .knobs:before {
+    top: 0; /* Pulsante Left in cima */
+  }
+
+  #button-1 .knobs:after {
+    top: 60px; /* Pulsante Right un po' più sotto */
+  }
+
+  /* Quando il checkbox è selezionato, cambia la posizione e la dimensione */
+  #button-1 .checkbox:checked + .knobs:before {
+    top: 60px; /* "Left" scende sotto */
+    opacity: 0.5;
+    z-index: 1;
+    transform: translateX(-50%) scale(0.8); /* Diventa più piccolo */
+  }
+
+  #button-1 .checkbox:checked + .knobs:after {
+    top: 0; /* "Right" sale sopra */
+    opacity: 1;
+    z-index: 2;
+    transform: translateX(-50%) scale(1); /* Diventa più grande */
+  }
+
+  #button-1 .layer {
+    background-color: #fcebeb;
+  }
+}
+
+.line-container {
+  display: flex;
+  align-items: center;
+  margin: 2rem 0;
+}
+
+.line {
+  width: 90%;
+  height: 1px;
+  background-color: #ccc;
+  margin: 0 auto;
+}
+
+.star-rating {
+  text-align: center;
+}
+
+.stars {
+  display: flex;
+  justify-content: center;
+}
+
+.star {
+  width: 30px; /* Riduci la larghezza */
+  height: 30px; /* Riduci l'altezza */
+  margin: 0 4px; /* Distanza tra le stelline */
+  cursor: pointer;
+}
+
+.fade-out-stars-enter-active,
+.fade-out-stars-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-out-stars-enter-from,
+.fade-out-stars-leave-to {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.fade-out-stars-leave-active {
+  opacity: 0;
+}
+
+.fade-in-thank-you-enter-active {
+  transition: opacity 0.8s ease;
+}
+.fade-in-thank-you-enter-from {
+  opacity: 0;
+}
+.fade-in-thank-you-enter-to {
+  opacity: 1;
 }
 
 h5.carica-radiografia {
