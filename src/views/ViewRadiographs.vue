@@ -1,9 +1,7 @@
 <template>
   <div class="welcome">
     <div class="container mt-5">
-      <h5 class="visualizza-radiografia">
-        <strong>Visualizza radiografie</strong>
-      </h5>
+      <h1>Visualizza radiografie</h1>
 
       <!-- Messaggio di caricamento -->
       <div v-if="isLoading" class="alert alert-info small-text">
@@ -140,59 +138,37 @@ export default {
       errorNoRadiographies: false,
     };
   },
-  async created() {
-    const userDataString = localStorage.getItem("userData");
-    const userData = JSON.parse(userDataString);
-    this.role = userData.role;
-    if (this.role === "doctor") {
-      this.patients = await getPatientsFromDoctor(userData.doctorID);
-    } else if (this.role === "patient") {
-      this.selectedPatientId = userData.uid;
-      this.selectedPatientName = localStorage.getItem("Name");
-      this.selectedPatientSurname = localStorage.getItem("Surname");
-      this.isLoadingRadiographs = true;
-
-      this.userRadiographs = await loadRadiographiesForPatient(
-        this.selectedPatientId
-      );
-
-      if (this.userRadiographs.length == 0) {
-        this.errorNoRadiographies = true;
-      } else {
-        this.errorNoRadiographies = false;
-      }
-
-      this.isLoadingRadiographs = false;
-    }
-    const id = this.$route.query.patient_id;
-    if (id) {
-      this.selectedPatientId = id;
-      this.isLoadingRadiographs = true;
-      const patient = this.patients.find(
-        (p) => p.userId === this.selectedPatientId
-      );
-
-      if (patient) {
-        this.selectedPatientName = patient.name;
-        this.selectedPatientSurname = patient.family_name;
-        this.selectedPatientId = patient.userId;
-      }
-
-      this.userRadiographs = await loadRadiographiesForPatient(
-        this.selectedPatientId
-      );
-
-      if (this.userRadiographs.length == 0) {
-        this.errorNoRadiographies = true;
-      } else {
-        this.errorNoRadiographies = false;
-      }
-
-      this.isLoadingRadiographs = false;
-    }
-    this.isLoading = false;
+  created() {
+    this.loadData(); // Chiama il metodo asincrono separato
   },
   methods: {
+    async loadData() {
+      const userDataString = localStorage.getItem("userData");
+      const userData = JSON.parse(userDataString);
+      this.role = userData.role;
+
+      if (this.role === "doctor") {
+        this.patients = await getPatientsFromDoctor(userData.doctorID);
+      } else if (this.role === "patient") {
+        this.selectedPatientId = userData.uid;
+        this.selectedPatientName = localStorage.getItem("Name");
+        this.selectedPatientSurname = localStorage.getItem("Surname");
+        this.isLoadingRadiographs = true;
+
+        this.userRadiographs = await loadRadiographiesForPatient(
+          this.selectedPatientId
+        );
+
+        if (this.userRadiographs.length === 0) {
+          this.errorNoRadiographies = true;
+        } else {
+          this.errorNoRadiographies = false;
+        }
+
+        this.isLoadingRadiographs = false;
+      }
+      this.isLoading = false;
+    },
     async onPatientChange() {
       this.userRadiographs = [];
       this.isLoadingRadiographs = true;
@@ -268,6 +244,11 @@ export default {
   height: auto;
   text-align: center;
   flex-grow: 1;
+}
+
+h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
 }
 
 .img-preview {
@@ -420,13 +401,6 @@ export default {
 
 .btn-primary:hover {
   background-color: #0056b3;
-}
-
-h5.visualizza-radiografia {
-  font-size: 18px; /* Stessa dimensione del testo di "Elenco Pazienti" */
-  font-family: inherit; /* Assicura che usi lo stesso font ereditato dal contesto */
-  font-weight: normal; /* Mantenere il peso del font uguale */
-  margin-bottom: 20px; /* Margine inferiore uguale per allineamento */
 }
 
 .small-text {
