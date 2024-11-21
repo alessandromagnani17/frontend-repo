@@ -1,7 +1,7 @@
 <template>
   <div class="profile">
     <div class="container mt-5">
-      <h2 class="mb-4">Benvenuto nel tuo Profilo!</h2>
+      <h1>Benvenuto nel tuo Profilo!</h1>
       <div class="user-info">
         <div v-for="(value, key) in displayFields" :key="key" class="user-item">
           <p>
@@ -136,8 +136,8 @@ export default {
   text-align: left;
 }
 
-h2 {
-  font-size: 20px;
+h1 {
+  font-size: 24px;
   margin-bottom: 20px;
 }
 
