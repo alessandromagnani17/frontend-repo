@@ -10,7 +10,7 @@
         Caricamento delle informazioni...
       </div>
       <div v-else>
-        <h5><strong>Visualizzazione radiografia</strong></h5>
+        <h1>Dettagli radiografia</h1>
         <table class="table table-bordered mt-3">
           <tbody>
             <tr>
@@ -89,7 +89,7 @@
           </div>
         </div>
         <div v-if="userRole === 'doctor'">
-          <h5><strong>Informazioni caricamento</strong></h5>
+          <h1>Informazioni caricamento</h1>
           <table class="table table-bordered mt-3">
             <tbody>
               <tr>
@@ -194,6 +194,11 @@ export default {
   height: auto;
   text-align: center;
   flex-grow: 1;
+}
+
+h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
 }
 
 .row {
