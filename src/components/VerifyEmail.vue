@@ -1,26 +1,5 @@
 <template>
   <div class="verify-email">
-    <aside class="sidebar bg-dark text-white">
-      <h4 class="text-center mt-3">Link Rapidi</h4>
-      <ul class="nav flex-column">
-        <li class="nav-item">
-          <router-link class="nav-link text-white" to="/view-radiographs">
-            Visualizza Radiografie
-          </router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link text-white" to="/manage-patients">
-            Gestisci Pazienti
-          </router-link>
-        </li>
-        <li class="nav-item">
-          <router-link class="nav-link text-white" to="/reports">
-            Rapporti
-          </router-link>
-        </li>
-      </ul>
-    </aside>
-
     <div class="container mt-5">
       <h2 class="mb-4">{{ verificationMessage }}</h2>
       <p v-if="errorMessage">{{ errorMessage }}</p>
@@ -86,7 +65,7 @@ export default {
 }
 
 .container {
-  max-width: 600px;
+  max-width: 80%;
   padding: 40px;
   border-radius: 15px;
   background: #ffffff;
@@ -116,7 +95,18 @@ p {
 
 .btn-primary {
   background-color: #007bff;
+  color: white;
+  padding: 8px;
   border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 80%;
+  max-width: 300px;
+  min-width: 200px;
+  font-size: 13px;
+  transition: background-color 0.3s ease;
+  text-align: center;
+  display: inline-block;
 }
 
 .btn-primary:hover {
