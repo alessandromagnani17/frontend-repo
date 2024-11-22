@@ -359,7 +359,7 @@ li.radiograph-item {
 }
 
 .close-icon {
-  width: 12px;
-  height: 12px;
+  width: 22px;
+  height: 22px;
 }
 </style>
