@@ -242,6 +242,9 @@ export default {
       this.selectedPatientInfo = { name: "", surname: "", userId: "" };
       this.showKneeSide = false;
       this.selectedSide = false;
+      this.showThankYouMessage = false; // Nascondi il messaggio di ringraziamento
+      this.starsHidden = false; // Mostra di nuovo le stelline
+      this.selectedRating = 0; // Reimposta il rating selezionato
       if (this.$refs.fileInput) {
         this.$refs.fileInput.value = "";
       }
