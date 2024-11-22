@@ -45,10 +45,10 @@
             </span>
             <span class="change-text" @click="changePatient">Cambia</span>
           </div>
-          <div v-else>
+          <div v-else class="medium-text">
             Benvenuto
-            <strong class="small-text">
-              {{ selectedPatientName }} {{ selectedPatientSurname }}
+            <strong class="medium-text">
+              {{ selectedPatientName }} {{ selectedPatientSurname }}!
             </strong>
           </div>
 
@@ -92,8 +92,11 @@
 
           <!-- Messaggio di errore nel caso non ci siano radiografie -->
           <div v-else>
-            <div v-if="errorNoRadiographies" class="alert alert-danger mt-3">
-              <p>
+            <div
+              v-if="errorNoRadiographies"
+              class="alert alert-danger mt-3 small-text"
+            >
+              <p class="alert-text">
                 L'utente {{ selectedPatientName }}
                 {{ selectedPatientSurname }} non ha radiografie.
               </p>
@@ -106,14 +109,14 @@
           v-if="patients.length == 0 && role === 'doctor'"
           class="text-danger"
         >
-          <p>NON hai pazienti.</p>
+          <p>Non hai pazienti.</p>
         </div>
       </div>
 
       <!-- Messaggio per utenti senza permessi -->
       <div v-else>
         <p class="text-muted">
-          You do not have permission to view radiographs.
+          Non hai i permessi per visualizzare le radiografie.
         </p>
       </div>
     </div>
@@ -407,9 +410,31 @@ h1 {
   font-size: 13px;
 }
 
+.medium-text {
+  font-size: 14px;
+}
+
 /* Applica una riduzione globale della dimensione del testo per tutto il corpo della pagina */
 body {
   font-size: 13px; /* Ridotto la dimensione del testo per tutto il corpo */
   line-height: 1.4; /* Aumentato l'interlinea per una lettura più facile */
+}
+
+.alert.alert-danger {
+  display: flex; /* Abilita Flexbox */
+  align-items: center; /* Centra il contenuto verticalmente */
+  justify-content: center; /* Centra il contenuto orizzontalmente */
+  padding: 8px 15px; /* Riduce l'altezza complessiva */
+  font-size: 14px; /* Riduce la dimensione del testo */
+  line-height: 1.2; /* Compatta l'interlinea */
+  margin-bottom: 10px; /* Margine inferiore */
+  border-radius: 5px; /* Bordo arrotondato */
+  text-align: center; /* Centra il testo se multilinea */
+  min-height: 50px; /* Imposta un'altezza minima per coerenza */
+  box-sizing: border-box; /* Include padding nei calcoli dell'altezza */
+}
+
+.alert-text {
+  margin: 0; /* Rimuove margini aggiuntivi del paragrafo */
 }
 </style>
