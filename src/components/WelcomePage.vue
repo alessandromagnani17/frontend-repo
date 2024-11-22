@@ -69,7 +69,7 @@ export default {
 }
 
 .container {
-  max-width: 600px;
+  max-width: 80%;
   width: 100%; /* Imposta una larghezza del 100% */
   padding: 40px;
   border-radius: 15px;
@@ -93,14 +93,25 @@ p {
 }
 
 .btn-group .btn {
-  width: 100%; /* Assicura che i bottoni occupino l'intera larghezza */
+  width: 100%;
   margin-top: 20px;
   padding: 10px;
 }
 
 .btn-primary {
   background-color: #007bff;
+  color: white;
+  padding: 8px;
   border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 80%;
+  max-width: 300px;
+  min-width: 200px;
+  font-size: 13px;
+  transition: background-color 0.3s ease;
+  text-align: center;
+  display: inline-block;
 }
 
 .btn-primary:hover {
