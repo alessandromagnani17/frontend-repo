@@ -77,7 +77,7 @@ export default {
 }
 
 .container {
-  max-width: 600px;
+  max-width: 80%;
   padding: 40px;
   border-radius: 15px;
   background: #ffffff;
