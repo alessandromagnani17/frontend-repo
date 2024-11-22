@@ -34,10 +34,6 @@
               <td>{{ radiographyInfo.birthdate }}</td>
             </tr>
             <tr>
-              <th>Genere</th>
-              <td>{{ radiographyInfo.gender }}</td>
-            </tr>
-            <tr>
               <th>Codice Fiscale</th>
               <td>{{ radiographyInfo.tax_code }}</td>
             </tr>
@@ -88,7 +84,7 @@
             </h5>
           </div>
         </div>
-        <div v-if="userRole === 'doctor'">
+        <div v-if="userRole === 'doctor'" class="mt-5">
           <h1>Informazioni caricamento</h1>
           <table class="table table-bordered mt-3">
             <tbody>
@@ -252,7 +248,6 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
 }
 
 .back-button {
