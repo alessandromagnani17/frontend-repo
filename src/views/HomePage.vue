@@ -3,8 +3,7 @@
     <div class="container text-center">
       <h1 class="display-3">Welcome to Radiology Portal</h1>
       <p class="lead">
-        Explore and manage radiographs with ease and efficiency, crafted for
-        both doctors and patients.
+        La semplicità incontra l’innovazione: scopri il futuro delle radiografie!
       </p>
       <!-- Mostra una serie di immagini di radiografie -->
       <div class="xray-images">
@@ -92,6 +91,7 @@ export default {
         "functionality2.png",
         "functionality3.png",
         "functionality4.png",
+        "functionality5.png",
       ],
       currentImageIndex: 0,
       interval: null, // Timer per l'autoscorrimento
@@ -141,7 +141,7 @@ export default {
 }
 
 .container {
-  max-width: 700px;
+  max-width: 100%;
   padding: 40px;
   border-radius: 10px;
   background: #ffffff;
@@ -158,7 +158,7 @@ export default {
 
 .xray-img {
   width: calc(
-    21% - 10px
+    19% - 10px
   ); /* Riduce la larghezza per adattarsi a 4 immagini in una riga */
   height: auto;
 }
@@ -166,7 +166,7 @@ export default {
 .slider-container {
   position: relative;
   width: 100%;
-  max-width: 600px;
+  max-width: 1000px;
   margin: 20px auto;
   overflow: hidden;
   margin-bottom: 40px;
