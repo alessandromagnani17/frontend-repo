@@ -566,7 +566,7 @@ export default {
 
           if (this.isDoctorRole) {
             const response = await axios.post(
-              "http://127.0.0.1:5000/register",
+              "http://34.122.99.160:5000/register",
               {
                 email: email,
                 password: password, // Invio della password al backend
@@ -587,7 +587,7 @@ export default {
             console.log("Response dal backend:", response.data);
           } else {
             const response = await axios.post(
-              "http://127.0.0.1:5000/register",
+              "http://34.122.99.160:5000/register",
               {
                 email: email,
                 password: password, // Invio della password al backend

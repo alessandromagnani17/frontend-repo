@@ -269,10 +269,11 @@ export default {
     };
 
     // Funzione per controllare la verifica dell'email
+    // Se si esegue in locale usare 127.0.0.1:5000, altrimenti 34.122.99.160
     const checkEmailVerification = async () => {
       try {
         const verificationResponse = await axios.post(
-          "http://127.0.0.1:5000/check-email-verification",
+          "http://34.122.99.160:5000/check-email-verification",
           { email: form.value.email }
         );
 
@@ -337,9 +338,10 @@ export default {
     };
 
     // Funzione per gestire la risposta del login
+    // Se si esegue in locale usare 127.0.0.1:5000, altrimenti 34.122.99.160
     const handleLoginResponse = async (token) => {
       try {
-        const response = await axios.post("http://127.0.0.1:5000/login", {
+        const response = await axios.post("http://34.122.99.160:5000/login", {
           idToken: token,
         });
         storeUserData(response.data.user, token);
@@ -390,10 +392,11 @@ export default {
     };
 
     // Funzione per gestire credenziali non valide
+    // Se si esegue in locale usare 127.0.0.1:5000, altrimenti 34.122.99.160
     const handleInvalidCredential = async () => {
       try {
         const decrementResponse = await axios.post(
-          "http://127.0.0.1:5000/decrement-attempts",
+          "http://34.122.99.160:5000/decrement-attempts",
           { email: form.value.email }
         );
 
