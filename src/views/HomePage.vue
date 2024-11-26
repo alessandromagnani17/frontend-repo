@@ -3,7 +3,8 @@
     <div class="container text-center">
       <h1 class="display-3">Welcome to Radiology Portal</h1>
       <p class="lead">
-        La semplicità incontra l’innovazione: scopri il futuro delle radiografie!
+        La semplicità incontra l’innovazione: scopri il futuro delle
+        radiografie!
       </p>
       <!-- Mostra una serie di immagini di radiografie -->
       <div class="xray-images">
