@@ -2,7 +2,7 @@
 FROM node:14
 
 # Imposta la directory di lavoro
-WORKDIR /asw-project/frontend
+WORKDIR /osteoarthritis-project/frontend
 
 # Copia il file package.json e package-lock.json
 COPY package*.json ./
