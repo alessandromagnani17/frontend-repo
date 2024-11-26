@@ -14,7 +14,7 @@ module.exports = defineConfig({
     port: 8080, // Porta del frontend
     proxy: {
       "/api": {
-        target: "http://localhost:5000", // Backend Flask API
+        target: "http://34.122.99.160:5000", // Backend Flask API
         changeOrigin: true,
         secure: false,
       },
