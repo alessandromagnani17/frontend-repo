@@ -446,7 +446,7 @@ export default {
     fetchDoctors() {
       console.log("Sono dentro fetch doctors frontend");
       return new Promise((resolve, reject) => {
-        fetch("http://localhost:5000/api/doctors")
+        fetch("http://34.122.99.160:5000/api/doctors")
           .then((response) => {
             if (!response.ok) {
               throw new Error("Network response was not ok");
@@ -468,7 +468,7 @@ export default {
     fetchPatients() {
       console.log("Sono dentro fetch patients frontend");
       return new Promise((resolve, reject) => {
-        fetch("http://localhost:5000/api/patients")
+        fetch("http://34.122.99.160:5000/api/patients")
           .then((response) => {
             if (!response.ok) {
               throw new Error("Network response was not ok");
