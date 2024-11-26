@@ -28,7 +28,7 @@ export default {
     const uid = this.$route.params.uid; // Assicurati che l'UID sia presente nell'URL
     try {
       const response = await axios.get(
-        `http://localhost:5000/verify-email/${uid}`
+        `http://34.122.99.160:5000/verify-email/${uid}`
       );
 
       // Imposta il messaggio di verifica basato sulla risposta del server
