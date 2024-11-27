@@ -64,7 +64,7 @@ export default {
         return;
       }
 
-      fetch(`http://34.122.99.160:5000/get_user/${userId}`)
+      fetch(`http://127.0.0.1:5000/get_user/${userId}`)
         .then((response) =>
           response.ok
             ? response.json()
@@ -105,7 +105,7 @@ export default {
         return;
       }
 
-      fetch("http://34.122.99.160:5000/update_user", {
+      fetch("http://127.0.0.1:5000/update_user", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, [field]: value }),

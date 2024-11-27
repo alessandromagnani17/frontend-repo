@@ -278,7 +278,7 @@ export default {
 
       try {
         const response = await axios.post(
-          "http://34.122.99.160:5000/predict",
+          "http://127.0.0.1:5000/predict",
           formData,
           {
             headers: {
@@ -337,7 +337,7 @@ export default {
         formData.append("side", this.selectedSide ? "Right" : "Left");
 
         axios
-          .post("http://34.122.99.160:5000/upload-to-dataset", formData, {
+          .post("http://127.0.0.1:5000/upload-to-dataset", formData, {
             headers: {
               "Content-Type": "multipart/form-data",
             },

@@ -157,7 +157,11 @@ export default {
   },
   methods: {
     goBack() {
-      localStorage.setItem("selectedPatientId", this.radiographyInfo.userId);
+      localStorage.setItem("selectedPatientName", this.radiographyInfo.name);
+      localStorage.setItem(
+        "selectedPatientSurname",
+        this.radiographyInfo.surname
+      );
       localStorage.setItem("selected_original_img", "");
       localStorage.setItem("selected_gradcam_img", "");
       this.$router.push({

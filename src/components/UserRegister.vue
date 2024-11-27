@@ -446,7 +446,7 @@ export default {
     fetchDoctors() {
       console.log("Sono dentro fetch doctors frontend");
       return new Promise((resolve, reject) => {
-        fetch("http://34.122.99.160:5000/api/doctors")
+        fetch("http://127.0.0.1:5000/api/doctors")
           .then((response) => {
             if (!response.ok) {
               throw new Error("Network response was not ok");
@@ -468,7 +468,7 @@ export default {
     fetchPatients() {
       console.log("Sono dentro fetch patients frontend");
       return new Promise((resolve, reject) => {
-        fetch("http://34.122.99.160:5000/api/patients")
+        fetch("http://127.0.0.1:5000/api/patients")
           .then((response) => {
             if (!response.ok) {
               throw new Error("Network response was not ok");
@@ -566,7 +566,7 @@ export default {
 
           if (this.isDoctorRole) {
             const response = await axios.post(
-              "http://34.122.99.160:5000/register",
+              "http://127.0.0.1:5000/register",
               {
                 email: email,
                 password: password, // Invio della password al backend
@@ -587,7 +587,7 @@ export default {
             console.log("Response dal backend:", response.data);
           } else {
             const response = await axios.post(
-              "http://34.122.99.160:5000/register",
+              "http://127.0.0.1:5000/register",
               {
                 email: email,
                 password: password, // Invio della password al backend

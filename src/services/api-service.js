@@ -1,7 +1,7 @@
 import axios from "axios";
 
-//const API_URL = "http://localhost:5000"; // URL backend locale
-const API_URL = "http://34.122.99.160:5000";
+const API_URL = "http://127.0.0.1:5000"; // URL backend locale
+//const API_URL = "http://34.122.99.160:5000";
 
 // Funzione per la registrazione
 export const registerUser = async (userData) => {
