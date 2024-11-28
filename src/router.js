@@ -13,6 +13,7 @@ import ProfilePage from "./views/ProfilePage.vue";
 import SettingsPage from "./views/SettingsPage.vue";
 import ViewRadiographs from "./views/ViewRadiographs.vue";
 import ActivityCalendar from "@/components/ActivityCalendar.vue";
+import UserNotifications from "@/views/UserNotifications.vue";
 
 const routes = [
   {
@@ -42,6 +43,12 @@ const routes = [
     path: "/dashboard",
     name: "DashboardPage",
     component: DashboardPage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/notifications",
+    name: "UserNotifications",
+    component: UserNotifications,
     meta: { requiresAuth: true },
   },
   {
