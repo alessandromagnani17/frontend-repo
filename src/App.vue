@@ -42,6 +42,15 @@
                   >Visualizza Radiografie</router-link
                 >
               </li>
+              <li class="nav-item">
+                <router-link
+                  class="nav-link"
+                  to="/activity-calendar"
+                  @click="closeNavbar"
+                >
+                  Calendario Attività
+                </router-link>
+              </li>
             </template>
 
             <template v-else>
