@@ -192,13 +192,16 @@
         </transition>
         <div
           v-if="showNewPredictionButton"
-          class="mt-4 d-flex justify-content-start"
+          class="mt-4 d-flex flex-column flex-md-row justify-content-center align-items-center gap-2"
         >
-          <button @click="resetPrediction" class="btn btn-new-prediction">
+          <button
+            @click="resetPrediction"
+            class="btn btn-light btn-new-prediction"
+          >
             Esegui nuova predizione
           </button>
           <!-- Pulsante Pianifica Operazione -->
-          <button @click="scheduleOperation" class="btn btn-upload">
+          <button @click="scheduleOperation" class="btn btn-primary btn-upload">
             Pianifica Operazione
           </button>
         </div>
@@ -434,7 +437,6 @@ h1 {
   margin-top: 15px;
 }
 
-/* Media Query per schermi più piccoli */
 @media (max-width: 767px) {
   .img-preview {
     width: 60vw;
@@ -498,18 +500,24 @@ h1 {
   font-size: 13px;
 }
 
-.btn-upload {
-  background-color: #007bff;
-  color: white;
+.btn-upload,
+.btn-new-prediction {
+  margin: 0; /* Rimuove eventuali margini inutili */
   padding: 8px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  width: 40%;
-  min-width: 150px;
+  width: 40%; /* Imposta larghezza al 100% del contenitore */
+  max-width: 300px; /* Imposta una larghezza massima */
+  min-width: 100px; /* Imposta una larghezza minima */
   font-size: 13px;
   transition: background-color 0.3s ease;
   text-align: center;
+}
+
+.btn-upload {
+  background-color: #007bff;
+  color: white;
 }
 
 .btn-upload:hover {
@@ -519,15 +527,22 @@ h1 {
 .btn-new-prediction {
   background: #d9d9d9; /* Colore grigio chiaro */
   color: black; /* Colore del testo */
-  padding: 8px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 40%;
-  min-width: 150px;
-  font-size: 13px;
-  transition: background-color 0.3s ease;
-  text-align: center;
+}
+
+.btn-new-prediction:hover {
+  background: #bfbfbf;
+}
+
+/* Aggiungi un po' di spazio tra i pulsanti */
+.gap-2 {
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  /* Per schermi piccoli, impila i pulsanti verticalmente */
+  .flex-md-row {
+    flex-direction: column;
+  }
 }
 
 .small-text {
