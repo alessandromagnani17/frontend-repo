@@ -147,11 +147,19 @@
         </div>
         <div class="card prediction-card mb-3">
           <div class="card-body">
+            <!-- Mostra il messaggio completo -->
             <h5 class="card-title small-text">
-              {{ predictedClass }} ({{
+              {{ predictedClassMessage }} ({{
                 selectedSide ? "Ginocchio destro" : "Ginocchio sinistro"
               }})
             </h5>
+            <!-- Mostra la scritta in rosso se il grado è 4 o 5 -->
+            <p
+              v-if="predictedClass === 4 || predictedClass === 5"
+              class="text-danger"
+            >
+              È necessaria un’operazione protesica per il paziente.
+            </p>
           </div>
         </div>
 
@@ -182,9 +190,16 @@
             Grazie per la recensione!
           </div>
         </transition>
-        <div v-if="showNewPredictionButton" class="mt-4">
-          <button @click="resetPrediction" class="btn-upload">
+        <div
+          v-if="showNewPredictionButton"
+          class="mt-4 d-flex justify-content-start"
+        >
+          <button @click="resetPrediction" class="btn btn-new-prediction">
             Esegui nuova predizione
+          </button>
+          <!-- Pulsante Pianifica Operazione -->
+          <button @click="scheduleOperation" class="btn btn-upload">
+            Pianifica Operazione
           </button>
         </div>
       </div>
@@ -287,8 +302,15 @@ export default {
           }
         );
 
-        console.log("Response from server:", response.data);
-        this.predictedClass = response.data.predicted_class;
+        this.predictedClassMessage = response.data.predicted_class;
+
+        // Estrazione numero dal messaggio
+        const classMatch = this.predictedClassMessage.match(/\d+/);
+        this.predictedClass = classMatch ? parseInt(classMatch[0], 10) : null;
+
+        console.log("Predicted Class (number):", this.predictedClass);
+        console.log("Predicted Class (message):", this.predictedClassMessage);
+
         this.gradcamImage = response.data.gradcam_image;
         this.showNewPredictionButton = true;
         this.showPredictButton = false;
@@ -492,6 +514,20 @@ h1 {
 
 .btn-upload:hover {
   background-color: #0056b3;
+}
+
+.btn-new-prediction {
+  background: #d9d9d9; /* Colore grigio chiaro */
+  color: black; /* Colore del testo */
+  padding: 8px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 40%;
+  min-width: 150px;
+  font-size: 13px;
+  transition: background-color 0.3s ease;
+  text-align: center;
 }
 
 .small-text {
