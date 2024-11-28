@@ -12,6 +12,7 @@ import RadiographyDetail from "./components/RadiographyDetail.vue";
 import ProfilePage from "./views/ProfilePage.vue";
 import SettingsPage from "./views/SettingsPage.vue";
 import ViewRadiographs from "./views/ViewRadiographs.vue";
+import ActivityCalendar from "@/components/ActivityCalendar.vue";
 
 const routes = [
   {
@@ -88,6 +89,12 @@ const routes = [
     path: "/radiography-detail",
     name: "RadiographyDetail",
     component: RadiographyDetail,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/activity-calendar",
+    name: "ActivityCalendar",
+    component: ActivityCalendar,
     meta: { requiresAuth: true },
   },
 ];
