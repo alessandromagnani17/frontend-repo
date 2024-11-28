@@ -78,6 +78,8 @@
               />
             </div>
             <div v-if="showKneeSide" class="button-cover">
+              <div v-if="loadingPredict" class="loading-overlay"></div>
+
               <div
                 class="buttonSide r"
                 id="button-1"
@@ -105,10 +107,20 @@
           v-if="showPredictButton"
           @click="submitImage"
           class="btn-upload"
+          :disabled="loadingPredict"
         >
-          Predici osteoartrite
+          <span v-if="loadingPredict">Caricamento...</span>
+          <span v-else>Predici osteoartrite</span>
         </button>
       </div>
+
+      <!-- Loading overlay per predizione -->
+      <div v-if="loadingPredict" class="loading-overlay">
+        <div class="loading-icon">
+          <img src="@/assets/loading-icon.svg" alt="Loading..." />
+        </div>
+      </div>
+
       <div v-if="predictedClass !== null" class="mt-4">
         <div class="card prediction-card mb-3">
           <div class="card-body">
@@ -163,7 +175,6 @@
           </div>
         </div>
 
-        <!-- Linea e scritta sopra il pulsante "Esegui nuova predizione" -->
         <div class="line-container">
           <div class="line"></div>
         </div>
@@ -237,6 +248,7 @@ export default {
       starFilled: require("@/assets/star-filled.svg"),
       showThankYouMessage: false,
       starsHidden: false,
+      loadingPredict: false,
     };
   },
   async created() {
@@ -282,17 +294,14 @@ export default {
     async submitImage() {
       if (!this.selectedFile) return;
 
+      this.loadingPredict = true; // Avvia il caricamento
       const formData = new FormData();
       formData.append("file", this.selectedFile);
 
       const userData = JSON.parse(localStorage.getItem("userData"));
       formData.append("userData", JSON.stringify(userData));
       formData.append("selectedPatientID", this.selectedPatient);
-      if (this.selectedSide) {
-        formData.append("selectedSide", "Right");
-      } else {
-        formData.append("selectedSide", "Left");
-      }
+      formData.append("selectedSide", this.selectedSide ? "Right" : "Left");
 
       try {
         const response = await axios.post(
@@ -322,6 +331,8 @@ export default {
         this.showKneeSide = false;
       } catch (error) {
         console.error("Error predicting image:", error);
+      } finally {
+        this.loadingPredict = false; // Ferma il caricamento
       }
     },
     onPatientChange() {
@@ -623,6 +634,7 @@ h1 {
   display: flex;
   justify-content: center; /* Centra orizzontalmente i pulsanti */
   align-items: center; /* Centra verticalmente i pulsanti */
+  z-index: 11;
 }
 
 /* Stili esistenti per i pulsanti Left/Right */
@@ -727,6 +739,24 @@ h1 {
   #button-1 .layer {
     background-color: #fcebeb;
   }
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Assicurati che l'overlay sia sopra tutto */
+}
+
+.loading-icon {
+  width: 50px;
+  height: 50px;
 }
 
 .line-container {
