@@ -92,6 +92,14 @@
                 >
                   <router-link
                     class="dropdown-item"
+                    to="/notifications"
+                    @click="closeNavbar"
+                  >
+                    <i class="fas fa-bell"></i> Notifiche
+                    <span class="badge badge-pill badge-warning">3</span>
+                  </router-link>
+                  <router-link
+                    class="dropdown-item"
                     to="/profile"
                     @click="closeNavbar"
                     >Profilo</router-link
