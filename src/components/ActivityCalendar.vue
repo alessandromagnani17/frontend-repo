@@ -1,7 +1,36 @@
 <template>
   <div class="calendar-container">
     <h1>Calendario Attività</h1>
+    <button @click="openScheduleModal" class="btn btn-primary">
+      Pianifica Operazione
+    </button>
 
+    <!-- Modale per inserire i dettagli dell'operazione -->
+    <div v-if="showModal" class="modal">
+      <div class="modal-content">
+        <h2>Pianifica una nuova operazione</h2>
+        <label for="operationDate">Data dell'operazione:</label>
+        <input
+          type="date"
+          v-model="operationDate"
+          id="operationDate"
+          :min="minDate"
+        />
+
+        <label for="operationTime">Ora dell'operazione:</label>
+        <input type="time" v-model="operationTime" id="operationTime" />
+
+        <label for="description">Descrizione:</label>
+        <textarea v-model="description" id="description"></textarea>
+
+        <button @click="scheduleOperation" class="btn btn-success">
+          Salva
+        </button>
+        <button @click="closeScheduleModal" class="btn btn-secondary">
+          Annulla
+        </button>
+      </div>
+    </div>
     <!-- Verifica se l'utente è un paziente o un dottore -->
     <div v-if="isPatient">
       <div class="calendar">
@@ -162,6 +191,11 @@ export default {
       patientId: null, // ID del paziente
       selectedPatient: null, // Paziente selezionato (loggato)
       patients: [], // Pazienti associati al dottore
+      showModal: false, // Controlla la visibilità del modale
+      operationDate: "", // Data dell'operazione
+      operationTime: "",
+      description: "", // Descrizione dell'operazione
+      minDate: new Date().toISOString().split("T")[0], // Data minima (oggi)
     };
   },
   mounted() {
@@ -224,6 +258,108 @@ export default {
     },
   },
   methods: {
+    openScheduleModal() {
+      this.showModal = true;
+    },
+    // Chiude il modale
+    closeScheduleModal() {
+      this.showModal = false;
+      this.operationDate = "";
+      this.description = "";
+    },
+    async scheduleOperation() {
+      try {
+        // Controlla che i campi non siano vuoti
+        if (!this.operationDate || !this.operationTime || !this.description) {
+          alert("Data, ora o descrizione mancanti.");
+          return;
+        }
+
+        // Recupera l'ID del dottore e del paziente
+        const doctorId = localStorage.getItem("doctorId");
+        const patientId = this.selectedPatient?.userId || "default_patient_id"; // Sostituisci con un ID valido
+
+        // Verifica che la data selezionata non sia nel passato
+        const selectedDate = new Date(this.operationDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Rimuove l'ora dalla data corrente
+        if (selectedDate < today) {
+          alert("La data deve essere futura!");
+          return;
+        }
+
+        // Combinare la data e l'ora
+        const formattedDate = this.combineDateAndTime(
+          this.operationDate,
+          this.operationTime
+        );
+
+        // Chiamata al backend per salvare l'operazione
+        const response = await fetch("/api/operations", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            doctorId,
+            patientId,
+            operationDate: formattedDate, // Invio la data + ora combinata
+            description: this.description,
+            createdAt: new Date().toISOString(), // Timestamp di creazione
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(
+            error.message || "Errore durante la pianificazione dell'operazione."
+          );
+        }
+
+        await response.json();
+        alert("Operazione pianificata con successo!");
+
+        // Mostra il calendario delle attività
+        this.showActivityCalendar();
+
+        // Chiudi il modal
+        this.closeScheduleModal();
+      } catch (error) {
+        console.error(
+          "Errore durante la pianificazione dell'operazione:",
+          error
+        );
+        alert("Errore: " + error.message);
+      }
+    },
+
+    // Funzione per combinare la data e l'ora in un formato compatibile con Firebase (YYYY-MM-DDTHH:MM:SS)
+    combineDateAndTime(date, time) {
+      return `${date}T${time}:00`; // Combina la data e l'ora in formato corretto
+    },
+
+    // Funzione per ottenere la data minima per l'input (oggi)
+    getMinDate() {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = (today.getMonth() + 1).toString().padStart(2, "0");
+      const dd = today.getDate().toString().padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    },
+
+    // Chiude il modal
+    closeModal() {
+      this.showModal = false;
+    },
+
+    // Mostra il calendario delle attività
+    showActivityCalendar() {
+      // Logica per visualizzare il calendario
+      this.selectedDay = null; // Resetta la selezione del giorno
+      this.loadPatients(); // Ricarica i pazienti per aggiornare il calendario
+      alert("Calendario aggiornato!"); // Messaggio temporaneo
+    },
+
     checkUserRole() {
       const userData = JSON.parse(localStorage.getItem("userData"));
       if (userData && userData.role === "patient") {
@@ -425,5 +561,54 @@ button:hover {
 .fade-enter,
 .fade-leave-to {
   opacity: 0;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  text-align: center;
+}
+
+.modal-content label {
+  display: block;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.modal-content input,
+.modal-content textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
 }
 </style>
