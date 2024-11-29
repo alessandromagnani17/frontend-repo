@@ -373,8 +373,8 @@ h1 {
 }
 
 .card {
-  flex: 0 0 30%; /* Imposta la larghezza al 30% per avere 3 card per riga */
-  margin: 10px; /* Margine tra le card */
+  flex: 0 0 29%; /* Imposta la larghezza al 30% per avere 3 card per riga */
+  margin: 0.8vw;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
