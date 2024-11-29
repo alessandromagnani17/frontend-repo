@@ -212,7 +212,10 @@
             Esegui nuova predizione
           </button>
           <!-- Pulsante Pianifica Operazione -->
-          <button @click="scheduleOperation" class="btn btn-primary btn-upload">
+          <button
+            @click="goToActivityCalendar"
+            class="btn btn-primary btn-upload"
+          >
             Pianifica Operazione
           </button>
         </div>
@@ -258,6 +261,9 @@ export default {
     this.isLoading = false;
   },
   methods: {
+    goToActivityCalendar() {
+      this.$router.push("/activity-calendar"); // Reindirizza alla pagina del calendario
+    },
     resetPrediction() {
       this.selectedFile = null;
       this.selectedFileName = null;
