@@ -191,6 +191,7 @@ export default {
       patientId: null, // ID del paziente
       selectedPatient: null, // Paziente selezionato (loggato)
       patients: [], // Pazienti associati al dottore
+      operations: [], // Operazioni pianificate
       showModal: false, // Controlla la visibilità del modale
       operationDate: "", // Data dell'operazione
       operationTime: "",
@@ -202,6 +203,7 @@ export default {
     this.checkUserRole();
     if (this.isDoctor) {
       this.loadPatients(); // Carica i pazienti del dottore
+      this.loadDoctorOperations();
     }
     if (this.isPatient) {
       this.loadRadiographs(); // Carica le radiografie del paziente loggato
@@ -258,6 +260,19 @@ export default {
     },
   },
   methods: {
+    async loadDoctorOperations() {
+      const doctorId = localStorage.getItem("doctorId");
+      if (doctorId) {
+        try {
+          const response = await fetch(`/api/doctor/${doctorId}/operations`);
+          const data = await response.json();
+          this.operations = data; // Salva le operazioni pianificate dal medico
+          console.log("Operazioni pianificate:", this.operations);
+        } catch (error) {
+          console.error("Errore nel recupero delle operazioni:", error);
+        }
+      }
+    },
     openScheduleModal() {
       this.showModal = true;
     },
