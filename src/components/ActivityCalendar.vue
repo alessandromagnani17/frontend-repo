@@ -67,24 +67,26 @@
             <!-- Data -->
             <div class="date">{{ day.date }}</div>
 
-            <!-- Operazioni -->
-            <div v-if="day.operations.length > 0" class="operation-count">
-              {{ day.operations.length }}
-              {{
-                day.operations.length === 1
-                  ? "operazione pianificata"
-                  : "operazioni pianificate"
-              }}
+            <!-- Icone Operazioni -->
+            <div class="icon-row operations">
+              <img
+                v-for="n in day.operations.length"
+                :key="'operation-' + n + '-' + day.date"
+                :src="operationIcon"
+                alt="Operazione"
+                class="icon"
+              />
             </div>
 
-            <!-- Radiografie -->
-            <div v-if="day.radiographs.length > 0" class="radiograph-count">
-              {{ day.radiographs.length }}
-              {{
-                day.radiographs.length === 1
-                  ? "caricamento radiografia"
-                  : "caricamenti radiografie"
-              }}
+            <!-- Icone Radiografie -->
+            <div class="icon-row radiographs">
+              <img
+                v-for="n in day.radiographs.length"
+                :key="'radiograph-' + n + '-' + day.date"
+                :src="radiographIcon"
+                alt="Radiografia"
+                class="icon"
+              />
             </div>
           </div>
         </div>
@@ -150,24 +152,26 @@
               <!-- Data -->
               <div class="date">{{ day.date }}</div>
 
-              <!-- Operazioni -->
-              <div v-if="day.operations.length > 0" class="operation-count">
-                {{ day.operations.length }}
-                {{
-                  day.operations.length === 1
-                    ? "operazione pianificata"
-                    : "operazioni pianificate"
-                }}
+              <!-- Icone Operazioni -->
+              <div class="icon-row operations">
+                <img
+                  v-for="n in day.operations.length"
+                  :key="'operation-' + n + '-' + day.date"
+                  :src="operationIcon"
+                  alt="Operazione"
+                  class="icon"
+                />
               </div>
 
-              <!-- Radiografie -->
-              <div v-if="day.radiographs.length > 0" class="radiograph-count">
-                {{ day.radiographs.length }}
-                {{
-                  day.radiographs.length === 1
-                    ? "caricamento radiografia"
-                    : "caricamenti radiografie"
-                }}
+              <!-- Icone Radiografie -->
+              <div class="icon-row radiographs">
+                <img
+                  v-for="n in day.radiographs.length"
+                  :key="'radiograph-' + n + '-' + day.date"
+                  :src="radiographIcon"
+                  alt="Radiografia"
+                  class="icon"
+                />
               </div>
             </div>
           </div>
@@ -240,6 +244,8 @@ export default {
       operationTime: "",
       description: "", // Descrizione dell'operazione
       minDate: new Date().toISOString().split("T")[0], // Data minima (oggi)
+      operationIcon: require("@/assets/operation-icon.png"),
+      radiographIcon: require("@/assets/radiograph-icon.png"),
     };
   },
   mounted() {
@@ -685,26 +691,27 @@ export default {
   font-size: 1.2em;
 }
 
-.radiograph-count {
-  position: absolute;
-  bottom: 10px;
-  left: 5px;
-  font-size: 0.7em;
-  color: #007bff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.activity-icons {
+  display: flex;
+  flex-direction: column; /* Cambia la direzione per impilare le righe */
+  align-items: center;
+  gap: 10px; /* Spazio tra righe */
+  margin-top: 5px;
 }
 
-.operation-count {
-  position: absolute;
-  bottom: 10px;
-  left: 5px;
-  font-size: 0.7em;
-  color: red;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.icon-row {
+  display: flex;
+  justify-content: center;
+  gap: 2px; /* Spazio tra le icone nella stessa riga */
+}
+
+.operations {
+  margin-bottom: 5px; /* Aggiunge margine tra operazioni e radiografie */
+}
+
+.icon {
+  width: 10px;
+  height: 10px;
 }
 
 button {
