@@ -1,7 +1,7 @@
 <template>
   <div class="activity-calendar">
     <div class="calendar-container">
-      <h1>Calendario Attività</h1>
+      <h1 class="calendar">Calendario Attività</h1>
       <button @click="openScheduleModal" class="btn btn-primary">
         Pianifica Operazione
       </button>
@@ -683,6 +683,13 @@ export default {
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
 }
 
+h1.calendar {
+  font-size: 18px; /* Stessa dimensione del testo di "Elenco Pazienti" */
+  font-family: inherit; /* Assicura che usi lo stesso font ereditato dal contesto */
+  font-weight: normal; /* Mantenere il peso del font uguale */
+  margin-bottom: 20px; /* Margine inferiore uguale per allineamento */
+}
+
 .calendar-header {
   display: flex;
   justify-content: space-between;
@@ -745,7 +752,7 @@ export default {
 
 .operations {
   min-height: 7px;
-  margin-bottom: 5px; /* Aggiunge margine tra operazioni e radiografie */
+  margin-bottom: 3px; /* Aggiunge margine tra operazioni e radiografie */
 }
 
 .icon {
