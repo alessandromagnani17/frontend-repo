@@ -60,9 +60,9 @@
         <div class="calendar-grid">
           <div
             v-for="day in daysInMonth"
-            :key="day.date"
-            class="calendar-day"
-            @click="showDayDetails(day)"
+            :key="`${day.year}-${day.month}-${day.date}`"
+            :class="['calendar-day', { disabled: day.isDisabled }]"
+            @click="!day.isDisabled && showDayDetails(day)"
           >
             <!-- Data -->
             <div class="date">{{ day.date }}</div>
@@ -78,7 +78,6 @@
               />
             </div>
 
-            <!-- Icone Radiografie -->
             <div class="icon-row radiographs">
               <img
                 v-for="n in day.radiographs.length"
@@ -145,9 +144,9 @@
           <div class="calendar-grid">
             <div
               v-for="day in daysInMonth"
-              :key="day.date"
-              class="calendar-day"
-              @click="showDayDetails(day)"
+              :key="`${day.year}-${day.month}-${day.date}`"
+              :class="['calendar-day', { disabled: day.isDisabled }]"
+              @click="!day.isDisabled && showDayDetails(day)"
             >
               <!-- Data -->
               <div class="date">{{ day.date }}</div>
@@ -163,7 +162,6 @@
                 />
               </div>
 
-              <!-- Icone Radiografie -->
               <div class="icon-row radiographs">
                 <img
                   v-for="n in day.radiographs.length"
@@ -264,20 +262,19 @@ export default {
       const days = [];
       const lastDayOfMonth = new Date(this.year, this.month + 1, 0);
       const totalDays = lastDayOfMonth.getDate();
+      const firstDayOfMonth = new Date(this.year, this.month, 1);
+      const startDayOfWeek = firstDayOfMonth.getDay(); // Giorno della settimana (0 = Domenica, 1 = Lunedì, ecc.)
 
-      // Crea un array per tenere traccia delle radiografie per ogni giorno
+      // Calcola quanti giorni del mese precedente devono essere inclusi
+      const daysFromPrevMonth = (startDayOfWeek + 6) % 7; // Se il mese inizia di lunedì, vogliamo 0 giorni precedenti
+      const prevMonthLastDay = new Date(this.year, this.month, 0).getDate();
+
+      // Radiografie e operazioni per ogni giorno
       const radiographsPerDay = {};
-
-      // Crea un array per tenere traccia delle operazioni per ogni giorno
       const operationsPerDay = {};
 
       if (this.isDoctor) {
-        console.log("DEBUG: Utente loggato come medico.");
-        // Aggrega tutte le radiografie dei pazienti associati al dottore
         this.patients.forEach((patient) => {
-          console.log(
-            `DEBUG: Elaborazione paziente: ${patient.name} ${patient.family_name}`
-          );
           if (patient.radiographs) {
             patient.radiographs.forEach((radiograph) => {
               const radiographDate = new Date(radiograph.date).toDateString();
@@ -291,29 +288,9 @@ export default {
             });
           }
 
-          // Debug per le operazioni dei pazienti
           if (patient.operations) {
-            console.log(
-              `DEBUG: Operazioni del paziente ${patient.name} ${patient.family_name}:`,
-              patient.operations
-            );
             patient.operations.forEach((operation) => {
-              // Conversione esplicita della data
-              if (!operation.operationDate) {
-                console.warn(
-                  `DEBUG: Operazione senza data trovata:`,
-                  operation
-                );
-                return; // Salta questa operazione
-              }
-
-              // Conversione della data con parsing robusto
               const operationDate = this.parseISODate(operation.operationDate);
-              console.log(
-                `DEBUG: Data operazione convertita: ${operationDate}, Operazione:`,
-                operation
-              );
-
               if (operationDate !== "Invalid Date") {
                 if (!operationsPerDay[operationDate]) {
                   operationsPerDay[operationDate] = [];
@@ -322,19 +299,11 @@ export default {
                   ...operation,
                   patientName: `${patient.name} ${patient.family_name}`,
                 });
-              } else {
-                console.warn(
-                  `DEBUG: Operazione scartata a causa di una data non valida:`,
-                  operation
-                );
               }
             });
           }
-          console.log("DEBUG: daysInMonth", this.daysInMonth);
         });
       } else {
-        console.log("DEBUG: Utente loggato come paziente.");
-        // Se l'utente è un paziente, usa le proprie radiografie
         this.radiographs.forEach((radiograph) => {
           const radiographDate = new Date(radiograph.date).toDateString();
           if (!radiographsPerDay[radiographDate]) {
@@ -343,54 +312,70 @@ export default {
           radiographsPerDay[radiographDate].push(radiograph);
         });
 
-        // Debug per le operazioni del paziente
-        console.log("DEBUG: Operazioni del paziente:", this.operations);
         this.operations.forEach((operation) => {
-          if (!operation.operationDate) {
-            console.warn("DEBUG: Operazione senza data trovata:", operation);
-            return; // Salta questa operazione
-          }
-
           const operationDate = this.parseISODate(operation.operationDate);
-          console.log(
-            `DEBUG: Data operazione convertita: ${operationDate}, Operazione:`,
-            operation
-          );
-
           if (operationDate !== "Invalid Date") {
             if (!operationsPerDay[operationDate]) {
               operationsPerDay[operationDate] = [];
             }
             operationsPerDay[operationDate].push(operation);
-          } else {
-            console.warn(
-              `DEBUG: Operazione scartata a causa di una data non valida:`,
-              operation
-            );
           }
         });
       }
 
-      // Popola i giorni del mese
-      for (let i = 1; i <= totalDays; i++) {
-        const dayDate = new Date(this.year, this.month, i).toDateString();
-        const radiographsOnDay = radiographsPerDay[dayDate] || [];
-        const operationsOnDay = operationsPerDay[dayDate] || [];
-
-        // Debug per le operazioni aggregate per giorno
-        console.log(
-          `DEBUG: Giorno: ${dayDate}, Operazioni trovate:`,
-          operationsOnDay
+      // Aggiungi i giorni del mese precedente
+      for (let i = daysFromPrevMonth; i > 0; i--) {
+        const date = new Date(
+          this.year,
+          this.month - 1,
+          prevMonthLastDay - i + 1
         );
-
+        const dayString = date.toDateString();
+        const radiographsOnDay = radiographsPerDay[dayString] || [];
+        const operationsOnDay = operationsPerDay[dayString] || [];
         days.push({
-          date: i,
+          date: date.getDate(),
+          year: date.getFullYear(), // Aggiungi l'anno
+          month: date.getMonth(), // Aggiungi il mese (0 = Gennaio, 11 = Dicembre)
           radiographs: radiographsOnDay,
           operations: operationsOnDay,
+          isDisabled: true, // Per i giorni del mese precedente
         });
       }
 
-      console.log("DEBUG: Struttura finale dei giorni:", days);
+      // Aggiungi i giorni del mese corrente
+      for (let i = 1; i <= totalDays; i++) {
+        const date = new Date(this.year, this.month, i);
+        const dayString = date.toDateString();
+        const radiographsOnDay = radiographsPerDay[dayString] || [];
+        const operationsOnDay = operationsPerDay[dayString] || [];
+        days.push({
+          date: i,
+          year: date.getFullYear(), // Aggiungi l'anno
+          month: date.getMonth(), // Aggiungi il mese (0 = Gennaio, 11 = Dicembre)
+          radiographs: radiographsOnDay,
+          operations: operationsOnDay,
+          isDisabled: false, // Per i giorni del mese corrente
+        });
+      }
+
+      // Calcola quanti giorni del mese successivo devono essere inclusi
+      const remainingDays = 42 - days.length; // Un calendario completo ha 6 settimane = 42 giorni
+      for (let i = 1; i <= remainingDays; i++) {
+        const date = new Date(this.year, this.month + 1, i);
+        const dayString = date.toDateString();
+        const radiographsOnDay = radiographsPerDay[dayString] || [];
+        const operationsOnDay = operationsPerDay[dayString] || [];
+        days.push({
+          date: i,
+          year: date.getFullYear(), // Aggiungi l'anno
+          month: date.getMonth(), // Aggiungi il mese (0 = Gennaio, 11 = Dicembre)
+          radiographs: radiographsOnDay,
+          operations: operationsOnDay,
+          isDisabled: true, // Per i giorni del mese successivo
+        });
+      }
+
       return days;
     },
   },
@@ -685,6 +670,19 @@ export default {
   height: 100px;
   overflow: hidden;
   cursor: pointer;
+}
+
+/* Giorni disabilitati (mese precedente e successivo) */
+.calendar-day.disabled {
+  opacity: 0.5;
+  color: #ccc; /* Testo grigio chiaro */
+  pointer-events: none; /* Non cliccabili */
+  background-color: #f9f9f9; /* Sfondo leggermente diverso, opzionale */
+}
+
+/* Puoi anche aggiungere un bordo per evidenziare meglio i giorni */
+.calendar-day.disabled:hover {
+  border: 1px dashed #ddd; /* Aggiunge un bordo hover sui giorni disabilitati */
 }
 
 .date {
