@@ -1,139 +1,56 @@
 <template>
-  <div class="calendar-container">
-    <h1>Calendario Attività</h1>
-    <button @click="openScheduleModal" class="btn btn-primary">
-      Pianifica Operazione
-    </button>
+  <div class="activity-calendar">
+    <div class="calendar-container">
+      <h1>Calendario Attività</h1>
+      <button @click="openScheduleModal" class="btn btn-primary">
+        Pianifica Operazione
+      </button>
 
-    <!-- Modale per inserire i dettagli dell'operazione -->
-    <div v-if="showModal" class="modal">
-      <div class="modal-content">
-        <h2>Pianifica una nuova operazione</h2>
-        <!-- Menu a tendina per selezionare un paziente -->
-        <label for="patientSelect">Seleziona un paziente:</label>
-        <select
-          v-model="selectedPatientId"
-          id="patientSelect"
-          class="form-select"
-        >
-          <option value="" disabled>Seleziona un paziente</option>
-          <option
-            v-for="patient in patients"
-            :key="patient.userId"
-            :value="patient.userId"
+      <!-- Modale per inserire i dettagli dell'operazione -->
+      <div v-if="showModal" class="modal">
+        <div class="modal-content">
+          <h2>Pianifica una nuova operazione</h2>
+          <!-- Menu a tendina per selezionare un paziente -->
+          <label for="patientSelect">Seleziona un paziente:</label>
+          <select
+            v-model="selectedPatientId"
+            id="patientSelect"
+            class="form-select"
           >
-            {{ patient.name }} {{ patient.family_name }}
-          </option>
-        </select>
+            <option value="" disabled>Seleziona un paziente</option>
+            <option
+              v-for="patient in patients"
+              :key="patient.userId"
+              :value="patient.userId"
+            >
+              {{ patient.name }} {{ patient.family_name }}
+            </option>
+          </select>
 
-        <label for="operationDate">Data dell'operazione:</label>
-        <input
-          type="date"
-          v-model="operationDate"
-          id="operationDate"
-          :min="minDate"
-        />
+          <label for="operationDate">Data dell'operazione:</label>
+          <input
+            type="date"
+            v-model="operationDate"
+            id="operationDate"
+            :min="minDate"
+          />
 
-        <label for="operationTime">Ora dell'operazione:</label>
-        <input type="time" v-model="operationTime" id="operationTime" />
+          <label for="operationTime">Ora dell'operazione:</label>
+          <input type="time" v-model="operationTime" id="operationTime" />
 
-        <label for="description">Descrizione:</label>
-        <textarea v-model="description" id="description"></textarea>
+          <label for="description">Descrizione:</label>
+          <textarea v-model="description" id="description"></textarea>
 
-        <button @click="scheduleOperation" class="btn btn-success">
-          Salva
-        </button>
-        <button @click="closeScheduleModal" class="btn btn-secondary">
-          Annulla
-        </button>
-      </div>
-    </div>
-    <!-- Verifica se l'utente è un paziente o un dottore -->
-    <div v-if="isPatient">
-      <div class="calendar">
-        <div class="calendar-header">
-          <button @click="changeMonth(-1)">&#8249;</button>
-          <span>{{ monthNames[month] }} {{ year }}</span>
-          <button @click="changeMonth(1)">&#8250;</button>
-        </div>
-
-        <div class="calendar-grid">
-          <div
-            v-for="day in daysInMonth"
-            :key="`${day.year}-${day.month}-${day.date}`"
-            :class="['calendar-day', { disabled: day.isDisabled }]"
-            @click="!day.isDisabled && showDayDetails(day)"
-          >
-            <!-- Data -->
-            <div class="date">{{ day.date }}</div>
-
-            <!-- Icone Operazioni -->
-            <div class="icon-row operations">
-              <img
-                v-for="n in day.operations.length"
-                :key="'operation-' + n + '-' + day.date"
-                :src="operationIcon"
-                alt="Operazione"
-                class="icon"
-              />
-            </div>
-
-            <div class="icon-row radiographs">
-              <img
-                v-for="n in day.radiographs.length"
-                :key="'radiograph-' + n + '-' + day.date"
-                :src="radiographIcon"
-                alt="Radiografia"
-                class="icon"
-              />
-            </div>
-          </div>
+          <button @click="scheduleOperation" class="btn btn-success">
+            Salva
+          </button>
+          <button @click="closeScheduleModal" class="btn btn-secondary">
+            Annulla
+          </button>
         </div>
       </div>
-
-      <!-- Dettagli del giorno selezionato con animazione -->
-      <transition
-        name="fade"
-        @before-enter="beforeEnter"
-        @enter="enter"
-        @leave="leave"
-      >
-        <div v-if="selectedDay" class="day-details">
-          <h2>
-            Dettagli del Giorno: {{ selectedDay.date }} {{ monthNames[month] }}
-            {{ year }}
-          </h2>
-          <p>
-            <strong>Paziente:</strong> {{ selectedPatient.name }}
-            {{ selectedPatient.family_name }}
-          </p>
-          <div v-if="selectedDay.radiographs.length > 0">
-            <h3>Radiografie caricate:</h3>
-            <ul>
-              <li
-                v-for="radiograph in selectedDay.radiographs"
-                :key="radiograph.name"
-              >
-                <strong>{{ radiograph.name }}</strong
-                ><br />
-                <span>{{ radiograph.date }}</span
-                ><br />
-                <button @click="enlargeRadiograph(radiograph.url)">
-                  Visualizza Immagine
-                </button>
-              </li>
-            </ul>
-          </div>
-          <div v-else>
-            <p>Nessuna radiografia caricata per questa data.</p>
-          </div>
-        </div>
-      </transition>
-    </div>
-
-    <!-- Se l'utente è un dottore, visualizza tutte le radiografie dei pazienti -->
-    <div v-else>
-      <div v-if="isDoctor">
+      <!-- Verifica se l'utente è un paziente o un dottore -->
+      <div v-if="isPatient">
         <div class="calendar">
           <div class="calendar-header">
             <button @click="changeMonth(-1)">&#8249;</button>
@@ -145,7 +62,16 @@
             <div
               v-for="day in daysInMonth"
               :key="`${day.year}-${day.month}-${day.date}`"
-              :class="['calendar-day', { disabled: day.isDisabled }]"
+              :class="[
+                'calendar-day',
+                {
+                  disabled: day.isDisabled,
+                  today:
+                    `${day.year}-${String(day.month).padStart(2, '0')}-${String(
+                      day.date
+                    ).padStart(2, '0')}` === minDate,
+                },
+              ]"
               @click="!day.isDisabled && showDayDetails(day)"
             >
               <!-- Data -->
@@ -174,34 +100,131 @@
             </div>
           </div>
         </div>
+
+        <!-- Dettagli del giorno selezionato con animazione -->
+        <transition
+          name="fade"
+          @before-enter="beforeEnter"
+          @enter="enter"
+          @leave="leave"
+        >
+          <div v-if="selectedDay" class="day-details">
+            <h2>
+              Dettagli del Giorno: {{ selectedDay.date }}
+              {{ monthNames[month] }}
+              {{ year }}
+            </h2>
+            <p>
+              <strong>Paziente:</strong> {{ selectedPatient.name }}
+              {{ selectedPatient.family_name }}
+            </p>
+            <div v-if="selectedDay.radiographs.length > 0">
+              <h3>Radiografie caricate:</h3>
+              <ul>
+                <li
+                  v-for="radiograph in selectedDay.radiographs"
+                  :key="radiograph.name"
+                >
+                  <strong>{{ radiograph.name }}</strong
+                  ><br />
+                  <span>{{ radiograph.date }}</span
+                  ><br />
+                  <button @click="enlargeRadiograph(radiograph.url)">
+                    Visualizza Immagine
+                  </button>
+                </li>
+              </ul>
+            </div>
+            <div v-else>
+              <p>Nessuna radiografia caricata per questa data.</p>
+            </div>
+          </div>
+        </transition>
       </div>
 
-      <!-- Dettagli del giorno selezionato con animazione -->
-      <transition
-        name="fade"
-        @before-enter="beforeEnter"
-        @enter="enter"
-        @leave="leave"
-      >
-        <div v-if="selectedDay" class="day-details">
-          <h2>
-            Dettagli del Giorno: {{ selectedDay.date }} {{ monthNames[month] }}
-            {{ year }}
-          </h2>
-          <div
-            v-for="radiograph in selectedDay.radiographs"
-            :key="radiograph.name"
-          >
-            <p>
-              <strong>{{ radiograph.patientName }}:</strong>
-              {{ radiograph.name }}
-            </p>
-            <button @click="enlargeRadiograph(radiograph.url)">
-              Visualizza Immagine
-            </button>
+      <!-- Se l'utente è un dottore, visualizza tutte le radiografie dei pazienti -->
+      <div v-else>
+        <div v-if="isDoctor">
+          <div class="calendar">
+            <div class="calendar-header">
+              <button @click="changeMonth(-1)">&#8249;</button>
+              <span>{{ monthNames[month] }} {{ year }}</span>
+              <button @click="changeMonth(1)">&#8250;</button>
+            </div>
+
+            <div class="calendar-grid">
+              <div
+                v-for="day in daysInMonth"
+                :key="`${day.year}-${day.month}-${day.date}`"
+                :class="[
+                  'calendar-day',
+                  {
+                    disabled: day.isDisabled,
+                    today:
+                      `${day.year}-${String(day.month).padStart(
+                        2,
+                        '0'
+                      )}-${String(day.date).padStart(2, '0')}` === minDate,
+                  },
+                ]"
+                @click="!day.isDisabled && showDayDetails(day)"
+              >
+                <!-- Data -->
+                <div class="date">{{ day.date }}</div>
+
+                <!-- Icone Operazioni -->
+                <div class="icon-row operations">
+                  <img
+                    v-for="n in day.operations.length"
+                    :key="'operation-' + n + '-' + day.date"
+                    :src="operationIcon"
+                    alt="Operazione"
+                    class="icon"
+                  />
+                </div>
+
+                <div class="icon-row radiographs">
+                  <img
+                    v-for="n in day.radiographs.length"
+                    :key="'radiograph-' + n + '-' + day.date"
+                    :src="radiographIcon"
+                    alt="Radiografia"
+                    class="icon"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </transition>
+
+        <!-- Dettagli del giorno selezionato con animazione -->
+        <transition
+          name="fade"
+          @before-enter="beforeEnter"
+          @enter="enter"
+          @leave="leave"
+        >
+          <div v-if="selectedDay" class="day-details">
+            <h2>
+              Dettagli del Giorno: {{ selectedDay.date }}
+              {{ monthNames[month] }}
+              {{ year }}
+            </h2>
+            <div
+              v-for="radiograph in selectedDay.radiographs"
+              :key="radiograph.name"
+            >
+              <p>
+                <strong>{{ radiograph.patientName }}:</strong>
+                {{ radiograph.name }}
+              </p>
+              <button @click="enlargeRadiograph(radiograph.url)">
+                Visualizza Immagine
+              </button>
+            </div>
+          </div>
+        </transition>
+      </div>
     </div>
   </div>
 </template>
@@ -247,6 +270,8 @@ export default {
     };
   },
   mounted() {
+    console.log("minDate:", this.minDate);
+
     this.checkUserRole();
     if (this.isDoctor) {
       this.loadPatients(); // Carica i pazienti del dottore
@@ -352,7 +377,7 @@ export default {
         days.push({
           date: i,
           year: date.getFullYear(), // Aggiungi l'anno
-          month: date.getMonth(), // Aggiungi il mese (0 = Gennaio, 11 = Dicembre)
+          month: date.getMonth() + 1, // Aggiungi il mese (0 = Gennaio, 11 = Dicembre)
           radiographs: radiographsOnDay,
           operations: operationsOnDay,
           isDisabled: false, // Per i giorni del mese corrente
@@ -369,7 +394,7 @@ export default {
         days.push({
           date: i,
           year: date.getFullYear(), // Aggiungi l'anno
-          month: date.getMonth(), // Aggiungi il mese (0 = Gennaio, 11 = Dicembre)
+          month: date.getMonth() + 1, // Aggiungi il mese (0 = Gennaio, 11 = Dicembre)
           radiographs: radiographsOnDay,
           operations: operationsOnDay,
           isDisabled: true, // Per i giorni del mese successivo
@@ -641,11 +666,21 @@ export default {
 </script>
 
 <style scoped>
-/* Stili generali per il calendario */
-.calendar-container {
-  width: 100%;
-  padding: 20px;
+.calendar-calendar {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  position: relative;
+}
+
+.calendar-container {
+  max-width: 100%;
+  padding: 40px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
 }
 
 .calendar-header {
@@ -667,7 +702,7 @@ export default {
   position: relative;
   padding: 10px;
   border: 1px solid #ddd;
-  height: 100px;
+  height: 80px;
   overflow: hidden;
   cursor: pointer;
 }
@@ -683,6 +718,11 @@ export default {
 /* Puoi anche aggiungere un bordo per evidenziare meglio i giorni */
 .calendar-day.disabled:hover {
   border: 1px dashed #ddd; /* Aggiunge un bordo hover sui giorni disabilitati */
+}
+
+.calendar-day.today {
+  border: 2px solid #fc2424db; /* Bordo rosso per il giorno corrente */
+  border-radius: 5px; /* Bordo arrotondato (opzionale) */
 }
 
 .date {
@@ -704,6 +744,7 @@ export default {
 }
 
 .operations {
+  min-height: 10px;
   margin-bottom: 5px; /* Aggiunge margine tra operazioni e radiografie */
 }
 
