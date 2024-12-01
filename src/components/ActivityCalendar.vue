@@ -702,7 +702,7 @@ export default {
   position: relative;
   padding: 10px;
   border: 1px solid #ddd;
-  height: 80px;
+  height: 70px;
   overflow: hidden;
   cursor: pointer;
 }
@@ -726,7 +726,7 @@ export default {
 }
 
 .date {
-  font-size: 1.2em;
+  font-size: 1em;
 }
 
 .activity-icons {
@@ -744,13 +744,13 @@ export default {
 }
 
 .operations {
-  min-height: 10px;
+  min-height: 7px;
   margin-bottom: 5px; /* Aggiunge margine tra operazioni e radiografie */
 }
 
 .icon {
-  width: 10px;
-  height: 10px;
+  width: 7px;
+  height: 7px;
 }
 
 button {
