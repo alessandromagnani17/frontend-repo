@@ -1,7 +1,7 @@
 <template>
   <div class="welcome">
     <div class="container mt-5">
-      <h1>Visualizza radiografie</h1>
+      <h1 class="view-radiographs">Visualizza radiografie</h1>
 
       <!-- Messaggio di caricamento -->
       <div v-if="isLoading" class="alert alert-info small-text">
@@ -249,11 +249,12 @@ export default {
   flex-grow: 1;
 }
 
-h1 {
-  font-size: 24px;
-  margin-bottom: 20px;
+h1.view-radiographs {
+  font-size: 18px; /* Stessa dimensione del testo di "Elenco Pazienti" */
+  font-family: inherit; /* Assicura che usi lo stesso font ereditato dal contesto */
+  font-weight: normal; /* Mantenere il peso del font uguale */
+  margin-bottom: 20px; /* Margine inferiore uguale per allineamento */
 }
-
 .img-preview {
   max-width: 100%;
   max-height: 50vh;
