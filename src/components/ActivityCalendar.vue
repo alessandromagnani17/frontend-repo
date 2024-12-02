@@ -3,123 +3,88 @@
     <div class="calendar-container">
       <h1 class="calendar">Calendario Attività</h1>
 
-      <div v-if="isPatient">
-        <!-- Calendario per paziente -->
-        <Calendar
+      <!-- Calendario per utente (paziente o dottore) -->
+      <Calendar
+        :month="month"
+        :year="year"
+        :daysInMonth="daysInMonth"
+        :monthNames="monthNames"
+        :dayNames="dayNames"
+        :minDate="minDate"
+        :operationIcon="operationIcon"
+        :radiographIcon="radiographIcon"
+        :showDayDetails="showDayDetails"
+        :changeMonth="changeMonth"
+        :selectedDay="selectedDay"
+        @update-selected-day="updateSelectedDay"
+      />
+
+      <!-- Dettagli del giorno selezionato -->
+      <transition
+        name="fade"
+        @before-enter="beforeEnter"
+        @enter="enter"
+        @leave="leave"
+      >
+        <DayDetails
+          v-if="selectedDay"
+          :selectedDay="selectedDay"
+          :monthNames="monthNames"
           :month="month"
           :year="year"
-          :daysInMonth="daysInMonth"
-          :monthNames="monthNames"
-          :dayNames="dayNames"
-          :minDate="minDate"
-          :operationIcon="operationIcon"
-          :radiographIcon="radiographIcon"
-          :showDayDetails="showDayDetails"
-          :changeMonth="changeMonth"
-          :selectedDay="selectedDay"
-          @update-selected-day="updateSelectedDay"
+          :formatDate="formatDate"
+          :formatTime="formatTime"
+          :enlargeRadiograph="enlargeRadiograph"
         />
-        <transition
-          name="fade"
-          @before-enter="beforeEnter"
-          @enter="enter"
-          @leave="leave"
-        >
-          <DayDetails
-            v-if="selectedDay"
-            :selectedDay="selectedDay"
-            :monthNames="monthNames"
-            :month="month"
-            :year="year"
-            :formatDate="formatDate"
-            :formatTime="formatTime"
-            :enlargeRadiograph="enlargeRadiograph"
-          />
-        </transition>
-      </div>
+      </transition>
 
-      <div v-else>
-        <!-- Calendario per dottore -->
-        <div v-if="isDoctor">
-          <!-- Calendario per il dottore -->
-          <Calendar
-            :month="month"
-            :year="year"
-            :daysInMonth="daysInMonth"
-            :monthNames="monthNames"
-            :dayNames="dayNames"
-            :minDate="minDate"
-            :operationIcon="operationIcon"
-            :radiographIcon="radiographIcon"
-            :showDayDetails="showDayDetails"
-            :changeMonth="changeMonth"
-            :selectedDay="selectedDay"
-            @update-selected-day="updateSelectedDay"
-          />
-          <transition
-            name="fade"
-            @before-enter="beforeEnter"
-            @enter="enter"
-            @leave="leave"
-          >
-            <DayDetails
-              v-if="selectedDay"
-              :selectedDay="selectedDay"
-              :monthNames="monthNames"
-              :month="month"
-              :year="year"
-              :formatDate="formatDate"
-              :formatTime="formatTime"
-              :enlargeRadiograph="enlargeRadiograph"
-            />
-          </transition>
+      <!-- Modale per pianificare l'operazione (solo per dottore) -->
+      <div v-if="isDoctor">
+        <button @click="openScheduleModal" class="btn btn-primary custom-btn">
+          Pianifica Operazione
+        </button>
 
-          <button @click="openScheduleModal" class="btn btn-primary custom-btn">
-            Pianifica Operazione
-          </button>
-
-          <!-- Modale per inserire i dettagli dell'operazione -->
-          <div v-if="showModal" class="modal">
-            <div class="modal-content">
-              <h2>Pianifica una nuova operazione</h2>
-              <label for="patientSelect">Seleziona un paziente:</label>
-              <select
-                v-model="selectedPatientId"
-                id="patientSelect"
-                class="form-select"
+        <!-- Modale per inserire i dettagli dell'operazione -->
+        <div v-if="showModal" class="modal">
+          <div class="modal-content">
+            <h2>Pianifica una nuova operazione</h2>
+            <label for="patientSelect">Seleziona un paziente:</label>
+            <select
+              v-model="selectedPatientId"
+              id="patientSelect"
+              class="form-select"
+            >
+              <option value="" disabled>Seleziona un paziente</option>
+              <option
+                v-for="patient in patients"
+                :key="patient.userId"
+                :value="patient.userId"
               >
-                <option value="" disabled>Seleziona un paziente</option>
-                <option
-                  v-for="patient in patients"
-                  :key="patient.userId"
-                  :value="patient.userId"
-                >
-                  {{ patient.name }} {{ patient.family_name }}
-                </option>
-              </select>
+                {{ patient.name }} {{ patient.family_name }}
+              </option>
+            </select>
 
-              <label for="operationDate">Data dell'operazione:</label>
-              <input
-                type="date"
-                v-model="operationDate"
-                id="operationDate"
-                :min="minDate"
-              />
+            <label for="operationDate">Data dell'operazione:</label>
+            <input
+              type="date"
+              v-model="operationDate"
+              id="operationDate"
+              :min="minDate"
+            />
 
-              <label for="operationTime">Ora dell'operazione:</label>
-              <input type="time" v-model="operationTime" id="operationTime" />
+            <label for="operationTime">Ora dell'operazione:</label>
+            <input type="time" v-model="operationTime" id="operationTime" />
 
-              <label for="description">Descrizione:</label>
-              <textarea v-model="description" id="description"></textarea>
+            <label for="description">Descrizione:</label>
+            <textarea v-model="description" id="description"></textarea>
 
-              <div>
-                <button @click="scheduleOperation" class="btn btn-success">
-                  Salva
-                </button>
-                <button @click="closeScheduleModal" class="btn btn-secondary">
-                  Annulla
-                </button>
-              </div>
+            <div>
+              <button @click="scheduleOperation" class="btn btn-success">
+                Salva
+              </button>
+              <button @click="closeScheduleModal" class="btn btn-secondary">
+                Annulla
+              </button>
             </div>
           </div>
         </div>
