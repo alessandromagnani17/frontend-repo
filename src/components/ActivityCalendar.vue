@@ -2,53 +2,7 @@
   <div class="activity-calendar">
     <div class="calendar-container">
       <h1 class="calendar">Calendario Attività</h1>
-      <button @click="openScheduleModal" class="btn btn-primary">
-        Pianifica Operazione
-      </button>
 
-      <!-- Modale per inserire i dettagli dell'operazione -->
-      <div v-if="showModal" class="modal">
-        <div class="modal-content">
-          <h2>Pianifica una nuova operazione</h2>
-          <!-- Menu a tendina per selezionare un paziente -->
-          <label for="patientSelect">Seleziona un paziente:</label>
-          <select
-            v-model="selectedPatientId"
-            id="patientSelect"
-            class="form-select"
-          >
-            <option value="" disabled>Seleziona un paziente</option>
-            <option
-              v-for="patient in patients"
-              :key="patient.userId"
-              :value="patient.userId"
-            >
-              {{ patient.name }} {{ patient.family_name }}
-            </option>
-          </select>
-
-          <label for="operationDate">Data dell'operazione:</label>
-          <input
-            type="date"
-            v-model="operationDate"
-            id="operationDate"
-            :min="minDate"
-          />
-
-          <label for="operationTime">Ora dell'operazione:</label>
-          <input type="time" v-model="operationTime" id="operationTime" />
-
-          <label for="description">Descrizione:</label>
-          <textarea v-model="description" id="description"></textarea>
-
-          <button @click="scheduleOperation" class="btn btn-success">
-            Salva
-          </button>
-          <button @click="closeScheduleModal" class="btn btn-secondary">
-            Annulla
-          </button>
-        </div>
-      </div>
       <!-- Verifica se l'utente è un paziente o un dottore -->
       <div v-if="isPatient">
         <div class="calendar">
@@ -56,6 +10,13 @@
             <button @click="changeMonth(-1)">&#8249;</button>
             <span>{{ monthNames[month] }} {{ year }}</span>
             <button @click="changeMonth(1)">&#8250;</button>
+          </div>
+
+          <!-- Riga per i nomi dei giorni -->
+          <div class="calendar-day-names">
+            <div v-for="dayName in dayNames" :key="dayName" class="day-name">
+              {{ dayName }}
+            </div>
           </div>
 
           <div class="calendar-grid">
@@ -77,7 +38,6 @@
               <!-- Data -->
               <div class="date">{{ day.date }}</div>
 
-              <!-- Icone Operazioni -->
               <div class="icon-row operations">
                 <img
                   v-for="n in day.operations.length"
@@ -114,10 +74,25 @@
               {{ monthNames[month] }}
               {{ year }}
             </h2>
-            <p>
-              <strong>Paziente:</strong> {{ selectedPatient.name }}
-              {{ selectedPatient.family_name }}
-            </p>
+            <div v-if="selectedDay.operations.length > 0">
+              <h3>Operazioni pianificate:</h3>
+              <ul>
+                <li
+                  v-for="operation in selectedDay.operations"
+                  :key="operation.id"
+                >
+                  <strong>{{ operation.type }}</strong
+                  ><br />
+                  <span>{{ operation.date }}</span
+                  ><br />
+                  <span>{{ operation.description }}</span
+                  ><br />
+                </li>
+              </ul>
+            </div>
+            <div v-else>
+              <p>Nessuna operazione pianificata per questa data.</p>
+            </div>
             <div v-if="selectedDay.radiographs.length > 0">
               <h3>Radiografie caricate:</h3>
               <ul>
@@ -145,11 +120,65 @@
       <!-- Se l'utente è un dottore, visualizza tutte le radiografie dei pazienti -->
       <div v-else>
         <div v-if="isDoctor">
+          <button @click="openScheduleModal" class="btn btn-primary">
+            Pianifica Operazione
+          </button>
+
+          <!-- Modale per inserire i dettagli dell'operazione -->
+          <div v-if="showModal" class="modal">
+            <div class="modal-content">
+              <h2>Pianifica una nuova operazione</h2>
+              <!-- Menu a tendina per selezionare un paziente -->
+              <label for="patientSelect">Seleziona un paziente:</label>
+              <select
+                v-model="selectedPatientId"
+                id="patientSelect"
+                class="form-select"
+              >
+                <option value="" disabled>Seleziona un paziente</option>
+                <option
+                  v-for="patient in patients"
+                  :key="patient.userId"
+                  :value="patient.userId"
+                >
+                  {{ patient.name }} {{ patient.family_name }}
+                </option>
+              </select>
+
+              <label for="operationDate">Data dell'operazione:</label>
+              <input
+                type="date"
+                v-model="operationDate"
+                id="operationDate"
+                :min="minDate"
+              />
+
+              <label for="operationTime">Ora dell'operazione:</label>
+              <input type="time" v-model="operationTime" id="operationTime" />
+
+              <label for="description">Descrizione:</label>
+              <textarea v-model="description" id="description"></textarea>
+
+              <button @click="scheduleOperation" class="btn btn-success">
+                Salva
+              </button>
+              <button @click="closeScheduleModal" class="btn btn-secondary">
+                Annulla
+              </button>
+            </div>
+          </div>
           <div class="calendar">
             <div class="calendar-header">
               <button @click="changeMonth(-1)">&#8249;</button>
               <span>{{ monthNames[month] }} {{ year }}</span>
               <button @click="changeMonth(1)">&#8250;</button>
+            </div>
+
+            <!-- Riga per i nomi dei giorni -->
+            <div class="calendar-day-names">
+              <div v-for="dayName in dayNames" :key="dayName" class="day-name">
+                {{ dayName }}
+              </div>
             </div>
 
             <div class="calendar-grid">
@@ -210,17 +239,45 @@
               {{ monthNames[month] }}
               {{ year }}
             </h2>
-            <div
-              v-for="radiograph in selectedDay.radiographs"
-              :key="radiograph.name"
-            >
-              <p>
-                <strong>{{ radiograph.patientName }}:</strong>
-                {{ radiograph.name }}
-              </p>
-              <button @click="enlargeRadiograph(radiograph.url)">
-                Visualizza Immagine
-              </button>
+            <!-- Operazioni -->
+            <div v-if="selectedDay.operations.length > 0">
+              <h1 class="calendar">Operazioni pianificate:</h1>
+              <div
+                v-for="operation in selectedDay.operations"
+                :key="operation.id"
+              >
+                <p>
+                  <strong>{{ operation.patientName }}:</strong>
+                  {{ operation.name }}
+                </p>
+                <span>{{ operation.operationDate }}</span
+                ><br />
+                <span>{{ operation.description }}</span
+                ><br />
+              </div>
+            </div>
+            <div v-else>
+              <p>Nessuna operazione pianificata per questa data.</p>
+            </div>
+            <!-- Radiografie -->
+            <div v-if="selectedDay.radiographs.length > 0">
+              <h1 class="calendar">Radiografie caricate:</h1>
+
+              <div
+                v-for="radiograph in selectedDay.radiographs"
+                :key="radiograph.name"
+              >
+                <p>
+                  <strong>{{ radiograph.patientName }}:</strong>
+                  {{ radiograph.name }}
+                </p>
+                <button @click="enlargeRadiograph(radiograph.url)">
+                  Visualizza Immagine
+                </button>
+              </div>
+            </div>
+            <div v-else>
+              <p>Nessuna radiografia caricata in questa data.</p>
             </div>
           </div>
         </transition>
@@ -255,6 +312,7 @@ export default {
         "Novembre",
         "Dicembre",
       ],
+      dayNames: ["LUN", "MAR", "MER", "GIO", "VEN", "SAB", "DOM"],
       isPatient: false, // Indica se l'utente è un paziente
       isDoctor: false, // Indica se l'utente è un dottore
       selectedPatient: null, // Paziente selezionato (loggato)
@@ -270,16 +328,19 @@ export default {
     };
   },
   mounted() {
-    console.log("minDate:", this.minDate);
-
-    this.checkUserRole();
+    this.checkUserRole(); // Verifica il ruolo dell'utente
     if (this.isDoctor) {
       this.loadPatients(); // Carica i pazienti del dottore
     }
     if (this.isPatient) {
-      this.loadRadiographs(); // Carica le radiografie del paziente loggato
-      this.loadOperations();
-      this.refreshCalendar();
+      const userData = JSON.parse(localStorage.getItem("userData")); // Decodifica il JSON
+      if (userData && userData.userId) {
+        const userId = userData.userId; // Recupera lo userId
+        console.log("User ID recuperato:", userId);
+        this.loadPatientData(userId); // Carica operazioni e radiografie per il paziente
+      } else {
+        console.error("User ID non trovato in userData.");
+      }
     }
   },
   computed: {
@@ -298,6 +359,7 @@ export default {
       const radiographsPerDay = {};
       const operationsPerDay = {};
 
+      // Se l'utente è un medico
       if (this.isDoctor) {
         this.patients.forEach((patient) => {
           if (patient.radiographs) {
@@ -329,23 +391,35 @@ export default {
           }
         });
       } else {
-        this.radiographs.forEach((radiograph) => {
-          const radiographDate = new Date(radiograph.date).toDateString();
-          if (!radiographsPerDay[radiographDate]) {
-            radiographsPerDay[radiographDate] = [];
-          }
-          radiographsPerDay[radiographDate].push(radiograph);
-        });
+        const userData = JSON.parse(localStorage.getItem("userData")); // Decodifica il JSON
 
-        this.operations.forEach((operation) => {
-          const operationDate = this.parseISODate(operation.operationDate);
-          if (operationDate !== "Invalid Date") {
-            if (!operationsPerDay[operationDate]) {
-              operationsPerDay[operationDate] = [];
+        if (this.radiographs) {
+          this.radiographs.forEach((radiograph) => {
+            const radiographDate = new Date(radiograph.date).toDateString(); // Data della radiografia
+            if (!radiographsPerDay[radiographDate]) {
+              radiographsPerDay[radiographDate] = []; // Inizializza se non esiste
             }
-            operationsPerDay[operationDate].push(operation);
-          }
-        });
+            radiographsPerDay[radiographDate].push({
+              ...radiograph,
+              patientName: `${userData.name} ${userData.family_name}`,
+            }); // Aggiungi radiografia alla data
+          });
+        }
+
+        if (this.operations) {
+          this.operations.forEach((operation) => {
+            const operationDate = this.parseISODate(operation.operationDate); // Data dell'operazione
+            if (operationDate !== "Invalid Date") {
+              if (!operationsPerDay[operationDate]) {
+                operationsPerDay[operationDate] = []; // Inizializza se non esiste
+              }
+              operationsPerDay[operationDate].push({
+                ...operation,
+                patientName: `${userData.name} ${userData.family_name}`,
+              }); // Aggiungi operazione alla data
+            }
+          });
+        }
       }
 
       // Aggiungi i giorni del mese precedente
@@ -404,7 +478,18 @@ export default {
       return days;
     },
   },
+
   methods: {
+    checkUserRole() {
+      const userData = JSON.parse(localStorage.getItem("userData"));
+      if (userData && userData.role === "patient") {
+        this.isPatient = true;
+        console.log("Ruolo utente: Paziente");
+      } else if (userData && userData.role === "doctor") {
+        this.isDoctor = true;
+        console.log("Ruolo utente: Dottore");
+      }
+    },
     openScheduleModal() {
       this.showModal = true;
     },
@@ -530,22 +615,7 @@ export default {
       alert("Calendario aggiornato!"); // Messaggio temporaneo
     },
 
-    checkUserRole() {
-      const userData = JSON.parse(localStorage.getItem("userData"));
-      if (userData && userData.role === "patient") {
-        this.isPatient = true;
-        this.patientId = userData.userId; // Recupera l'ID del paziente
-        this.selectedPatient = userData; // Imposta il paziente selezionato
-
-        // Carica le operazioni del paziente loggato
-        this.loadPatientOperations();
-      } else if (userData && userData.role === "doctor") {
-        this.isDoctor = true;
-        console.log("Ruolo utente: Dottore");
-      }
-    },
-
-    // Modifica per caricare le radiografie dei pazienti
+    // Modifica per caricare i pazienti (solo per i medici)
     async loadPatients() {
       const doctorId = localStorage.getItem("doctorId");
       if (doctorId) {
@@ -554,10 +624,9 @@ export default {
           const data = await response.json();
           this.patients = data;
 
-          // Carica le radiografie per ogni paziente
+          // Carica le radiografie e le operazioni per ogni paziente
           this.patients.forEach((patient) => {
-            this.loadRadiographs(patient.userId); // Carica le radiografie per ogni paziente
-            this.loadOperations(patient.userId);
+            this.loadPatientData(patient.userId); // Carica i dati per ogni paziente
           });
         } catch (error) {
           console.error("Errore nel caricamento dei pazienti:", error);
@@ -565,48 +634,60 @@ export default {
       }
     },
 
-    async loadOperations(patientId) {
+    // Funzione generica per caricare le operazioni e le radiografie
+    async loadPatientData(patientId) {
       try {
-        const response = await fetch(`/api/patients/${patientId}/operations`);
-        if (response.ok) {
-          const data = await response.json();
-
-          // Log delle operazioni trovate
-          console.log(
-            `Operazioni trovate per il paziente con ID ${patientId}:`,
-            data
-          );
-
-          // Trova il paziente e aggiungi le operazioni al suo record
-          const patient = this.patients.find((p) => p.userId === patientId);
-          if (patient) {
-            patient.operations = data; // Aggiungi le operazioni al paziente
-          }
+        console.log("PATIENTIDNJNDEJINCJDJ: ", patientId);
+        // Carica le operazioni
+        const operationsResponse = await fetch(
+          `/api/patients/${patientId}/operations`
+        );
+        if (operationsResponse.ok) {
+          const operationsData = await operationsResponse.json();
+          console.log("RADIOGRNJCNEJCD: ", operationsData);
+          this.handleLoadedData("operations", patientId, operationsData);
         } else {
           console.error("Errore nel recupero delle operazioni");
+        }
+
+        // Carica le radiografie
+        const radiographsResponse = await fetch(
+          `/api/patients/${patientId}/radiographs`
+        );
+        if (radiographsResponse.ok) {
+          const radiographsData = await radiographsResponse.json();
+          this.handleLoadedData("radiographs", patientId, radiographsData);
+        } else {
+          console.error("Errore nel recupero delle radiografie");
         }
       } catch (error) {
         console.error("Errore di connessione al server:", error);
       }
     },
 
-    // Modifica per caricare le radiografie specifiche di un paziente
-    async loadRadiographs(patientId) {
-      try {
-        const response = await fetch(`/api/patients/${patientId}/radiographs`);
-        if (response.ok) {
-          const data = await response.json();
-
-          // Trova il paziente e aggiungi le radiografie al suo record
-          const patient = this.patients.find((p) => p.userId === patientId);
-          if (patient) {
-            patient.radiographs = data; // Aggiungi le radiografie al paziente
-          }
-        } else {
-          console.error("Errore nel recupero delle radiografie");
+    // Funzione per gestire i dati caricati (operazioni o radiografie)
+    handleLoadedData(type, patientId, data) {
+      // Se l'utente è un medico, aggiorna la lista dei pazienti
+      if (this.isDoctor) {
+        const patient = this.patients.find((p) => p.userId === patientId);
+        if (patient) {
+          patient[type] = data; // Aggiungi le operazioni o radiografie al paziente
+          console.log(
+            `${
+              type.charAt(0).toUpperCase() + type.slice(1)
+            } aggiunti al paziente:`,
+            patient[type]
+          );
         }
-      } catch (error) {
-        console.error("Errore di connessione al server:", error);
+      } else {
+        // Se l'utente è un paziente, aggiorna direttamente il proprio profilo
+        this[type] = data; // Aggiungi le operazioni o radiografie al profilo del paziente
+        console.log(
+          `${
+            type.charAt(0).toUpperCase() + type.slice(1)
+          } aggiunti al profilo del paziente:`,
+          this[type]
+        );
       }
     },
 
@@ -732,6 +813,22 @@ h1.calendar {
   border-radius: 5px; /* Bordo arrotondato (opzionale) */
 }
 
+.calendar-day-names {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background-color: #f0f0f0;
+  padding: 10px 0;
+  font-weight: bold;
+  color: #555;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.day-name {
+  text-transform: uppercase;
+  font-size: 0.9em;
+}
+
 .date {
   font-size: 1em;
 }
@@ -773,7 +870,7 @@ button:hover {
 
 /* Animazione della transizione */
 .day-details {
-  margin-top: 20px;
+  margin-top: 50px;
   text-align: left;
   transition: opacity 0.5s ease;
 }
