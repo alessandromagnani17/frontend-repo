@@ -25,9 +25,10 @@
               `${day.year}-${String(day.month).padStart(2, '0')}-${String(
                 day.date
               ).padStart(2, '0')}` === minDate,
+            selected: isSelectedDay(day), // Aggiungi la classe 'selected' per il giorno selezionato
           },
         ]"
-        @click="!day.isDisabled && showDayDetails(day)"
+        @click="!day.isDisabled && selectDay(day)"
       >
         <!-- Data -->
         <div class="date">{{ day.date }}</div>
@@ -70,6 +71,27 @@ export default {
     radiographIcon: String,
     showDayDetails: Function,
     changeMonth: Function,
+    selectedDay: Object,
+  },
+  methods: {
+    selectDay(day) {
+      // Aggiungi una proprietà 'formattedDate' alla data
+      const formattedDate = `${day.year}-${String(day.month).padStart(
+        2,
+        "0"
+      )}-${String(day.date).padStart(2, "0")}`;
+      this.$emit("update-selected-day", { ...day, formattedDate });
+    },
+    isSelectedDay(day) {
+      // Confronta la data formattata
+      return (
+        this.selectedDay &&
+        this.selectedDay.formattedDate ===
+          `${day.year}-${String(day.month).padStart(2, "0")}-${String(
+            day.date
+          ).padStart(2, "0")}`
+      );
+    },
   },
 };
 </script>
@@ -131,9 +153,22 @@ export default {
   background-color: #f9f9f9;
 }
 
+/* Giorno di oggi - colore di sfondo rosso chiaro */
 .calendar-day.today {
-  border: 2px solid #fc2424db;
+  background-color: #fdf1f1; /* Rosso chiaro */
+  border: 2px solid #fe9797db; /* Bordo rosso (già presente) */
   border-radius: 5px;
+}
+
+/* Giorno selezionato - bordo blu (#007bff) */
+.calendar-day.selected {
+  border: 2px solid #007bff; /* Bordo blu */
+}
+
+/* Modifica la visibilità del bordo di oggi per avere un'idea chiara del giorno corrente */
+.calendar-day.today.selected {
+  background-color: #ffebeb; /* Rosso chiaro */
+  border: 2px solid #007bff; /* Bordo blu per il giorno selezionato */
 }
 
 .calendar-day-names {
