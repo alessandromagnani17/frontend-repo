@@ -16,6 +16,8 @@
           :radiographIcon="radiographIcon"
           :showDayDetails="showDayDetails"
           :changeMonth="changeMonth"
+          :selectedDay="selectedDay"
+          @update-selected-day="updateSelectedDay"
         />
         <transition
           name="fade"
@@ -51,6 +53,8 @@
             :radiographIcon="radiographIcon"
             :showDayDetails="showDayDetails"
             :changeMonth="changeMonth"
+            :selectedDay="selectedDay"
+            @update-selected-day="updateSelectedDay"
           />
           <transition
             name="fade"
@@ -342,6 +346,9 @@ export default {
       this.showModal = false;
       this.operationDate = "";
       this.description = "";
+    },
+    updateSelectedDay(day) {
+      this.selectedDay = day;
     },
     async scheduleOperation() {
       try {
