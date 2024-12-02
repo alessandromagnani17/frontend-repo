@@ -39,54 +39,6 @@
       <div v-else>
         <!-- Calendario per dottore -->
         <div v-if="isDoctor">
-          <button @click="openScheduleModal" class="btn btn-primary">
-            Pianifica Operazione
-          </button>
-
-          <!-- Modale per inserire i dettagli dell'operazione -->
-          <div v-if="showModal" class="modal">
-            <div class="modal-content">
-              <h2>Pianifica una nuova operazione</h2>
-              <!-- Menu a tendina per selezionare un paziente -->
-              <label for="patientSelect">Seleziona un paziente:</label>
-              <select
-                v-model="selectedPatientId"
-                id="patientSelect"
-                class="form-select"
-              >
-                <option value="" disabled>Seleziona un paziente</option>
-                <option
-                  v-for="patient in patients"
-                  :key="patient.userId"
-                  :value="patient.userId"
-                >
-                  {{ patient.name }} {{ patient.family_name }}
-                </option>
-              </select>
-
-              <label for="operationDate">Data dell'operazione:</label>
-              <input
-                type="date"
-                v-model="operationDate"
-                id="operationDate"
-                :min="minDate"
-              />
-
-              <label for="operationTime">Ora dell'operazione:</label>
-              <input type="time" v-model="operationTime" id="operationTime" />
-
-              <label for="description">Descrizione:</label>
-              <textarea v-model="description" id="description"></textarea>
-
-              <button @click="scheduleOperation" class="btn btn-success">
-                Salva
-              </button>
-              <button @click="closeScheduleModal" class="btn btn-secondary">
-                Annulla
-              </button>
-            </div>
-          </div>
-
           <!-- Calendario per il dottore -->
           <Calendar
             :month="month"
@@ -117,6 +69,55 @@
               :enlargeRadiograph="enlargeRadiograph"
             />
           </transition>
+
+          <button @click="openScheduleModal" class="btn btn-primary custom-btn">
+            Pianifica Operazione
+          </button>
+
+          <!-- Modale per inserire i dettagli dell'operazione -->
+          <div v-if="showModal" class="modal">
+            <div class="modal-content">
+              <h2>Pianifica una nuova operazione</h2>
+              <label for="patientSelect">Seleziona un paziente:</label>
+              <select
+                v-model="selectedPatientId"
+                id="patientSelect"
+                class="form-select"
+              >
+                <option value="" disabled>Seleziona un paziente</option>
+                <option
+                  v-for="patient in patients"
+                  :key="patient.userId"
+                  :value="patient.userId"
+                >
+                  {{ patient.name }} {{ patient.family_name }}
+                </option>
+              </select>
+
+              <label for="operationDate">Data dell'operazione:</label>
+              <input
+                type="date"
+                v-model="operationDate"
+                id="operationDate"
+                :min="minDate"
+              />
+
+              <label for="operationTime">Ora dell'operazione:</label>
+              <input type="time" v-model="operationTime" id="operationTime" />
+
+              <label for="description">Descrizione:</label>
+              <textarea v-model="description" id="description"></textarea>
+
+              <div>
+                <button @click="scheduleOperation" class="btn btn-success">
+                  Salva
+                </button>
+                <button @click="closeScheduleModal" class="btn btn-secondary">
+                  Annulla
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -625,27 +626,94 @@ h1.calendar {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 999;
 }
 
 .modal-content {
-  background: white;
+  background: #fff;
   padding: 20px;
   border-radius: 8px;
-  width: 400px;
-  text-align: center;
+  width: 500px; /* Aumentiamo la larghezza del modale */
+  text-align: left;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h2 {
+  font-size: 1.2em; /* Aumentiamo leggermente il font per il titolo */
+  margin-bottom: 15px;
+  color: #333;
+  font-weight: bold;
 }
 
 .modal-content label {
   display: block;
-  margin-bottom: 10px;
-  text-align: left;
+  margin-bottom: 5px;
+  color: #555;
+  font-weight: 600;
+  font-size: 0.85em; /* Ridotto per le etichette */
 }
 
+.modal-content select,
 .modal-content input,
 .modal-content textarea {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 20px;
+  padding: 4px 8px; /* Ridotto ulteriormente il padding dei campi */
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px; /* Border-radius più sottile */
+  font-size: 0.75em; /* Ridotto ulteriormente la dimensione del font */
+  box-sizing: border-box;
+  transition: border 0.3s ease;
+}
+
+.modal-content select:focus,
+.modal-content input:focus,
+.modal-content textarea:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.modal-content textarea {
+  resize: vertical;
+  height: 60px; /* Ancora più piccola la textarea */
+}
+
+.modal-content button {
+  padding: 6px 12px; /* Ridotto il padding dei pulsanti */
+  border-radius: 4px;
+  border: none;
+  font-size: 12px; /* Ridotto ulteriormente la dimensione dei pulsanti */
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  margin-right: 6px;
+}
+
+.modal-content .btn-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.modal-content .btn-success:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
+}
+
+.modal-content .btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.modal-content .btn-secondary:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+}
+
+.modal-content .btn {
+  min-width: 90px; /* Ridotto il minimo larghezza dei pulsanti */
+}
+
+.modal-content .btn:focus {
+  outline: none;
 }
 
 button {
@@ -658,6 +726,24 @@ button {
 
 button:hover {
   color: #007bff;
+}
+
+.custom-btn {
+  display: block; /* Imposta il pulsante come blocco per permettere il centramento */
+  margin: 20px auto; /* Centra il pulsante e aggiungi un margine superiore di 20px */
+  background-color: #007bff; /* Colore di sfondo */
+  color: white; /* Colore del testo */
+  border-radius: 5px; /* Raggio dei bordi per renderlo arrotondato */
+  padding: 6px 12px; /* Ridotto il padding per rendere il pulsante più piccolo */
+  text-align: center; /* Allinea il testo al centro */
+  font-size: 14px; /* Dimensione del font più piccola */
+  max-width: 200px; /* Limita la larghezza massima del pulsante */
+  width: 100%; /* Permette di ridimensionare il pulsante in base alla larghezza del contenitore */
+}
+
+.custom-btn:hover {
+  background-color: #0056b3; /* Colore di hover per effetto */
+  cursor: pointer; /* Cambia il cursore su hover */
 }
 
 .fade-enter-active,
