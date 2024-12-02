@@ -4,16 +4,6 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 const API_URL = "http://127.0.0.1:5000"; // URL backend locale
 //const API_URL = "http://34.122.99.160:5000";
 
-// Funzione per la registrazione
-export const registerUser2 = async (userData) => {
-  try {
-    const response = await axios.post(`${API_URL}/register`, userData);
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response ? error.response.data.error : error.message);
-  }
-};
-
 // Funzione per il login
 export const loginUser = async (loginData) => {
   try {
