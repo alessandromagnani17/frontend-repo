@@ -193,8 +193,11 @@
 </template>
 
 <script>
-import axios from "axios";
-import { getPatientsFromDoctor } from "@/services/api-service";
+import {
+  getPatientsFromDoctor,
+  predictImage,
+  uploadToDataset,
+} from "@/services/api-service";
 
 export default {
   data() {
@@ -270,33 +273,19 @@ export default {
       const userData = JSON.parse(localStorage.getItem("userData"));
       formData.append("userData", JSON.stringify(userData));
       formData.append("selectedPatientID", this.selectedPatient);
-      if (this.selectedSide) {
-        formData.append("selectedSide", "Right");
-      } else {
-        formData.append("selectedSide", "Left");
-      }
+      formData.append("selectedSide", this.selectedSide ? "Right" : "Left");
 
       try {
-        const response = await axios.post(
-          "http://127.0.0.1:5000/predict",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-
-        console.log("Response from server:", response.data);
-        this.predictedClass = response.data.predicted_class;
-        this.gradcamImage = response.data.gradcam_image;
+        const response = await predictImage(formData);
+        this.predictedClass = response.predicted_class;
+        this.gradcamImage = response.gradcam_image;
         this.showNewPredictionButton = true;
         this.showPredictButton = false;
         this.showUploadSection = false;
         this.showMainImagePreview = false;
         this.showKneeSide = false;
       } catch (error) {
-        console.error("Error predicting image:", error);
+        console.error("Errore durante la previsione:", error);
       }
     },
     onPatientChange() {
@@ -309,7 +298,7 @@ export default {
             surname: patient.family_name,
             userId: patient.userId,
           }
-        : { name: "", surname: "", userId: "" }; // Se non trovato, resetta a valori vuoti
+        : { name: "", surname: "", userId: "" };
 
       this.showPredictButton = true;
       this.showKneeSide = false;
@@ -336,18 +325,9 @@ export default {
         formData.append("patientID", this.selectedPatient);
         formData.append("side", this.selectedSide ? "Right" : "Left");
 
-        axios
-          .post("http://127.0.0.1:5000/upload-to-dataset", formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          })
-          .then(() => {
-            console.log("File caricato con successo nella cartella dataset.");
-          })
-          .catch((error) => {
-            console.error("Errore durante il caricamento del file:", error);
-          });
+        uploadToDataset(formData).catch((error) =>
+          console.error("Errore durante il caricamento del file:", error)
+        );
       }
 
       // Nascondi le stelline con l'animazione

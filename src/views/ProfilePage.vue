@@ -31,6 +31,8 @@
 </template>
 
 <script>
+import { getUserData, updateUserData } from "@/services/api-service";
+
 export default {
   name: "ProfilePage",
   data() {
@@ -56,7 +58,7 @@ export default {
     this.loadUserData();
   },
   methods: {
-    loadUserData() {
+    async loadUserData() {
       const userData = JSON.parse(localStorage.getItem("userData"));
       const userId = userData?.userId;
       if (!userId) {
@@ -64,22 +66,16 @@ export default {
         return;
       }
 
-      fetch(`http://127.0.0.1:5000/get_user/${userId}`)
-        .then((response) =>
-          response.ok
-            ? response.json()
-            : Promise.reject("Errore nel recupero dei dati utente")
-        )
-        .then((data) => {
-          this.userData = data;
-          this.resetEditableValues();
-        })
-        .catch((error) => {
-          console.error("Errore:", error);
-          alert(
-            "Si è verificato un errore durante il caricamento dei dati utente."
-          );
-        });
+      try {
+        const data = await getUserData(userId);
+        this.userData = data;
+        this.resetEditableValues();
+      } catch (error) {
+        console.error("Errore durante il caricamento dei dati utente:", error);
+        alert(
+          "Si è verificato un errore durante il caricamento dei dati utente."
+        );
+      }
     },
     resetEditableValues() {
       Object.keys(this.displayFields).forEach((key) => {
@@ -90,14 +86,20 @@ export default {
     startEditing(field) {
       this.editingField[field] = true;
     },
-    saveField(field) {
+    async saveField(field) {
       const newValue = this.editableValues[field];
       if (newValue !== this.userData[field]) {
-        this.updateUserData(field, newValue);
+        try {
+          await this.updateUserData(field, newValue);
+          alert("Informazione aggiornata con successo!");
+          this.loadUserData();
+        } catch (error) {
+          alert("Si è verificato un errore durante l'aggiornamento.");
+        }
       }
       this.editingField[field] = false;
     },
-    updateUserData(field, value) {
+    async updateUserData(field, value) {
       const userData = JSON.parse(localStorage.getItem("userData"));
       const userId = userData?.userId;
       if (!userId) {
@@ -105,20 +107,7 @@ export default {
         return;
       }
 
-      fetch("http://127.0.0.1:5000/update_user", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, [field]: value }),
-      })
-        .then((response) => {
-          if (!response.ok) throw new Error("Errore nel salvataggio dei dati");
-          alert("Informazione aggiornata con successo!");
-          this.loadUserData();
-        })
-        .catch((error) => {
-          console.error("Errore:", error);
-          alert("Si è verificato un errore durante l'aggiornamento.");
-        });
+      await updateUserData(userId, field, value);
     },
   },
 };

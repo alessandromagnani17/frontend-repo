@@ -352,8 +352,12 @@
 </template>
 
 <script>
-import axios from "axios";
 import { parse, format, isValid, isBefore, isAfter, subYears } from "date-fns";
+import {
+  fetchDoctors,
+  fetchPatients,
+  registerUser,
+} from "@/services/api-service";
 
 export default {
   data() {
@@ -407,7 +411,7 @@ export default {
     }
 
     // Aspetta che entrambe le funzioni siano completate
-    Promise.all([this.fetchDoctors(), this.fetchPatients()])
+    Promise.all([this.loadDoctors(), this.loadPatients()])
       .then(() => {
         this.checkEmail(); // Chiama checkEmail dopo aver recuperato i dati
       })
@@ -443,48 +447,23 @@ export default {
 
       this.$router.push("/welcome");
     },
-    fetchDoctors() {
-      console.log("Sono dentro fetch doctors frontend");
-      return new Promise((resolve, reject) => {
-        fetch("http://127.0.0.1:5000/api/doctors")
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Network response was not ok");
-            }
-            return response.json();
-          })
-          .then((data) => {
-            console.log("Dati dottori ricevuti:", data); // Aggiunto log
-            this.doctors = data; // Popola l'array con i dottori
-            resolve();
-          })
-          .catch((error) => {
-            console.error("Errore nel recupero dei dottori:", error);
-            reject(error);
-          });
-      });
+    async loadDoctors() {
+      console.log("Caricamento dei dottori...");
+      try {
+        this.doctors = await fetchDoctors();
+        console.log("Dottori caricati:", this.doctors);
+      } catch (error) {
+        console.error("Errore nel caricamento dei dottori:", error);
+      }
     },
-
-    fetchPatients() {
-      console.log("Sono dentro fetch patients frontend");
-      return new Promise((resolve, reject) => {
-        fetch("http://127.0.0.1:5000/api/patients")
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Network response was not ok");
-            }
-            return response.json();
-          })
-          .then((data) => {
-            console.log("Dati pazienti ricevuti:", data);
-            this.patients = data; // Popola l'array con i pazienti
-            resolve();
-          })
-          .catch((error) => {
-            console.error("Errore nel recupero dei pazienti:", error);
-            reject(error);
-          });
-      });
+    async loadPatients() {
+      console.log("Caricamento dei pazienti...");
+      try {
+        this.patients = await fetchPatients();
+        console.log("Pazienti caricati:", this.patients);
+      } catch (error) {
+        console.error("Errore nel caricamento dei pazienti:", error);
+      }
     },
     checkEmail() {
       console.log("Dottori:", this.doctors);
@@ -562,55 +541,21 @@ export default {
 
         try {
           const { email, password, ...userData } = this.form;
-          console.log("REGISTRAZIONE:", JSON.stringify(userData, null, 2));
 
-          if (this.isDoctorRole) {
-            const response = await axios.post(
-              "http://127.0.0.1:5000/register",
-              {
-                email: email,
-                password: password, // Invio della password al backend
-                nome: userData.nome,
-                cognome: userData.cognome,
-                gender: userData.gender,
-                data: userData.data,
-                address: userData.address,
-                cap_code: userData.cap_code,
-                tax_code: userData.tax_code,
-                telefono: userData.telefono,
-                username: userData.username,
-                role: userData.role,
-                doctorID: userData.doctorID,
-              }
-            );
+          const payload = {
+            email,
+            password,
+            ...userData,
+            doctorID: this.isDoctorRole
+              ? userData.doctorID
+              : this.form.doctorID,
+          };
 
-            console.log("Response dal backend:", response.data);
-          } else {
-            const response = await axios.post(
-              "http://127.0.0.1:5000/register",
-              {
-                email: email,
-                password: password, // Invio della password al backend
-                nome: userData.nome,
-                cognome: userData.cognome,
-                gender: userData.gender,
-                data: userData.data,
-                address: userData.address,
-                cap_code: userData.cap_code,
-                tax_code: userData.tax_code,
-                telefono: userData.telefono,
-                username: userData.username,
-                role: userData.role,
-                doctorID: this.form.doctorID,
-              }
-            );
+          const response = await registerUser(payload);
+          console.log("Response dal backend:", response);
 
-            console.log("Response dal backend:", response.data);
-          }
-
-          // Imposta il messaggio di successo
           this.loading = false;
-          this.currentStep = 4; // Passa al passo del messaggio di successo
+          this.currentStep = 4;
         } catch (error) {
           console.error("Errore nella registrazione:", error);
           if (error.response) {

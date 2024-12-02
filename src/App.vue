@@ -195,6 +195,7 @@ export default {
       this.userDataUid = userData?.uid || null;
       this.userDataName = userData?.name || null;
       this.userDataSurname = userData?.family_name || null;
+      this.dropdownOpen = false;
       //console.log("[DEBUG] updateAuthStatus - authToken:", this.authToken);
       //console.log("[DEBUG] role:", this.userRole);
     },
