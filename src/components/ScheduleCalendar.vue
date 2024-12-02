@@ -155,20 +155,21 @@ export default {
 
 /* Giorno di oggi - colore di sfondo rosso chiaro */
 .calendar-day.today {
-  background-color: #fdf1f1; /* Rosso chiaro */
+  background-color: #fbf3f3; /* Rosso chiaro */
   border: 2px solid #fe9797db; /* Bordo rosso (già presente) */
   border-radius: 5px;
 }
 
 /* Giorno selezionato - bordo blu (#007bff) */
 .calendar-day.selected {
-  border: 2px solid #007bff; /* Bordo blu */
+  border-radius: 5px;
+  border: 2px solid #7bbbffe7; /* Bordo blu */
 }
 
 /* Modifica la visibilità del bordo di oggi per avere un'idea chiara del giorno corrente */
 .calendar-day.today.selected {
   background-color: #ffebeb; /* Rosso chiaro */
-  border: 2px solid #007bff; /* Bordo blu per il giorno selezionato */
+  border: 2px solid #7bbbffe7; /* Bordo blu per il giorno selezionato */
 }
 
 .calendar-day-names {
