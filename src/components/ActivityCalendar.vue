@@ -74,44 +74,57 @@
               {{ monthNames[month] }}
               {{ year }}
             </h2>
-            <div v-if="selectedDay.operations.length > 0">
-              <h3>Operazioni pianificate:</h3>
-              <ul>
-                <li
-                  v-for="operation in selectedDay.operations"
-                  :key="operation.id"
-                >
-                  <strong>{{ operation.type }}</strong
-                  ><br />
-                  <span>{{ operation.date }}</span
-                  ><br />
-                  <span>{{ operation.description }}</span
-                  ><br />
-                </li>
-              </ul>
+
+            <!-- Verifica se ci sono operazioni o radiografie -->
+            <div
+              v-if="
+                selectedDay.operations.length > 0 ||
+                selectedDay.radiographs.length > 0
+              "
+            >
+              <!-- Se ci sono operazioni, mostriamo le operazioni pianificate -->
+              <div v-if="selectedDay.operations.length > 0">
+                <h3 class="small-text">Operazioni pianificate:</h3>
+                <ul>
+                  <li
+                    v-for="operation in selectedDay.operations"
+                    :key="operation.id"
+                  >
+                    <strong>{{ operation.type }}</strong
+                    ><br />
+                    <span>Data: {{ formatDate(operation.operationDate) }}</span
+                    ><br />
+                    <span>Ora: {{ formatTime(operation.operationDate) }}</span
+                    ><br />
+                    <span>Descrizione: {{ operation.description }}</span
+                    ><br />
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Se ci sono radiografie, mostriamo le radiografie caricate -->
+              <div v-if="selectedDay.radiographs.length > 0">
+                <h3 class="small-text">Radiografie caricate:</h3>
+                <ul>
+                  <li
+                    v-for="radiograph in selectedDay.radiographs"
+                    :key="radiograph.name"
+                  >
+                    <strong>{{ radiograph.name }}</strong
+                    ><br />
+                    <span>{{ radiograph.date }}</span
+                    ><br />
+                    <button @click="enlargeRadiograph(radiograph.url)">
+                      Visualizza Immagine
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
+
+            <!-- Se non ci sono né operazioni né radiografie -->
             <div v-else>
-              <p>Nessuna operazione pianificata per questa data.</p>
-            </div>
-            <div v-if="selectedDay.radiographs.length > 0">
-              <h3>Radiografie caricate:</h3>
-              <ul>
-                <li
-                  v-for="radiograph in selectedDay.radiographs"
-                  :key="radiograph.name"
-                >
-                  <strong>{{ radiograph.name }}</strong
-                  ><br />
-                  <span>{{ radiograph.date }}</span
-                  ><br />
-                  <button @click="enlargeRadiograph(radiograph.url)">
-                    Visualizza Immagine
-                  </button>
-                </li>
-              </ul>
-            </div>
-            <div v-else>
-              <p>Nessuna radiografia caricata per questa data.</p>
+              <p>Non ci sono attività pianificate per questa data.</p>
             </div>
           </div>
         </transition>
@@ -637,7 +650,6 @@ export default {
     // Funzione generica per caricare le operazioni e le radiografie
     async loadPatientData(patientId) {
       try {
-        console.log("PATIENTIDNJNDEJINCJDJ: ", patientId);
         // Carica le operazioni
         const operationsResponse = await fetch(
           `/api/patients/${patientId}/operations`
@@ -702,6 +714,18 @@ export default {
         this.selectedDay = day;
       }
       console.log(`Giorno selezionato: ${day.date}`);
+    },
+
+    formatDate(dateTime) {
+      const date = new Date(dateTime);
+      return date.toLocaleDateString("it-IT"); // Mostra solo la data in formato italiano
+    },
+    formatTime(dateTime) {
+      const date = new Date(dateTime);
+      return date.toLocaleTimeString("it-IT", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }); // Mostra solo l'ora in formato 24 ore
     },
 
     enlargeRadiograph(url) {
@@ -958,5 +982,10 @@ button:hover {
 .btn-secondary {
   background-color: #6c757d;
   color: white;
+}
+
+.small-text {
+  font-size: 0.9rem; /* Puoi regolare la dimensione come preferisci */
+  font-weight: 600; /* Opzionale, per mantenere il testo in grassetto */
 }
 </style>
