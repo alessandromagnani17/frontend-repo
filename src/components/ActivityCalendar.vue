@@ -3,135 +3,41 @@
     <div class="calendar-container">
       <h1 class="calendar">Calendario Attività</h1>
 
-      <!-- Verifica se l'utente è un paziente o un dottore -->
       <div v-if="isPatient">
-        <div class="calendar">
-          <div class="calendar-header">
-            <button @click="changeMonth(-1)">&#8249;</button>
-            <span>{{ monthNames[month] }} {{ year }}</span>
-            <button @click="changeMonth(1)">&#8250;</button>
-          </div>
-
-          <!-- Riga per i nomi dei giorni -->
-          <div class="calendar-day-names">
-            <div v-for="dayName in dayNames" :key="dayName" class="day-name">
-              {{ dayName }}
-            </div>
-          </div>
-
-          <div class="calendar-grid">
-            <div
-              v-for="day in daysInMonth"
-              :key="`${day.year}-${day.month}-${day.date}`"
-              :class="[
-                'calendar-day',
-                {
-                  disabled: day.isDisabled,
-                  today:
-                    `${day.year}-${String(day.month).padStart(2, '0')}-${String(
-                      day.date
-                    ).padStart(2, '0')}` === minDate,
-                },
-              ]"
-              @click="!day.isDisabled && showDayDetails(day)"
-            >
-              <!-- Data -->
-              <div class="date">{{ day.date }}</div>
-
-              <div class="icon-row operations">
-                <img
-                  v-for="n in day.operations.length"
-                  :key="'operation-' + n + '-' + day.date"
-                  :src="operationIcon"
-                  alt="Operazione"
-                  class="icon"
-                />
-              </div>
-
-              <div class="icon-row radiographs">
-                <img
-                  v-for="n in day.radiographs.length"
-                  :key="'radiograph-' + n + '-' + day.date"
-                  :src="radiographIcon"
-                  alt="Radiografia"
-                  class="icon"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Dettagli del giorno selezionato con animazione -->
+        <!-- Calendario per paziente -->
+        <Calendar
+          :month="month"
+          :year="year"
+          :daysInMonth="daysInMonth"
+          :monthNames="monthNames"
+          :dayNames="dayNames"
+          :minDate="minDate"
+          :operationIcon="operationIcon"
+          :radiographIcon="radiographIcon"
+          :showDayDetails="showDayDetails"
+          :changeMonth="changeMonth"
+        />
         <transition
           name="fade"
           @before-enter="beforeEnter"
           @enter="enter"
           @leave="leave"
         >
-          <div v-if="selectedDay" class="day-details">
-            <h2>
-              Dettagli del Giorno: {{ selectedDay.date }}
-              {{ monthNames[month] }}
-              {{ year }}
-            </h2>
-
-            <!-- Verifica se ci sono operazioni o radiografie -->
-            <div
-              v-if="
-                selectedDay.operations.length > 0 ||
-                selectedDay.radiographs.length > 0
-              "
-            >
-              <!-- Se ci sono operazioni, mostriamo le operazioni pianificate -->
-              <div v-if="selectedDay.operations.length > 0">
-                <h3 class="small-text">Operazioni pianificate:</h3>
-                <ul>
-                  <li
-                    v-for="operation in selectedDay.operations"
-                    :key="operation.id"
-                  >
-                    <strong>{{ operation.type }}</strong
-                    ><br />
-                    <span>Data: {{ formatDate(operation.operationDate) }}</span
-                    ><br />
-                    <span>Ora: {{ formatTime(operation.operationDate) }}</span
-                    ><br />
-                    <span>Descrizione: {{ operation.description }}</span
-                    ><br />
-                  </li>
-                </ul>
-              </div>
-
-              <!-- Se ci sono radiografie, mostriamo le radiografie caricate -->
-              <div v-if="selectedDay.radiographs.length > 0">
-                <h3 class="small-text">Radiografie caricate:</h3>
-                <ul>
-                  <li
-                    v-for="radiograph in selectedDay.radiographs"
-                    :key="radiograph.name"
-                  >
-                    <strong>{{ radiograph.name }}</strong
-                    ><br />
-                    <span>{{ radiograph.date }}</span
-                    ><br />
-                    <button @click="enlargeRadiograph(radiograph.url)">
-                      Visualizza Immagine
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- Se non ci sono né operazioni né radiografie -->
-            <div v-else>
-              <p>Non ci sono attività pianificate per questa data.</p>
-            </div>
-          </div>
+          <DayDetails
+            v-if="selectedDay"
+            :selectedDay="selectedDay"
+            :monthNames="monthNames"
+            :month="month"
+            :year="year"
+            :formatDate="formatDate"
+            :formatTime="formatTime"
+            :enlargeRadiograph="enlargeRadiograph"
+          />
         </transition>
       </div>
 
-      <!-- Se l'utente è un dottore, visualizza tutte le radiografie dei pazienti -->
       <div v-else>
+        <!-- Calendario per dottore -->
         <div v-if="isDoctor">
           <button @click="openScheduleModal" class="btn btn-primary">
             Pianifica Operazione
@@ -180,128 +86,52 @@
               </button>
             </div>
           </div>
-          <div class="calendar">
-            <div class="calendar-header">
-              <button @click="changeMonth(-1)">&#8249;</button>
-              <span>{{ monthNames[month] }} {{ year }}</span>
-              <button @click="changeMonth(1)">&#8250;</button>
-            </div>
 
-            <!-- Riga per i nomi dei giorni -->
-            <div class="calendar-day-names">
-              <div v-for="dayName in dayNames" :key="dayName" class="day-name">
-                {{ dayName }}
-              </div>
-            </div>
-
-            <div class="calendar-grid">
-              <div
-                v-for="day in daysInMonth"
-                :key="`${day.year}-${day.month}-${day.date}`"
-                :class="[
-                  'calendar-day',
-                  {
-                    disabled: day.isDisabled,
-                    today:
-                      `${day.year}-${String(day.month).padStart(
-                        2,
-                        '0'
-                      )}-${String(day.date).padStart(2, '0')}` === minDate,
-                  },
-                ]"
-                @click="!day.isDisabled && showDayDetails(day)"
-              >
-                <!-- Data -->
-                <div class="date">{{ day.date }}</div>
-
-                <!-- Icone Operazioni -->
-                <div class="icon-row operations">
-                  <img
-                    v-for="n in day.operations.length"
-                    :key="'operation-' + n + '-' + day.date"
-                    :src="operationIcon"
-                    alt="Operazione"
-                    class="icon"
-                  />
-                </div>
-
-                <div class="icon-row radiographs">
-                  <img
-                    v-for="n in day.radiographs.length"
-                    :key="'radiograph-' + n + '-' + day.date"
-                    :src="radiographIcon"
-                    alt="Radiografia"
-                    class="icon"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          <!-- Calendario per il dottore -->
+          <Calendar
+            :month="month"
+            :year="year"
+            :daysInMonth="daysInMonth"
+            :monthNames="monthNames"
+            :dayNames="dayNames"
+            :minDate="minDate"
+            :operationIcon="operationIcon"
+            :radiographIcon="radiographIcon"
+            :showDayDetails="showDayDetails"
+            :changeMonth="changeMonth"
+          />
+          <transition
+            name="fade"
+            @before-enter="beforeEnter"
+            @enter="enter"
+            @leave="leave"
+          >
+            <DayDetails
+              v-if="selectedDay"
+              :selectedDay="selectedDay"
+              :monthNames="monthNames"
+              :month="month"
+              :year="year"
+              :formatDate="formatDate"
+              :formatTime="formatTime"
+              :enlargeRadiograph="enlargeRadiograph"
+            />
+          </transition>
         </div>
-
-        <!-- Dettagli del giorno selezionato con animazione -->
-        <transition
-          name="fade"
-          @before-enter="beforeEnter"
-          @enter="enter"
-          @leave="leave"
-        >
-          <div v-if="selectedDay" class="day-details">
-            <h2>
-              Dettagli del Giorno: {{ selectedDay.date }}
-              {{ monthNames[month] }}
-              {{ year }}
-            </h2>
-            <!-- Operazioni -->
-            <div v-if="selectedDay.operations.length > 0">
-              <h1 class="calendar">Operazioni pianificate:</h1>
-              <div
-                v-for="operation in selectedDay.operations"
-                :key="operation.id"
-              >
-                <p>
-                  <strong>{{ operation.patientName }}:</strong>
-                  {{ operation.name }}
-                </p>
-                <span>{{ operation.operationDate }}</span
-                ><br />
-                <span>{{ operation.description }}</span
-                ><br />
-              </div>
-            </div>
-            <div v-else>
-              <p>Nessuna operazione pianificata per questa data.</p>
-            </div>
-            <!-- Radiografie -->
-            <div v-if="selectedDay.radiographs.length > 0">
-              <h1 class="calendar">Radiografie caricate:</h1>
-
-              <div
-                v-for="radiograph in selectedDay.radiographs"
-                :key="radiograph.name"
-              >
-                <p>
-                  <strong>{{ radiograph.patientName }}:</strong>
-                  {{ radiograph.name }}
-                </p>
-                <button @click="enlargeRadiograph(radiograph.url)">
-                  Visualizza Immagine
-                </button>
-              </div>
-            </div>
-            <div v-else>
-              <p>Nessuna radiografia caricata in questa data.</p>
-            </div>
-          </div>
-        </transition>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import Calendar from "./ScheduleCalendar.vue";
+import DayDetails from "./DayDetails.vue";
+
 export default {
-  name: "ActivityCalendar",
+  components: {
+    Calendar,
+    DayDetails,
+  },
   data() {
     return {
       loadingPrediction: false,
@@ -750,13 +580,12 @@ export default {
         }
       }
     },
-
     // Animazioni di transizione
     beforeEnter(el) {
       el.style.opacity = 0;
     },
     enter(el, done) {
-      el.offsetHeight; // trigger reflow
+      el.offsetHeight; // Trigger reflow
       el.style.transition = "opacity 0.5s ease";
       el.style.opacity = 1;
       done();
@@ -771,15 +600,6 @@ export default {
 </script>
 
 <style scoped>
-.calendar-calendar {
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  position: relative;
-}
-
 .calendar-container {
   max-width: 100%;
   padding: 40px;
@@ -789,150 +609,10 @@ export default {
 }
 
 h1.calendar {
-  font-size: 18px; /* Stessa dimensione del testo di "Elenco Pazienti" */
-  font-family: inherit; /* Assicura che usi lo stesso font ereditato dal contesto */
-  font-weight: normal; /* Mantenere il peso del font uguale */
-  margin-bottom: 20px; /* Margine inferiore uguale per allineamento */
-}
-
-.calendar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 1em;
-  margin-bottom: 10px;
-}
-
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.calendar-day {
-  position: relative;
-  padding: 10px;
-  border: 1px solid #ddd;
-  height: 70px;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-/* Giorni disabilitati (mese precedente e successivo) */
-.calendar-day.disabled {
-  opacity: 0.5;
-  color: #ccc; /* Testo grigio chiaro */
-  pointer-events: none; /* Non cliccabili */
-  background-color: #f9f9f9; /* Sfondo leggermente diverso, opzionale */
-}
-
-/* Puoi anche aggiungere un bordo per evidenziare meglio i giorni */
-.calendar-day.disabled:hover {
-  border: 1px dashed #ddd; /* Aggiunge un bordo hover sui giorni disabilitati */
-}
-
-.calendar-day.today {
-  border: 2px solid #fc2424db; /* Bordo rosso per il giorno corrente */
-  border-radius: 5px; /* Bordo arrotondato (opzionale) */
-}
-
-.calendar-day-names {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  background-color: #f0f0f0;
-  padding: 10px 0;
-  font-weight: bold;
-  color: #555;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
-}
-
-.day-name {
-  text-transform: uppercase;
-  font-size: 0.9em;
-}
-
-.date {
-  font-size: 1em;
-}
-
-.activity-icons {
-  display: flex;
-  flex-direction: column; /* Cambia la direzione per impilare le righe */
-  align-items: center;
-  gap: 10px; /* Spazio tra righe */
-  margin-top: 5px;
-}
-
-.icon-row {
-  display: flex;
-  justify-content: center;
-  gap: 2px; /* Spazio tra le icone nella stessa riga */
-}
-
-.operations {
-  min-height: 7px;
-  margin-bottom: 3px; /* Aggiunge margine tra operazioni e radiografie */
-}
-
-.icon {
-  width: 7px;
-  height: 7px;
-}
-
-button {
-  cursor: pointer;
-  background: none;
-  border: none;
-  font-size: 0.7em;
-}
-
-button:hover {
-  color: #007bff;
-}
-
-/* Animazione della transizione */
-.day-details {
-  margin-top: 50px;
-  text-align: left;
-  transition: opacity 0.5s ease;
-}
-
-.day-details h2 {
-  font-size: 1em;
-  margin-bottom: 10px;
-}
-
-.day-details p {
-  font-size: 0.7em;
-  margin-bottom: 10px;
-}
-
-.day-details ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.day-details li {
-  margin-bottom: 10px;
-}
-
-.day-details button {
-  background-color: #007bff;
-  color: white;
-  border-radius: 5px;
-  padding: 10px;
-}
-
-/* Transizione Fade */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-.fade-enter,
-.fade-leave-to {
-  opacity: 0;
+  font-size: 18px;
+  font-family: inherit;
+  font-weight: normal;
+  margin-bottom: 20px;
 }
 
 .modal {
@@ -968,24 +648,25 @@ button:hover {
   margin-bottom: 20px;
 }
 
-.btn {
-  padding: 10px 20px;
-  border: none;
+button {
   cursor: pointer;
+  background: none;
+  border: none;
+  color: #007bff;
+  font-size: 0.7em;
 }
 
-.btn-success {
-  background-color: #28a745;
-  color: white;
+button:hover {
+  color: #007bff;
 }
 
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
 }
 
-.small-text {
-  font-size: 0.9rem; /* Puoi regolare la dimensione come preferisci */
-  font-weight: 600; /* Opzionale, per mantenere il testo in grassetto */
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
