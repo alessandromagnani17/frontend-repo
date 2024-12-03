@@ -715,6 +715,7 @@ button:hover {
 
 .custom-btn:hover {
   background-color: #0056b3; /* Colore di hover per effetto */
+  color: white;
   cursor: pointer; /* Cambia il cursore su hover */
 }
 
