@@ -371,6 +371,9 @@ export default {
         await response.json();
         alert("Operazione pianificata con successo!");
 
+        // Dopo che l'operazione è stata pianificata, invia una notifica al paziente
+        await this.sendNotificationToPatient();
+
         // Mostra il calendario delle attività
         this.showActivityCalendar();
 
@@ -382,6 +385,37 @@ export default {
           error
         );
         alert("Errore: " + error.message);
+      }
+    },
+
+    // Aggiungi questa funzione per inviare la notifica
+    async sendNotificationToPatient() {
+      try {
+        const notificationMessage =
+          "Ciao, una nuova operazione è stata pianificata per te!";
+
+        // Chiamata al backend per inviare la notifica al paziente selezionato
+        const response = await fetch("/api/notifications", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            patientId: this.selectedPatientId,
+            message: notificationMessage,
+            date: new Date().toISOString(), // La data della notifica
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Errore nell'invio della notifica.");
+        }
+
+        alert("Notifica inviata al paziente.");
+      } catch (error) {
+        console.error("Errore nell'invio della notifica:", error);
+        alert("Errore nell'invio della notifica.");
       }
     },
 
