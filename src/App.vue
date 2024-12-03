@@ -97,7 +97,7 @@
                   <router-link
                     class="dropdown-item"
                     to="/notifications"
-                    @click="closeNavbar"
+                    @click="toggleDropdown"
                   >
                     <i class="fas fa-bell"></i> Notifiche
                     <span class="badge badge-pill badge-warning">3</span>
@@ -105,13 +105,13 @@
                   <router-link
                     class="dropdown-item"
                     to="/profile"
-                    @click="closeNavbar"
+                    @click="toggleDropdown"
                     >Profilo</router-link
                   >
                   <router-link
                     class="dropdown-item"
                     to="/settings"
-                    @click="closeNavbar"
+                    @click="toggleDropdown"
                     >Impostazioni</router-link
                   >
                   <a class="dropdown-item" href="#" @click.prevent="logout"
@@ -189,6 +189,7 @@ export default {
       this.authToken = null;
       this.userRole = null;
       this.userDataUid = null;
+      this.toggleDropdown();
       EventBus.emit("auth-changed");
       this.$router.push("/");
     },
