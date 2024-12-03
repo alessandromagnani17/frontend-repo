@@ -155,8 +155,8 @@ export default {
 
 /* Giorno di oggi - colore di sfondo rosso chiaro */
 .calendar-day.today {
-  background-color: #fbf3f3; /* Rosso chiaro */
-  border: 2px solid #fe9797db; /* Bordo rosso (già presente) */
+  background-color: #f9f4f4; /* Rosso chiaro */
+  border: 2px solid #ffa8a8db; /* Bordo rosso (già presente) */
   border-radius: 5px;
 }
 
