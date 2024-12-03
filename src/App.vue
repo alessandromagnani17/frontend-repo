@@ -74,7 +74,11 @@
           <ul class="navbar-nav">
             <!-- Contenitore per il dropdown -->
             <template v-if="isLoggedIn">
-              <li class="nav-item dropdown">
+              <li class="nav-item dropdown d-flex align-items-center">
+                <span class="nav-link me-2" style="pointer-events: none">{{
+                  userDataName
+                }}</span>
+
                 <a
                   class="nav-link dropdown-toggle"
                   href="#"
