@@ -26,15 +26,35 @@ export default {
   name: "UserNotifications",
   data() {
     return {
-      notifications: [
-        { message: "Nuova attività disponibile!", date: "2024-11-28" },
-        { message: "Il tuo profilo è stato aggiornato.", date: "2024-11-27" },
-        {
-          message: "Hai una nuova richiesta di appuntamento.",
-          date: "2024-11-26",
-        },
-      ],
+      notifications: [],
     };
+  },
+
+  mounted() {
+    this.fetchNotifications();
+  },
+  methods: {
+    async fetchNotifications() {
+      try {
+        const userData = JSON.parse(localStorage.getItem("userData")); // Decodifica il JSON
+        const userId = userData.userId;
+
+        console.log("Fetching notifications...");
+        console.log("Selected patient ID:", userId);
+
+        // Recupera le notifiche dal backend
+        const response = await fetch(`/api/notifications?patientId=${userId}`);
+        if (!response.ok) {
+          throw new Error("Errore nel recupero delle notifiche");
+        }
+
+        const data = await response.json();
+        console.log("Notifications data:", data); // Stampa il risultato delle notifiche
+        this.notifications = data.notifications; // Supponiamo che il backend ritorni un array di notifiche
+      } catch (error) {
+        console.error("Errore nel recupero delle notifiche:", error);
+      }
+    },
   },
 };
 </script>
