@@ -13,11 +13,11 @@
 
       <!-- Mostra operazioni pianificate se presenti -->
       <div v-if="selectedDay.operations.length > 0">
-        <h3 class="small-text">Operazioni pianificate:</h3>
+        <h3 class="small-b-text">Operazioni pianificate:</h3>
         <ul>
-          <li v-for="operation in selectedDay.operations" :key="operation.id">
+          <li v-for="operation in orderedOperations" :key="operation.id">
             <span class="small-text"
-              >Ora: {{ formatTime(operation.operationDate) }}</span
+              >Ore: {{ formatTime(operation.operationDate) }}</span
             ><br />
             <span class="small-text"
               >Descrizione: {{ operation.description }}</span
@@ -27,7 +27,7 @@
       </div>
 
       <div v-if="selectedDay.radiographs.length > 0">
-        <h3 class="small-text">Radiografie caricate:</h3>
+        <h3 class="small-b-text">Radiografie caricate:</h3>
         <ul class="radiograph-list">
           <li
             v-for="radiograph in selectedDay.radiographs"
@@ -131,6 +131,16 @@ export default {
       modalImageUrl: null,
     };
   },
+  computed: {
+    orderedOperations() {
+      return this.selectedDay.operations.slice().sort((a, b) => {
+        // Converti la data in millisecondi per confrontarle
+        const timeA = new Date(a.operationDate).getTime();
+        const timeB = new Date(b.operationDate).getTime();
+        return timeA - timeB; // Ordina in ordine crescente
+      });
+    },
+  },
   methods: {
     enlargeRadiograph(url) {
       if (!url) {
@@ -203,9 +213,13 @@ export default {
   margin-bottom: 10px;
 }
 
-.small-text {
+.small-b-text {
   font-size: 0.9rem; /* Puoi regolare la dimensione come preferisci */
   font-weight: 600; /* Opzionale, per mantenere il testo in grassetto */
+}
+
+.small-text {
+  font-size: 0.8rem; /* Puoi regolare la dimensione come preferisci */
 }
 
 .fade-enter-active,
