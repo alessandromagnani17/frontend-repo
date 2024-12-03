@@ -819,7 +819,7 @@ h1 {
   opacity: 1;
 }
 
-h5.carica-radiografia {
+h1.carica-radiografia {
   font-size: 18px; /* Stessa dimensione del testo di "Elenco Pazienti" */
   font-family: inherit; /* Assicura che usi lo stesso font ereditato dal contesto */
   font-weight: normal; /* Mantenere il peso del font uguale */
