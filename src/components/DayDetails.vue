@@ -11,17 +11,16 @@
         {{ year }}
       </h2>
 
+      <!-- Mostra operazioni pianificate se presenti -->
       <div v-if="selectedDay.operations.length > 0">
         <h3 class="small-text">Operazioni pianificate:</h3>
         <ul>
           <li v-for="operation in selectedDay.operations" :key="operation.id">
-            <strong>{{ operation.type }}</strong
+            <span class="small-text"
+              >Ora: {{ formatTime(operation.operationDate) }}</span
             ><br />
-            <span>Data: {{ formatDate(operation.operationDate) }}</span
-            ><br />
-            <span>Ora: {{ formatTime(operation.operationDate) }}</span
-            ><br />
-            <span>Descrizione: {{ operation.description }}</span
+            <span class="small-text"
+              >Descrizione: {{ operation.description }}</span
             ><br />
           </li>
         </ul>
@@ -29,24 +28,84 @@
 
       <div v-if="selectedDay.radiographs.length > 0">
         <h3 class="small-text">Radiografie caricate:</h3>
-        <ul>
+        <ul class="radiograph-list">
           <li
             v-for="radiograph in selectedDay.radiographs"
             :key="radiograph.name"
+            class="radiograph-item"
           >
-            <strong>{{ radiograph.name }}</strong
-            ><br />
-            <span>{{ radiograph.date }}</span
-            ><br />
-            <button @click="enlargeRadiograph(radiograph.url)">
-              Visualizza Immagine
-            </button>
+            <div>
+              {{ radiograph.date }} -
+              <button @click="toggleRadiograph(radiograph)" class="view-link">
+                Visualizza
+              </button>
+            </div>
+
+            <div
+              v-if="selectedRadiograph === radiograph"
+              class="radiograph-preview"
+            >
+              <div
+                class="content-with-animation"
+                :class="{
+                  'slide-down': isSlidingDown,
+                  'slide-up': isSlidingUp,
+                }"
+              >
+                <img
+                  :src="radiograph.url"
+                  alt="Radiografia"
+                  class="radiograph-image"
+                  v-show="isImageVisible"
+                />
+              </div>
+              <div class="radiograph-controls">
+                <button
+                  @click="enlargeRadiograph(radiograph.url)"
+                  class="control-button"
+                >
+                  <img src="@/assets/zoom.svg" alt="Zoom" class="icon" />
+                </button>
+                <a
+                  :href="`/api/download-radiograph?url=${encodeURIComponent(
+                    radiograph.url
+                  )}&filename=radiografia_${radiograph.date}.png`"
+                  class="control-button"
+                  download
+                >
+                  <img
+                    src="@/assets/download.svg"
+                    alt="Download"
+                    class="icon"
+                  />
+                </a>
+              </div>
+            </div>
           </li>
         </ul>
       </div>
 
-      <div v-else>
+      <!-- Mostra il messaggio solo se NON ci sono operazioni e radiografie -->
+      <div
+        v-if="
+          selectedDay.operations.length === 0 &&
+          selectedDay.radiographs.length === 0
+        "
+      >
         <p>Non ci sono attività pianificate per questa data.</p>
+      </div>
+
+      <div v-if="isModalOpen" class="modal">
+        <div class="modal-content">
+          <span @click="closeModal" class="close-button">
+            <img src="@/assets/cross.svg" alt="Chiudi" class="close-icon" />
+          </span>
+          <img
+            :src="modalImageUrl"
+            alt="Immagine ingrandita"
+            class="modal-image"
+          />
+        </div>
       </div>
     </div>
   </transition>
@@ -61,9 +120,45 @@ export default {
     year: Number,
     formatDate: Function,
     formatTime: Function,
-    enlargeRadiograph: Function,
+  },
+  data() {
+    return {
+      selectedRadiograph: null,
+      isSlidingDown: false,
+      isSlidingUp: false,
+      isImageVisible: false,
+      isModalOpen: false,
+      modalImageUrl: null,
+    };
   },
   methods: {
+    enlargeRadiograph(url) {
+      if (!url) {
+        console.error("URL mancante o non valido");
+        return;
+      }
+      this.modalImageUrl = url; // Imposta l'immagine da mostrare nel modale
+      this.isModalOpen = true; // Mostra il modale
+    },
+    closeModal() {
+      this.isModalOpen = false; // Chiudi il modale
+      this.modalImageUrl = null; // Resetta l'URL
+    },
+    toggleRadiograph(radiograph) {
+      if (this.selectedRadiograph === radiograph) {
+        this.isSlidingUp = true;
+        this.isSlidingDown = false;
+        setTimeout(() => {
+          this.selectedRadiograph = null;
+          this.isImageVisible = false;
+        }, 500); // Il tempo di transizione deve corrispondere a quello del CSS
+      } else {
+        this.selectedRadiograph = radiograph;
+        this.isSlidingDown = true;
+        this.isSlidingUp = false;
+        this.isImageVisible = true;
+      }
+    },
     beforeEnter(el) {
       el.style.opacity = 0;
     },
@@ -108,13 +203,6 @@ export default {
   margin-bottom: 10px;
 }
 
-.day-details button {
-  background-color: #007bff;
-  color: white;
-  border-radius: 5px;
-  padding: 10px;
-}
-
 .small-text {
   font-size: 0.9rem; /* Puoi regolare la dimensione come preferisci */
   font-weight: 600; /* Opzionale, per mantenere il testo in grassetto */
@@ -128,5 +216,132 @@ export default {
 .fade-enter,
 .fade-leave-to {
   opacity: 0;
+}
+
+.radiograph-list {
+  max-width: 800px;
+  margin: 20px auto;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li.radiograph-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #ccc;
+  font-size: 12px;
+  color: #444;
+  display: flex;
+  flex-direction: column;
+}
+
+.view-link {
+  color: #007bff;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: color 0.5s ease;
+  padding: 0;
+  margin: 0;
+}
+
+.view-link:hover {
+  color: #0056b3;
+}
+
+.radiograph-preview {
+  margin-top: 15px;
+  width: 95%;
+  align-self: center;
+}
+
+.radiograph-image {
+  width: 80%;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.content-with-animation {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.5s ease-out, transform 0.5s ease-out;
+  transform: translateY(-20px);
+}
+
+.content-with-animation.slide-down {
+  max-height: 550px;
+  transform: translateY(0);
+}
+
+.content-with-animation.slide-up {
+  max-height: 0;
+  transform: translateY(-20px);
+}
+
+.radiograph-controls {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.control-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8); /* Sfondo scuro semi-trasparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Assicurati che sia sopra altri elementi */
+}
+
+.modal-content {
+  position: relative;
+  background: white; /* Sfondo del contenuto */
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 90%;
+  max-height: 90%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-image {
+  max-width: 100%; /* Adatta la larghezza all'area del modale */
+  max-height: 100%; /* Adatta l'altezza all'area del modale */
+  border-radius: 4px; /* Angoli arrotondati per l'immagine */
+  object-fit: contain; /* Mantieni le proporzioni */
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.close-icon {
+  width: 24px; /* Dimensioni dell'icona di chiusura */
+  height: 24px;
 }
 </style>
