@@ -14,10 +14,11 @@
           class="list-group-item"
         >
           {{ notification.message }} - ID: {{ notification.id }}
-          <!-- Utilizza notification.id -->
           <span class="badge badge-success float-right">{{
             notification.date
           }}</span>
+
+          <!-- Mostra il pulsante solo se isRead è false -->
           <button
             v-if="!notification.isRead"
             @click="markAsRead(notification.id)"
@@ -65,7 +66,6 @@ export default {
         const data = await response.json();
         console.log("Notifications raw data:", data);
 
-        // Se la risposta contiene un array direttamente
         if (Array.isArray(data.notifications)) {
           this.notifications = data.notifications;
         } else {
@@ -73,6 +73,13 @@ export default {
         }
 
         console.log("Parsed notifications:", this.notifications);
+
+        // Debug per il valore di 'isRead'
+        this.notifications.forEach((notification, index) => {
+          console.log(
+            `Notification ${index} (ID: ${notification.id}) - isRead: ${notification.isRead}`
+          );
+        });
 
         // Calcola il conteggio delle notifiche non lette
         this.updateUnreadCount();
@@ -85,10 +92,17 @@ export default {
       this.unreadCount = this.notifications.filter(
         (notification) => !notification.isRead
       ).length;
+      console.log("Unread count:", this.unreadCount); // Debug per il conteggio delle notifiche non lette
     },
 
     async markAsRead(notificationId) {
       console.log("markAsRead called with notificationId:", notificationId);
+
+      const notification = this.notifications.find(
+        (notification) => notification.id === notificationId
+      );
+
+      console.log("Notification before marking as read:", notification);
 
       if (!notificationId) {
         console.error("No notification ID provided");
@@ -101,7 +115,7 @@ export default {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ isRead: true }), // Utilizza 'isRead' se è quello che usi nel backend
+          body: JSON.stringify({ isRead: true }), // Cambia 'read' in 'isRead' se necessario
         });
 
         if (!response.ok) {
@@ -116,6 +130,13 @@ export default {
         );
 
         console.log("Notification marked as read:", notificationId);
+
+        // Debug per il valore di 'isRead' dopo l'aggiornamento
+        const updatedNotification = this.notifications.find(
+          (notification) => notification.id === notificationId
+        );
+        console.log("Updated notification:", updatedNotification);
+
         this.updateUnreadCount();
       } catch (error) {
         console.error("Errore nel segnare la notifica come letta.", error);
