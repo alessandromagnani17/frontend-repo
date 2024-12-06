@@ -31,7 +31,7 @@
         </div>
 
         <!-- Sezione per il paziente selezionato -->
-        <div v-if="selectedPatientId" class="mt-2">
+        <div v-if="selectedPatientId" class="mt-4">
           <div
             v-if="role === 'doctor' && selectedPatientId"
             class="patient-info-container small-text"
@@ -46,9 +46,8 @@
             <span class="change-text" @click="changePatient">Cambia</span>
           </div>
           <div v-else class="medium-text">
-            Benvenuto
             <strong class="medium-text">
-              {{ selectedPatientName }} {{ selectedPatientSurname }}!
+              {{ selectedPatientName }} {{ selectedPatientSurname }}:
             </strong>
           </div>
 
@@ -62,7 +61,7 @@
 
           <!-- Sezione per visualizzare le radiografie -->
           <div
-            class="row mt-5"
+            class="row 2"
             v-if="userRadiographs.length > 0 && selectedPatientId"
           >
             <div
