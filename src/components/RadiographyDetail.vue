@@ -2,7 +2,7 @@
   <div class="welcome">
     <div class="container mt-5">
       <div class="header">
-        <button class="back-button" @click="goBack">
+        <button v-if="!isLoading" class="back-button" @click="goBack">
           <img src="@/assets/back-icon.svg" alt="Indietro" class="back-icon" />
         </button>
       </div>
