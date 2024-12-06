@@ -56,6 +56,7 @@
 import { format, parseISO } from "date-fns";
 import { it } from "date-fns/locale"; // Importa la localizzazione italiana
 import { formatDistanceToNow } from "date-fns";
+import EventBus from "../eventBus"; // Importa il tuo EventBus
 
 export default {
   name: "UserNotifications",
@@ -104,11 +105,18 @@ export default {
                 }
               ),
             }));
+
+          // Calcola il numero di notifiche non lette
+          this.unreadCount = this.notifications.filter(
+            (notification) => !notification.isRead
+          ).length;
+
+          console.log("Numero di notifiche non lette = ", this.unreadCount);
+          // Emetti l'evento per aggiornare il conteggio delle notifiche non lette
+          EventBus.emit("unread-count-changed", this.unreadCount); // Usa EventBus.emit per emettere l'evento
         } else {
           throw new Error("Formato delle notifiche inatteso");
         }
-
-        this.updateUnreadCount();
       } catch (error) {
         console.error("Errore nel recupero delle notifiche:", error);
       }
