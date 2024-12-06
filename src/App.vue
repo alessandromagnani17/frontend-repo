@@ -100,7 +100,13 @@
                     @click="toggleDropdown"
                   >
                     <i class="fas fa-bell"></i> Notifiche
-                    <span class="badge badge-pill badge-warning">3</span>
+                    <!-- Mostra il badge solo se unreadCount è maggiore di 0 -->
+                    <span
+                      v-if="unreadCount > 0"
+                      class="badge badge-pill badge-warning text-red"
+                    >
+                      {{ unreadCount }}
+                    </span>
                   </router-link>
                   <router-link
                     class="dropdown-item"
@@ -150,6 +156,7 @@ export default {
       userDataUid: null,
       userDataName: null,
       userDataSurname: null,
+      unreadCount: 0, // Aggiungi questa variabile per il conteggio delle notifiche non lette
     };
   },
   computed: {
@@ -171,11 +178,23 @@ export default {
       this.navbarOpen = !this.navbarOpen;
     },
     closeNavbar() {
-      this.navbarOpen = false;
+      this.navbarOpen = false; // Chiudi la navbar
+      this.dropdownOpen = false; // Chiudi il dropdown
     },
+
     closeNavbarOnClick(event) {
-      const isNavbar = event.target.closest(".navbar");
-      if (!isNavbar) {
+      const isNavbar = event.target.closest(".navbar"); // Verifica se il clic è dentro la navbar
+      const isNavbarToggler = event.target.closest(".navbar-toggler"); // Verifica se il clic è sul bottone di toggling
+      const isDropdownMenu = event.target.closest(".dropdown-menu"); // Verifica se il clic è dentro il dropdown menu
+      const isDropdownToggle = event.target.closest(".dropdown-toggle"); // Verifica se il clic è sul bottone di toggle del dropdown
+
+      // Se il clic non è dentro la navbar, il toggler o il dropdown menu, chiudi sia la navbar che il dropdown
+      if (
+        !isNavbar &&
+        !isNavbarToggler &&
+        !isDropdownMenu &&
+        !isDropdownToggle
+      ) {
         this.closeNavbar();
       }
     },
@@ -217,13 +236,17 @@ export default {
       this.userDataUid = userData?.uid || null;
       this.userDataName = userData?.name || null;
       this.userDataSurname = userData?.family_name || null;
-      //console.log("[DEBUG] updateAuthStatus - authToken:", this.authToken);
-      //console.log("[DEBUG] role:", this.userRole);
+    },
+    updateUnreadCount(count) {
+      this.unreadCount = count; // Aggiorna il conteggio delle notifiche non lette
     },
   },
   mounted() {
     this.updateAuthStatus(); // Inizializza authToken e userRole
     EventBus.on("auth-changed", this.updateAuthStatus);
+
+    // Aggiorna il conteggio delle notifiche non lette dal componente UserNotifications
+    EventBus.on("unread-count-changed", this.updateUnreadCount); // Ascolta l'evento per il conteggio delle notifiche
   },
   beforeUnmount() {
     EventBus.off("auth-changed", this.updateAuthStatus);
@@ -291,10 +314,6 @@ main {
   color: #d4d4d4;
 }
 
-.navbar-toggler {
-  border-color: #ffffff;
-}
-
 .navbar-toggler-icon {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23ffffff' viewBox='0 0 30 30'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
@@ -320,5 +339,9 @@ main {
 .dropdown-item:hover {
   background-color: #495057;
   color: #ffffff;
+}
+
+.badge.text-red {
+  color: #db0808ea;
 }
 </style>
