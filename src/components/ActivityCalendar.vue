@@ -501,24 +501,24 @@ export default {
     // Funzione generica per caricare le operazioni e le radiografie
     async loadPatientData(patientId) {
       try {
-        // Carica le operazioni
-        const operationsResponse = await fetch(
-          `/api/patients/${patientId}/operations`
-        );
+        // Carica le operazioni e le radiografie in parallelo
+        const [operationsResponse, radiographsResponse] = await Promise.all([
+          fetch(`/api/patients/${patientId}/operations`),
+          fetch(`/api/patients/${patientId}/radiographs`),
+        ]);
+
+        // Controlla se entrambe le risposte sono valide
         if (operationsResponse.ok) {
           const operationsData = await operationsResponse.json();
-          console.log("RADIOGRNJCNEJCD: ", operationsData);
+          console.log("Operazioni: ", operationsData);
           this.handleLoadedData("operations", patientId, operationsData);
         } else {
           console.error("Errore nel recupero delle operazioni");
         }
 
-        // Carica le radiografie
-        const radiographsResponse = await fetch(
-          `/api/patients/${patientId}/radiographs`
-        );
         if (radiographsResponse.ok) {
           const radiographsData = await radiographsResponse.json();
+          console.log("Radiografie: ", radiographsData);
           this.handleLoadedData("radiographs", patientId, radiographsData);
         } else {
           console.error("Errore nel recupero delle radiografie");
