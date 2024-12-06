@@ -391,8 +391,21 @@ export default {
     // Aggiungi questa funzione per inviare la notifica
     async sendNotificationToPatient() {
       try {
-        const notificationMessage =
-          "Ciao, una nuova operazione è stata pianificata per te!";
+        if (!this.operationDate || !this.operationTime || !this.description) {
+          alert(
+            "Assicurati di aver inserito tutti i dettagli dell'operazione."
+          );
+          return;
+        }
+
+        // Estrae solo la parte dell'ora e dei minuti per `time`
+        const notificationTime = this.operationTime; // Già in formato HH:mm
+
+        // Crea il messaggio della notifica usando le informazioni dell'operazione
+        const notificationMessage = `Una nuova operazione è stata pianificata per te!`;
+
+        // Aggiunge la data e ora di invio della notifica
+        const sentAt = new Date().toISOString(); // Data e ora corrente in formato ISO 8601
 
         // Chiamata al backend per inviare la notifica al paziente selezionato
         const response = await fetch("/api/notifications", {
@@ -403,7 +416,9 @@ export default {
           body: JSON.stringify({
             patientId: this.selectedPatientId,
             message: notificationMessage,
-            date: new Date().toISOString(), // La data della notifica
+            date: this.operationDate,
+            time: notificationTime,
+            sentAt, // Aggiunge l'attributo sentAt alla richiesta
           }),
         });
 
@@ -462,7 +477,6 @@ export default {
       // Logica per visualizzare il calendario
       this.selectedDay = null; // Resetta la selezione del giorno
       this.loadPatients(); // Ricarica i pazienti per aggiornare il calendario
-      alert("Calendario aggiornato!"); // Messaggio temporaneo
     },
 
     // Modifica per caricare i pazienti (solo per i medici)
