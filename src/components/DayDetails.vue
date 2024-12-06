@@ -22,6 +22,10 @@
             <span class="small-text"
               >Descrizione: {{ operation.description }}</span
             ><br />
+            <span class="small-text"
+              >Paziente: {{ operation.patientName }}
+              {{ operation.patientSurname }}</span
+            ><br />
           </li>
         </ul>
       </div>
@@ -131,6 +135,19 @@ export default {
       modalImageUrl: null,
     };
   },
+  mounted() {
+    console.log("DayDetails Mounted");
+    console.log("Props - Selected Day:", this.selectedDay); // Mostra il giorno selezionato
+    if (this.selectedDay && this.selectedDay.operations) {
+      console.log("Props - Operations:", this.selectedDay.operations); // Mostra le operazioni
+      this.selectedDay.operations.forEach((operation, index) => {
+        console.log(`Operation ${index + 1}:`, operation); // Mostra ogni operazione singolarmente
+      });
+    } else {
+      console.warn("No operations found for selected day!");
+    }
+  },
+
   computed: {
     orderedOperations() {
       return this.selectedDay.operations.slice().sort((a, b) => {
