@@ -157,6 +157,14 @@ export default {
     }
   },
   computed: {
+    debugSelectedDay() {
+      console.log("Selected Day Debug:", this.selectedDay); // Mostra il giorno selezionato
+      if (this.selectedDay && this.selectedDay.operations) {
+        console.log("Operations Debug:", this.selectedDay.operations); // Mostra le operazioni
+      }
+      return this.selectedDay;
+    },
+
     daysInMonth() {
       const days = [];
       const lastDayOfMonth = new Date(this.year, this.month + 1, 0);
@@ -188,8 +196,8 @@ export default {
             });
           }
 
-          if (patient.operations) {
-            patient.operations.forEach((operation) => {
+          if (this.operations) {
+            this.operations.forEach((operation) => {
               const operationDate = this.parseISODate(operation.operationDate);
               if (operationDate !== "Invalid Date") {
                 if (!operationsPerDay[operationDate]) {
@@ -197,7 +205,9 @@ export default {
                 }
                 operationsPerDay[operationDate].push({
                   ...operation,
-                  patientName: `${patient.name} ${patient.family_name}`,
+                  patientName:
+                    operation.patientName ||
+                    `${this.userName} ${this.userFamilyName}`, // Include il nome del paziente
                 });
               }
             });
@@ -221,15 +231,17 @@ export default {
 
         if (this.operations) {
           this.operations.forEach((operation) => {
-            const operationDate = this.parseISODate(operation.operationDate); // Data dell'operazione
+            const operationDate = this.parseISODate(operation.operationDate);
             if (operationDate !== "Invalid Date") {
               if (!operationsPerDay[operationDate]) {
-                operationsPerDay[operationDate] = []; // Inizializza se non esiste
+                operationsPerDay[operationDate] = [];
               }
               operationsPerDay[operationDate].push({
                 ...operation,
-                patientName: `${userData.name} ${userData.family_name}`,
-              }); // Aggiungi operazione alla data
+                patientName:
+                  operation.patientName ||
+                  `${this.userName} ${this.userFamilyName}`, // Include il nome del paziente
+              });
             }
           });
         }
@@ -502,14 +514,26 @@ export default {
     async loadPatientData(patientId) {
       try {
         // Carica le operazioni e le radiografie in parallelo
-        const [operationsResponse, radiographsResponse] = await Promise.all([
-          fetch(`/api/patients/${patientId}/operations`),
-          fetch(`/api/patients/${patientId}/radiographs`),
-        ]);
+        console.log("PAATIENTINDU: ", patientId);
+        const [operationsResponse, radiographsResponse, patientResponse] =
+          await Promise.all([
+            fetch(`/api/patients/${patientId}/operations`),
+            fetch(`/api/patients/${patientId}/radiographs`),
+            fetch(`/api/get_user/${patientId}`), // Nuova chiamata per recuperare i dettagli del paziente
+          ]);
 
-        // Controlla se entrambe le risposte sono valide
+        // Controlla se tutte le risposte sono valide
         if (operationsResponse.ok) {
           const operationsData = await operationsResponse.json();
+
+          // Recupera il nome e il cognome del paziente
+          if (patientResponse.ok) {
+            const patientData = await patientResponse.json();
+            operationsData.forEach((operation) => {
+              operation.patientName = `${patientData.name} ${patientData.family_name}`;
+            });
+          }
+
           console.log("Operazioni: ", operationsData);
           this.handleLoadedData("operations", patientId, operationsData);
         } else {
