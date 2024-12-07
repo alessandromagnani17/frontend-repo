@@ -25,10 +25,11 @@
               `${day.year}-${String(day.month).padStart(2, '0')}-${String(
                 day.date
               ).padStart(2, '0')}` === minDate,
-            selected: isSelectedDay(day), // Aggiungi la classe 'selected' per il giorno selezionato
+            selected: isSelectedDay(day),
           },
         ]"
         @click="!day.isDisabled && selectDay(day)"
+        :title="generateTooltip(day)"
       >
         <!-- Data -->
         <div class="date">{{ day.date }}</div>
@@ -92,6 +93,47 @@ export default {
           ).padStart(2, "0")}`
       );
     },
+    generateTooltip(day) {
+      // Ottieni le operazioni per il giorno corrente
+      const operations = day.operations || [];
+      const numberOfOperations = operations.length;
+
+      // Se non ci sono operazioni
+      if (numberOfOperations === 0) {
+        return `Nessuna operazione programmata per oggi.`;
+      }
+
+      // Estrai gli orari delle operazioni, formattando solo l'ora (HH:mm)
+      const operationTimes = operations
+        .map((op) => {
+          const operationTime = new Date(op.operationDate);
+          const hours = String(operationTime.getHours()).padStart(2, "0");
+          const minutes = String(operationTime.getMinutes()).padStart(2, "0");
+          return `${hours}:${minutes}`;
+        })
+        .sort(); // Ordina gli orari
+
+      // Se ci sono 3 o più operazioni, usa le virgole per separare gli orari
+      let operationText;
+      if (numberOfOperations >= 3) {
+        operationText = `Hai ${numberOfOperations} operazion${
+          numberOfOperations > 1 ? "i" : "e"
+        } programmat${
+          numberOfOperations > 1 ? "e" : "a"
+        } per oggi alle ${operationTimes.slice(0, -1).join(", alle ")} e alle ${
+          operationTimes[operationTimes.length - 1]
+        }`;
+      } else {
+        // Se ci sono meno di 3 operazioni, usa "e alle"
+        operationText = `Hai ${numberOfOperations} operazion${
+          numberOfOperations > 1 ? "i" : "e"
+        } programmat${
+          numberOfOperations > 1 ? "e" : "a"
+        } per oggi alle ${operationTimes.join(" e alle ")}`;
+      }
+
+      return operationText;
+    },
   },
 };
 </script>
@@ -113,21 +155,17 @@ export default {
 }
 
 .month-button {
-  background: none; /* Nessun sfondo */
-  border: none; /* Nessun bordo */
-  padding: 5px; /* Spazio interno per clic comodamente */
-  cursor: pointer; /* Cambia il cursore per indicare che è cliccabile */
-  font-size: 1.5em; /* Dimensione del carattere per renderlo visibile */
-  color: #007bff; /* Colore blu per l’icona del pulsante */
-  transition: color 0.3s ease; /* Animazione per un tocco moderno */
+  background: none;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  font-size: 1.5em;
+  color: #007bff;
+  transition: color 0.3s ease;
 }
 
 .month-button:hover {
-  color: #0056b3; /* Cambia colore al passaggio del mouse */
-}
-
-.month-button:focus {
-  outline: none; /* Rimuove il bordo di focus */
+  color: #0056b3;
 }
 
 .calendar-grid {
@@ -153,23 +191,20 @@ export default {
   background-color: #f9f9f9;
 }
 
-/* Giorno di oggi - colore di sfondo rosso chiaro */
 .calendar-day.today {
-  background-color: #f9f4f4; /* Rosso chiaro */
-  border: 2px solid #ffa8a8db; /* Bordo rosso (già presente) */
+  background-color: #f9f4f4;
+  border: 2px solid #ffa8a8db;
   border-radius: 5px;
 }
 
-/* Giorno selezionato - bordo blu (#007bff) */
 .calendar-day.selected {
   border-radius: 5px;
-  border: 2px solid #7bbbffe7; /* Bordo blu */
+  border: 2px solid #7bbbffe7;
 }
 
-/* Modifica la visibilità del bordo di oggi per avere un'idea chiara del giorno corrente */
 .calendar-day.today.selected {
-  background-color: #ffebeb; /* Rosso chiaro */
-  border: 2px solid #7bbbffe7; /* Bordo blu per il giorno selezionato */
+  background-color: #ffebeb;
+  border: 2px solid #7bbbffe7;
 }
 
 .calendar-day-names {
@@ -188,13 +223,6 @@ export default {
   font-size: 0.9em;
 }
 
-.activity-icons {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
 .icon-row {
   display: flex;
   justify-content: center;
@@ -209,5 +237,21 @@ export default {
 .icon {
   width: 7px;
   height: 7px;
+}
+
+/* Tooltip */
+.tooltip {
+  position: absolute;
+  top: -25px; /* Posiziona il tooltip sopra la data */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 12px;
+  z-index: 10;
+  visibility: visible;
+  opacity: 0.9;
 }
 </style>
