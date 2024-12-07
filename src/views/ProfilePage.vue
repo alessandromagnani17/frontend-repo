@@ -64,7 +64,7 @@ export default {
         return;
       }
 
-      fetch(`http://localhost:5000/get_user/${userId}`)
+      fetch(`http://localhost:5000/api/get_user/${userId}`)
         .then((response) =>
           response.ok
             ? response.json()
