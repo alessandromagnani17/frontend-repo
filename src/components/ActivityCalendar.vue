@@ -157,14 +157,6 @@ export default {
     }
   },
   computed: {
-    debugSelectedDay() {
-      console.log("Selected Day Debug:", this.selectedDay); // Mostra il giorno selezionato
-      if (this.selectedDay && this.selectedDay.operations) {
-        console.log("Operations Debug:", this.selectedDay.operations); // Mostra le operazioni
-      }
-      return this.selectedDay;
-    },
-
     daysInMonth() {
       const days = [];
       const lastDayOfMonth = new Date(this.year, this.month + 1, 0);
@@ -196,8 +188,9 @@ export default {
             });
           }
 
-          if (this.operations) {
-            this.operations.forEach((operation) => {
+          // Aggiungi le operazioni per ogni paziente
+          if (patient.operations) {
+            patient.operations.forEach((operation) => {
               const operationDate = this.parseISODate(operation.operationDate);
               if (operationDate !== "Invalid Date") {
                 if (!operationsPerDay[operationDate]) {
@@ -205,15 +198,14 @@ export default {
                 }
                 operationsPerDay[operationDate].push({
                   ...operation,
-                  patientName:
-                    operation.patientName ||
-                    `${this.userName} ${this.userFamilyName}`, // Include il nome del paziente
+                  patientName: `${patient.name} ${patient.family_name}`, // Include il nome del paziente
                 });
               }
             });
           }
         });
       } else {
+        // Se l'utente è un paziente, carica solo le proprie operazioni e radiografie
         const userData = JSON.parse(localStorage.getItem("userData")); // Decodifica il JSON
 
         if (this.radiographs) {
@@ -500,14 +492,36 @@ export default {
           const data = await response.json();
           this.patients = data;
 
-          // Carica le radiografie e le operazioni per ogni paziente
-          this.patients.forEach((patient) => {
-            this.loadPatientData(patient.userId); // Carica i dati per ogni paziente
-          });
+          // Carica i dati di tutti i pazienti in batch
+          await this.loadAllPatientData();
         } catch (error) {
           console.error("Errore nel caricamento dei pazienti:", error);
         }
       }
+    },
+
+    // Nuovo metodo per caricare i dati in batch
+    async loadAllPatientData() {
+      const batchPromises = this.patients.map((patient) =>
+        this.loadPatientData(patient.userId)
+      );
+
+      // Usa Promise.allSettled per evitare errori bloccanti
+      const results = await Promise.allSettled(batchPromises);
+
+      // Log dei risultati per il debug
+      results.forEach((result, index) => {
+        if (result.status === "fulfilled") {
+          console.log(
+            `Dati caricati per paziente ${this.patients[index].userId}`
+          );
+        } else {
+          console.error(
+            `Errore nel caricamento dei dati per paziente ${this.patients[index].userId}:`,
+            result.reason
+          );
+        }
+      });
     },
 
     // Funzione generica per caricare le operazioni e le radiografie
