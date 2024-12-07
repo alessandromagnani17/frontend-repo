@@ -24,7 +24,7 @@
             today:
               `${day.year}-${String(day.month).padStart(2, '0')}-${String(
                 day.date
-              ).padStart(2, '0')}` === minDate,
+              ).padStart(2, '0')}` === formattedToday,
             selected: isSelectedDay(day),
           },
         ]"
@@ -35,24 +35,27 @@
         <div class="date">{{ day.date }}</div>
 
         <!-- Icone Operazioni -->
-        <div class="icon-row operations">
-          <img
-            v-for="n in day.operations.length"
-            :key="'operation-' + n + '-' + day.date"
-            :src="operationIcon"
-            alt="Operazione"
-            class="icon"
-          />
-        </div>
+        <div class="icons">
+          <div class="icon-row operations">
+            <img
+              v-for="(operation, index) in day.operations"
+              :key="'operation-' + index + '-' + day.date"
+              :src="operationIcon"
+              alt="Operazione"
+              class="icon"
+            />
+          </div>
 
-        <div class="icon-row radiographs">
-          <img
-            v-for="n in day.radiographs.length"
-            :key="'radiograph-' + n + '-' + day.date"
-            :src="radiographIcon"
-            alt="Radiografia"
-            class="icon"
-          />
+          <!-- Icone Radiografie -->
+          <div class="icon-row radiographs">
+            <img
+              v-for="(radiograph, index) in day.radiographs"
+              :key="'radiograph-' + index + '-' + day.date"
+              :src="radiographIcon"
+              alt="Radiografia"
+              class="icon"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -74,9 +77,14 @@ export default {
     changeMonth: Function,
     selectedDay: Object,
   },
+  data() {
+    return {
+      // Ottieni la data di oggi in formato YYYY-MM-DD per il confronto
+      formattedToday: new Date().toISOString().split("T")[0],
+    };
+  },
   methods: {
     selectDay(day) {
-      // Aggiungi una proprietà 'formattedDate' alla data
       const formattedDate = `${day.year}-${String(day.month).padStart(
         2,
         "0"
@@ -84,7 +92,6 @@ export default {
       this.$emit("update-selected-day", { ...day, formattedDate });
     },
     isSelectedDay(day) {
-      // Confronta la data formattata
       return (
         this.selectedDay &&
         this.selectedDay.formattedDate ===
@@ -94,16 +101,25 @@ export default {
       );
     },
     generateTooltip(day) {
-      // Ottieni le operazioni per il giorno corrente
       const operations = day.operations || [];
       const numberOfOperations = operations.length;
 
-      // Se non ci sono operazioni
+      // Verifica se è oggi
+      const isToday =
+        `${day.year}-${String(day.month).padStart(2, "0")}-${String(
+          day.date
+        ).padStart(2, "0")}` === this.formattedToday;
+
       if (numberOfOperations === 0) {
-        return `Nessuna operazione programmata per oggi.`;
+        return isToday
+          ? "Nessuna operazione programmata per oggi."
+          : `Nessuna operazione programmata per ${
+              this.dayNames[
+                new Date(day.year, day.month - 1, day.date).getDay()
+              ]
+            } ${day.date}.`;
       }
 
-      // Estrai gli orari delle operazioni, formattando solo l'ora (HH:mm)
       const operationTimes = operations
         .map((op) => {
           const operationTime = new Date(op.operationDate);
@@ -111,27 +127,36 @@ export default {
           const minutes = String(operationTime.getMinutes()).padStart(2, "0");
           return `${hours}:${minutes}`;
         })
-        .sort(); // Ordina gli orari
+        .sort();
 
-      // Se ci sono 3 o più operazioni, usa le virgole per separare gli orari
       let operationText;
       if (numberOfOperations >= 3) {
         operationText = `Hai ${numberOfOperations} operazion${
           numberOfOperations > 1 ? "i" : "e"
-        } programmat${
-          numberOfOperations > 1 ? "e" : "a"
-        } per oggi alle ${operationTimes.slice(0, -1).join(", alle ")} e alle ${
+        } programmat${numberOfOperations > 1 ? "e" : "a"} per ${
+          isToday
+            ? "oggi"
+            : `${
+                this.dayNames[
+                  new Date(day.year, day.month - 1, day.date).getDay()
+                ]
+              } ${day.date}`
+        } alle ${operationTimes.slice(0, -1).join(", alle ")} e alle ${
           operationTimes[operationTimes.length - 1]
         }`;
       } else {
-        // Se ci sono meno di 3 operazioni, usa "e alle"
         operationText = `Hai ${numberOfOperations} operazion${
           numberOfOperations > 1 ? "i" : "e"
-        } programmat${
-          numberOfOperations > 1 ? "e" : "a"
-        } per oggi alle ${operationTimes.join(" e alle ")}`;
+        } programmat${numberOfOperations > 1 ? "e" : "a"} per ${
+          isToday
+            ? "oggi"
+            : `${
+                this.dayNames[
+                  new Date(day.year, day.month - 1, day.date).getDay()
+                ]
+              } ${day.date}`
+        } alle ${operationTimes.join(" e alle ")}`;
       }
-
       return operationText;
     },
   },
