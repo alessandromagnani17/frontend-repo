@@ -273,7 +273,6 @@ export default {
           form.value.password
         );
         if (!user) return;
-
         // 2: Controllo tentativi di accesso
         const attemptLeft = await getAttemptsLeft(form.value.email);
         if (attemptLeft == 0) {
@@ -348,6 +347,7 @@ export default {
           "Tentativi di accesso esauriti. Controlla la tua email per il link di reimpostazione della password.";
         sendPasswordResetEmailHandler(); // Trigger password reset
       } else {
+        console.log("error: ", error);
         errors.value.general = "Errore sconosciuto durante il login.";
       }
     };

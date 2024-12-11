@@ -314,7 +314,15 @@ export default {
 
       try {
         const response = await predictImage(formData);
-        this.predictedClass = response.predicted_class;
+
+        this.predictedClassMessage = response.predicted_class;
+        // Estrazione numero dal messaggio
+        const classMatch = this.predictedClassMessage.match(/\d+/);
+        this.predictedClass = classMatch ? parseInt(classMatch[0], 10) : null;
+
+        console.log("Predicted Class (number):", this.predictedClass);
+        console.log("Predicted Class (message):", this.predictedClassMessage);
+
         this.gradcamImage = response.gradcam_image;
         this.showNewPredictionButton = true;
         this.showPredictButton = false;
@@ -323,6 +331,8 @@ export default {
         this.showKneeSide = false;
       } catch (error) {
         console.error("Errore durante la previsione:", error);
+      } finally {
+        this.loadingPredict = false; // Ferma il caricamento
       }
     },
     onPatientChange() {
