@@ -123,8 +123,10 @@
 </template>
 
 <script>
-import { getPatientsFromDoctor } from "@/services/api-service";
-import { loadRadiographiesForPatient } from "@/services/api-service";
+import {
+  getPatientsFromDoctor,
+  loadRadiographiesForPatient,
+} from "@/services/api-service";
 
 export default {
   data() {
@@ -141,85 +143,80 @@ export default {
     };
   },
   created() {
-    this.loadData(); // Chiama il metodo asincrono separato
+    this.loadData();
   },
   methods: {
     async loadData() {
-      const userDataString = localStorage.getItem("userData");
-      const userData = JSON.parse(userDataString);
+      const userData = JSON.parse(localStorage.getItem("userData"));
       this.role = userData.role;
 
       if (this.role === "doctor") {
-        this.patients = await getPatientsFromDoctor(userData.doctorID);
+        await this.loadDoctorData(userData);
       } else if (this.role === "patient") {
-        this.selectedPatientId = userData.uid;
-        this.selectedPatientName = localStorage.getItem("Name");
-        this.selectedPatientSurname = localStorage.getItem("Surname");
-        this.isLoadingRadiographs = true;
-
-        this.userRadiographs = await loadRadiographiesForPatient(
-          this.selectedPatientId
-        );
-
-        if (this.userRadiographs.length === 0) {
-          this.errorNoRadiographies = true;
-        } else {
-          this.errorNoRadiographies = false;
-        }
-
-        this.isLoadingRadiographs = false;
+        await this.loadPatientData(userData);
       }
+
       this.isLoading = false;
     },
-    async onPatientChange() {
-      this.userRadiographs = [];
+    async loadDoctorData(userData) {
+      this.patients = await getPatientsFromDoctor(userData.doctorID);
+
+      if (this.$route.query.patient_id) {
+        this.selectedPatientId = this.$route.query.patient_id;
+        this.selectedPatientName = localStorage.getItem("selectedPatientName");
+        this.selectedPatientSurname = localStorage.getItem(
+          "selectedPatientSurname"
+        );
+        await this.loadRadiographies(this.selectedPatientId);
+        this.updateRoute();
+      }
+    },
+    async loadPatientData(userData) {
+      this.selectedPatientId = userData.uid;
+      this.selectedPatientName = localStorage.getItem("Name");
+      this.selectedPatientSurname = localStorage.getItem("Surname");
+      await this.loadRadiographies(this.selectedPatientId);
+    },
+    async loadRadiographies(patientId) {
       this.isLoadingRadiographs = true;
+      this.userRadiographs = await loadRadiographiesForPatient(patientId);
+      this.errorNoRadiographies = this.userRadiographs.length === 0;
+      this.isLoadingRadiographs = false;
+    },
+    updateRoute() {
+      this.$router.push({
+        name: "ViewRadiographs",
+        query: { patient_id: this.selectedPatientId },
+      });
+    },
+    async onPatientChange() {
       const patient = this.patients.find(
         (p) => p.userId === this.selectedPatientId
       );
-
       if (patient) {
         this.selectedPatientName = patient.name;
         this.selectedPatientSurname = patient.family_name;
-        this.selectedPatientId = patient.userId;
       }
-
-      this.userRadiographs = await loadRadiographiesForPatient(
-        this.selectedPatientId
-      );
-
-      if (this.userRadiographs.length == 0) {
-        this.errorNoRadiographies = true;
-      } else {
-        this.errorNoRadiographies = false;
-      }
-
-      this.isLoadingRadiographs = false;
-      this.$router.push({
-        name: "ViewRadiographs",
-        query: {
-          patient_id: this.selectedPatientId,
-        },
-      });
+      await this.loadRadiographies(this.selectedPatientId);
+      this.updateRoute();
     },
     changePatient() {
       this.selectedPatientId = "";
       this.selectedPatientName = "";
       this.selectedPatientSurname = "";
-      this.userRadiographies = [];
+      this.userRadiographs = [];
       this.errorNoRadiographies = false;
       this.isLoadingRadiographs = false;
-      this.$router.push({ name: "ViewRadiographs" });
+      this.updateRoute();
     },
-    goToRadiographDetail(index, or, gd) {
-      localStorage.setItem("selected_original_img", or);
-      localStorage.setItem("selected_gradcam_img", gd);
-      const idx = index + 1;
+    goToRadiographDetail(index, originalImg, gradcamImg) {
+      localStorage.setItem("selected_original_img", originalImg);
+      localStorage.setItem("selected_gradcam_img", gradcamImg);
       this.$router.push({
         name: "RadiographyDetail",
         query: {
           patient_id: this.selectedPatientId,
-          index: idx,
+          index: index + 1,
         },
       });
     },

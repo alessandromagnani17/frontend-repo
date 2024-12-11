@@ -53,7 +53,6 @@ export default {
 
       if (userData && userData.role === "patient") {
         selectedPatient.value = userData; // Imposta selectedPatient con userData
-        console.log("Informazioni utente loggato:", userData); // Stampa le informazioni dell'utente
       } else {
         console.error("Nessun ID paziente trovato nel localStorage.");
       }

@@ -75,6 +75,8 @@
 </template>
 
 <script>
+import { getRadiographs } from "@/services/api-service";
+
 export default {
   name: "PatientRadiographs",
   props: {
@@ -117,31 +119,14 @@ export default {
         console.log("Props patientId:", this.patientId);
         console.log("Props patientName:", this.patientName);
 
-        const response = await fetch(
-          `/api/patients/${this.currentPatientId}/radiographs`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log("[DEBUG] Radiografie ricevute dal backend:", data);
-          this.radiographs = data;
-        } else {
-          this.errorMessage = "Errore nel recupero delle radiografie.";
-          console.error(
-            "[ERROR] Errore nella risposta del server:",
-            response.status
-          );
-        }
+        // Usa la funzione del servizio API
+        const data = await getRadiographs(this.currentPatientId);
+        console.log("[DEBUG] Radiografie ricevute dal backend:", data);
+        this.radiographs = data;
       } catch (error) {
-        this.errorMessage = "Errore di connessione al server.";
+        this.errorMessage = "Errore nel recupero delle radiografie.";
         console.error(
-          "[ERROR] Errore durante la connessione al server:",
+          "[ERROR] Errore durante il recupero delle radiografie:",
           error
         );
       }

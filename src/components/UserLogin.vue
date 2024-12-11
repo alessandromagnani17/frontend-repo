@@ -164,9 +164,15 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { auth } from "@/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { sendPasswordResetEmail } from "firebase/auth";
 import EventBus from "../eventBus";
+import {
+  checkEmailVerification,
+  signInUser,
+  login,
+  getAttemptsLeft,
+  sendPasswordResetEmail,
+  decrementLoginAttempts,
+} from "@/services/api-service";
 
 export default {
   name: "UserLogin",
@@ -233,8 +239,8 @@ export default {
 
     const sendPasswordResetEmailHandler = async () => {
       try {
-        await sendPasswordResetEmail(auth, form.value.email); // Passa l'oggetto auth come primo argomento
-        alert("Un'email per reimpostare la password è stata inviata.");
+        console.log("UserLogin mando reset");
+        await sendPasswordResetEmail(form.value.email); // Passa l'oggetto auth come primo argomento
       } catch (error) {
         console.error("Errore durante l'invio dell'email di reset:", error);
         errors.value.general = "Errore durante l'invio dell'email di reset.";
@@ -253,76 +259,34 @@ export default {
       errors.value.general = ""; // Reset errors
 
       try {
-        if (!(await checkEmailVerification())) return;
+        // 1: Controllo email verificata
+        const emailVerified = await checkEmailVerification(form.value.email);
+        if (emailVerified) {
+          errors.value.general = emailVerified;
+          return;
+        }
 
-        const user = await signInUser();
-        if (!user) return; // Exit if sign-in failed
+        // 2: Controllo credenziali
+        const user = await signInUser(
+          auth,
+          form.value.email,
+          form.value.password
+        );
+        if (!user) return;
 
-        // Ottieni il token ID e invia al backend
+        // 2: Controllo tentativi di accesso
+        const attemptLeft = await getAttemptsLeft(form.value.email);
+        if (attemptLeft == 0) {
+          errors.value.general =
+            "Tentativi di accesso esauriti. Controlla la tua email per il link di reimpostazione della password.";
+          return;
+        }
         const token = await getIdToken(user);
         await handleLoginResponse(token);
       } catch (error) {
         handleError(error);
       } finally {
         loading.value = false;
-      }
-    };
-
-    // Funzione per controllare la verifica dell'email
-    const checkEmailVerification = async () => {
-      try {
-        const verificationResponse = await axios.post(
-          "http://127.0.0.1:5000/check-email-verification",
-          { email: form.value.email }
-        );
-
-        console.log(
-          `Risposta server verifica email: STATUS ${verificationResponse.status} MSG ${verificationResponse.data.message}`
-        );
-        return true;
-      } catch (error) {
-        if (error.response) {
-          switch (error.response.status) {
-            case 403:
-              errors.value.general =
-                "La tua email non è stata verificata. Verifica la tua email prima di accedere.";
-              break;
-            case 404:
-              errors.value.general =
-                "Utente non trovato. Controlla le credenziali.";
-              break;
-            case 400:
-              errors.value.general = "Inserire email.";
-              break;
-            default:
-              errors.value.general =
-                error.response.data.error ||
-                "Errore nella verifica dell'email.";
-          }
-        } else {
-          errors.value.general = "Errore di connessione. Riprova più tardi.";
-        }
-        console.error("Errore nella verifica dell'email:", error);
-        return false;
-      }
-    };
-
-    // Funzione per eseguire il login dell'utente
-    const signInUser = async () => {
-      try {
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          form.value.email,
-          form.value.password
-        );
-
-        const user = userCredential.user;
-
-        return user; // Return user object
-      } catch (error) {
-        console.error("Errore durante il login:", error);
-        handleError(error);
-        return null; // Return null if failed
       }
     };
 
@@ -337,11 +301,10 @@ export default {
     };
 
     // Funzione per gestire la risposta del login
+    // Se si esegue in locale usare 127.0.0.1:5000, altrimenti 34.122.99.160
     const handleLoginResponse = async (token) => {
       try {
-        const response = await axios.post("http://127.0.0.1:5000/login", {
-          idToken: token,
-        });
+        const response = await login(token);
         storeUserData(response.data.user, token);
         router.push({ name: "WelcomePage" });
       } catch (error) {
@@ -390,15 +353,21 @@ export default {
     };
 
     // Funzione per gestire credenziali non valide
+    // Se si esegue in locale usare 127.0.0.1:5000, altrimenti 34.122.99.160
     const handleInvalidCredential = async () => {
       try {
-        const decrementResponse = await axios.post(
-          "http://127.0.0.1:5000/decrement-attempts",
-          { email: form.value.email }
+        const decrementResponse = await decrementLoginAttempts(
+          form.value.email
         );
 
-        const attemptsRemaining = decrementResponse.data.loginAttemptsLeft;
-        errors.value.general = `Password errata. Hai ${attemptsRemaining} tentativi rimanenti.`;
+        const attemptsRemaining = decrementResponse.loginAttemptsLeft;
+        if (attemptsRemaining == 0) {
+          errors.value.general =
+            "Tentativi di accesso esauriti. Controlla la tua email per il link di reimpostazione della password.";
+          sendPasswordResetEmailHandler();
+        } else {
+          errors.value.general = `Password errata. Hai ${attemptsRemaining} tentativi rimanenti.`;
+        }
       } catch (decrementError) {
         console.error(
           "Errore durante il decremento dei tentativi:",

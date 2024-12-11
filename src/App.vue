@@ -239,6 +239,9 @@ export default {
     },
     updateUnreadCount(count) {
       this.unreadCount = count; // Aggiorna il conteggio delle notifiche non lette
+      this.dropdownOpen = false;
+      //console.log("[DEBUG] updateAuthStatus - authToken:", this.authToken);
+      //console.log("[DEBUG] role:", this.userRole);
     },
   },
   mounted() {
