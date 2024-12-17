@@ -57,6 +57,7 @@ import { format, parseISO } from "date-fns";
 import { it } from "date-fns/locale"; // Importa la localizzazione italiana
 import { formatDistanceToNow } from "date-fns";
 import EventBus from "../eventBus"; // Importa il tuo EventBus
+import { getNotifications, patchNotifications } from "@/services/api-service";
 
 export default {
   name: "UserNotifications",
@@ -73,52 +74,38 @@ export default {
 
   methods: {
     async fetchNotifications() {
-      try {
-        const userData = JSON.parse(localStorage.getItem("userData"));
-        const userId = userData.userId;
+      const userData = JSON.parse(localStorage.getItem("userData"));
+      const userId = userData.userId;
 
-        const response = await fetch(`/api/notifications?patientId=${userId}`);
-        if (!response.ok) {
-          throw new Error("Errore nel recupero delle notifiche");
-        }
+      const response = getNotifications(userId);
 
-        const data = await response.json();
-        if (Array.isArray(data.notifications)) {
-          // Ordina le notifiche dalla più recente alla più vecchia
-          this.notifications = data.notifications
-            .sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt)) // Ordinamento in base a 'sentAt'
-            .map((notification) => ({
-              ...notification,
-              relativeSentAt: formatDistanceToNow(
-                new Date(notification.sentAt),
-                {
-                  addSuffix: true,
-                  locale: it, // Aggiunge la lingua italiana
-                }
-              ),
-              // Formattazione della data
-              formattedDate: format(
-                parseISO(notification.date),
-                "d MMMM yyyy",
-                {
-                  locale: it, // Imposta la lingua italiana per la data
-                }
-              ),
-            }));
+      const data = await response.json();
+      if (Array.isArray(data.notifications)) {
+        // Ordina le notifiche dalla più recente alla più vecchia
+        this.notifications = data.notifications
+          .sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt)) // Ordinamento in base a 'sentAt'
+          .map((notification) => ({
+            ...notification,
+            relativeSentAt: formatDistanceToNow(new Date(notification.sentAt), {
+              addSuffix: true,
+              locale: it, // Aggiunge la lingua italiana
+            }),
+            // Formattazione della data
+            formattedDate: format(parseISO(notification.date), "d MMMM yyyy", {
+              locale: it, // Imposta la lingua italiana per la data
+            }),
+          }));
 
-          // Calcola il numero di notifiche non lette
-          this.unreadCount = this.notifications.filter(
-            (notification) => !notification.isRead
-          ).length;
+        // Calcola il numero di notifiche non lette
+        this.unreadCount = this.notifications.filter(
+          (notification) => !notification.isRead
+        ).length;
 
-          console.log("Numero di notifiche non lette = ", this.unreadCount);
-          // Emetti l'evento per aggiornare il conteggio delle notifiche non lette
-          EventBus.emit("unread-count-changed", this.unreadCount); // Usa EventBus.emit per emettere l'evento
-        } else {
-          throw new Error("Formato delle notifiche inatteso");
-        }
-      } catch (error) {
-        console.error("Errore nel recupero delle notifiche:", error);
+        console.log("Numero di notifiche non lette = ", this.unreadCount);
+        // Emetti l'evento per aggiornare il conteggio delle notifiche non lette
+        EventBus.emit("unread-count-changed", this.unreadCount); // Usa EventBus.emit per emettere l'evento
+      } else {
+        throw new Error("Formato delle notifiche inatteso");
       }
     },
 
@@ -135,17 +122,7 @@ export default {
       }
 
       try {
-        const response = await fetch(`/api/notifications/${notificationId}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ isRead: true }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Errore nel segnare la notifica come letta.");
-        }
+        patchNotifications(notificationId, JSON.stringify({ isRead: true }));
 
         // Aggiorna lo stato dopo aver segnato come letta
         this.notifications = this.notifications.map((notification) =>

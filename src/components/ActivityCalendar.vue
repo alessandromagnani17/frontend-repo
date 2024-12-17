@@ -96,6 +96,12 @@
 <script>
 import Calendar from "./ScheduleCalendar.vue";
 import DayDetails from "./DayDetails.vue";
+import {
+  fetchNotifications,
+  saveOperations,
+  loadPatientsData,
+  loadOperationsAndRadiographs,
+} from "@/services/api-service";
 
 export default {
   components: {
@@ -320,122 +326,84 @@ export default {
       this.selectedDay = day;
     },
     async scheduleOperation() {
-      try {
-        // Controlla che i campi non siano vuoti
-        if (
-          !this.selectedPatientId ||
-          !this.operationDate ||
-          !this.operationTime ||
-          !this.description
-        ) {
-          alert("Data, ora o descrizione mancanti.");
-          return;
-        }
-
-        // Recupera l'ID del dottore e del paziente
-        const doctorId = localStorage.getItem("doctorId");
-
-        // Verifica che la data selezionata non sia nel passato
-        const selectedDate = new Date(this.operationDate);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Rimuove l'ora dalla data corrente
-        if (selectedDate < today) {
-          alert("La data deve essere futura!");
-          return;
-        }
-
-        // Combinare la data e l'ora
-        const formattedDate = this.combineDateAndTime(
-          this.operationDate,
-          this.operationTime
-        );
-
-        // Chiamata al backend per salvare l'operazione
-        const response = await fetch("/api/operations", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            doctorId,
-            patientId: this.selectedPatientId,
-            operationDate: formattedDate, // Invio la data + ora combinata
-            description: this.description,
-            createdAt: new Date().toISOString(), // Timestamp di creazione
-          }),
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(
-            error.message || "Errore durante la pianificazione dell'operazione."
-          );
-        }
-
-        await response.json();
-        alert("Operazione pianificata con successo!");
-
-        // Dopo che l'operazione è stata pianificata, invia una notifica al paziente
-        await this.sendNotificationToPatient();
-
-        // Mostra il calendario delle attività
-        this.showActivityCalendar();
-
-        // Chiudi il modal
-        this.closeScheduleModal();
-      } catch (error) {
-        console.error(
-          "Errore durante la pianificazione dell'operazione:",
-          error
-        );
-        alert("Errore: " + error.message);
+      // Controlla che i campi non siano vuoti
+      if (
+        !this.selectedPatientId ||
+        !this.operationDate ||
+        !this.operationTime ||
+        !this.description
+      ) {
+        alert("Data, ora o descrizione mancanti.");
+        return;
       }
+
+      // Recupera l'ID del dottore e del paziente
+      const doctorId = localStorage.getItem("doctorId");
+
+      // Verifica che la data selezionata non sia nel passato
+      const selectedDate = new Date(this.operationDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Rimuove l'ora dalla data corrente
+      if (selectedDate < today) {
+        alert("La data deve essere futura!");
+        return;
+      }
+
+      // Combinare la data e l'ora
+      const formattedDate = this.combineDateAndTime(
+        this.operationDate,
+        this.operationTime
+      );
+
+      // Chiamata al backend per salvare l'operazione
+      const data = JSON.stringify({
+        doctorId,
+        patientId: this.selectedPatientId,
+        operationDate: formattedDate, // Invio la data + ora combinata
+        description: this.description,
+        createdAt: new Date().toISOString(), // Timestamp di creazione
+      });
+      const response = saveOperations(data);
+
+      await response.json();
+      alert("Operazione pianificata con successo!");
+
+      // Dopo che l'operazione è stata pianificata, invia una notifica al paziente
+      await this.sendNotificationToPatient();
+
+      // Mostra il calendario delle attività
+      this.showActivityCalendar();
+
+      // Chiudi il modal
+      this.closeScheduleModal();
     },
 
     // Aggiungi questa funzione per inviare la notifica
     async sendNotificationToPatient() {
-      try {
-        if (!this.operationDate || !this.operationTime || !this.description) {
-          alert(
-            "Assicurati di aver inserito tutti i dettagli dell'operazione."
-          );
-          return;
-        }
-
-        // Estrae solo la parte dell'ora e dei minuti per `time`
-        const notificationTime = this.operationTime; // Già in formato HH:mm
-
-        // Crea il messaggio della notifica usando le informazioni dell'operazione
-        const notificationMessage = `Una nuova operazione è stata pianificata per te!`;
-
-        // Aggiunge la data e ora di invio della notifica
-        const sentAt = new Date().toISOString(); // Data e ora corrente in formato ISO 8601
-
-        // Chiamata al backend per inviare la notifica al paziente selezionato
-        const response = await fetch("/api/notifications", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            patientId: this.selectedPatientId,
-            message: notificationMessage,
-            date: this.operationDate,
-            time: notificationTime,
-            sentAt, // Aggiunge l'attributo sentAt alla richiesta
-          }),
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || "Errore nell'invio della notifica.");
-        }
-
-        alert("Notifica inviata al paziente.");
-      } catch (error) {
-        console.error("Errore nell'invio della notifica:", error);
-        alert("Errore nell'invio della notifica.");
+      if (!this.operationDate || !this.operationTime || !this.description) {
+        alert("Assicurati di aver inserito tutti i dettagli dell'operazione.");
+        return;
       }
+
+      // Estrae solo la parte dell'ora e dei minuti per `time`
+      const notificationTime = this.operationTime; // Già in formato HH:mm
+
+      // Crea il messaggio della notifica usando le informazioni dell'operazione
+      const notificationMessage = `Una nuova operazione è stata pianificata per te!`;
+
+      // Aggiunge la data e ora di invio della notifica
+      const sentAt = new Date().toISOString(); // Data e ora corrente in formato ISO 8601
+
+      // Chiamata al backend per inviare la notifica al paziente selezionato
+      const data = JSON.stringify({
+        patientId: this.selectedPatientId,
+        message: notificationMessage,
+        date: this.operationDate,
+        time: notificationTime,
+        sentAt, // Aggiunge l'attributo sentAt alla richiesta
+      });
+      fetchNotifications(data);
+      alert("Notifica inviata al paziente.");
     },
 
     parseISODate(isoString) {
@@ -487,16 +455,12 @@ export default {
     async loadPatients() {
       const doctorId = localStorage.getItem("doctorId");
       if (doctorId) {
-        try {
-          const response = await fetch(`/api/${doctorId}/patients`);
-          const data = await response.json();
-          this.patients = data;
+        const response = loadPatientsData(doctorId);
+        const data = await response.json();
+        this.patients = data;
 
-          // Carica i dati di tutti i pazienti in batch
-          await this.loadAllPatientData();
-        } catch (error) {
-          console.error("Errore nel caricamento dei pazienti:", error);
-        }
+        // Carica i dati di tutti i pazienti in batch
+        await this.loadAllPatientData();
       }
     },
 
@@ -526,43 +490,31 @@ export default {
 
     // Funzione generica per caricare le operazioni e le radiografie
     async loadPatientData(patientId) {
-      try {
-        // Carica le operazioni e le radiografie in parallelo
-        console.log("PAATIENTINDU: ", patientId);
-        const [operationsResponse, radiographsResponse, patientResponse] =
-          await Promise.all([
-            fetch(`/api/patients/${patientId}/operations`),
-            fetch(`/api/patients/${patientId}/radiographs`),
-            fetch(`/api/get_user/${patientId}`), // Nuova chiamata per recuperare i dettagli del paziente
-          ]);
+      // Carica le operazioni e le radiografie in parallelo
+      console.log("PAATIENTINDU: ", patientId);
+      const [operationsResponse, radiographsResponse, patientResponse] =
+        loadOperationsAndRadiographs(patientId);
 
-        // Controlla se tutte le risposte sono valide
-        if (operationsResponse.ok) {
-          const operationsData = await operationsResponse.json();
+      // Controlla se tutte le risposte sono valide
+      if (operationsResponse.ok) {
+        const operationsData = await operationsResponse.json();
 
-          // Recupera il nome e il cognome del paziente
-          if (patientResponse.ok) {
-            const patientData = await patientResponse.json();
-            operationsData.forEach((operation) => {
-              operation.patientName = `${patientData.name} ${patientData.family_name}`;
-            });
-          }
-
-          console.log("Operazioni: ", operationsData);
-          this.handleLoadedData("operations", patientId, operationsData);
-        } else {
-          console.error("Errore nel recupero delle operazioni");
+        // Recupera il nome e il cognome del paziente
+        if (patientResponse.ok) {
+          const patientData = await patientResponse.json();
+          operationsData.forEach((operation) => {
+            operation.patientName = `${patientData.name} ${patientData.family_name}`;
+          });
         }
 
-        if (radiographsResponse.ok) {
-          const radiographsData = await radiographsResponse.json();
-          console.log("Radiografie: ", radiographsData);
-          this.handleLoadedData("radiographs", patientId, radiographsData);
-        } else {
-          console.error("Errore nel recupero delle radiografie");
-        }
-      } catch (error) {
-        console.error("Errore di connessione al server:", error);
+        console.log("Operazioni: ", operationsData);
+        this.handleLoadedData("operations", patientId, operationsData);
+      }
+
+      if (radiographsResponse.ok) {
+        const radiographsData = await radiographsResponse.json();
+        console.log("Radiografie: ", radiographsData);
+        this.handleLoadedData("radiographs", patientId, radiographsData);
       }
     },
 

@@ -213,7 +213,7 @@ export default {
       localStorage.setItem("selected_original_img", originalImg);
       localStorage.setItem("selected_gradcam_img", gradcamImg);
       this.$router.push({
-        name: "RadiographyDetail",
+        name: "RadiographDetail",
         query: {
           patient_id: this.selectedPatientId,
           index: index + 1,

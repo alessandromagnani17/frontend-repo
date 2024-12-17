@@ -42,7 +42,7 @@ export const uploadRadiograph = async (patientId, file) => {
 // Funzione per ottenere i pazienti associati a un dottore specifico
 export const getPatientsFromDoctor = async (doctorId) => {
   try {
-    const response = await axios.get(`/api/${doctorId}/patients`, {
+    const response = await axios.get(`${API_URL}/api/${doctorId}/patients`, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -192,6 +192,97 @@ export const fetchPatients = async () => {
     return response.data;
   } catch (error) {
     console.error("Errore nel recupero dei pazienti:", error);
+    throw error;
+  }
+};
+
+// Funzione per inviare una notifica
+export const fetchNotifications = async (data) => {
+  try {
+    const response = await fetch("/api/notifications", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: data,
+    });
+    return response;
+  } catch (error) {
+    console.error("Errore nell'invio della notifica:", error);
+    alert("Errore nell'invio della notifica.");
+    throw error;
+  }
+};
+
+// Funzione per salvare un'operazione
+export const saveOperations = async (data) => {
+  try {
+    const response = await fetch("/api/operations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: data,
+    });
+    return response;
+  } catch (error) {
+    console.error("Errore durante la pianificazione dell'operazione:", error);
+    alert("Errore: " + error.message);
+    throw error;
+  }
+};
+
+// Funzione per caricare tutti i dati dei pazienti
+export const loadPatientsData = async (doctorId) => {
+  try {
+    const response = await fetch(`/api/${doctorId}/patients`);
+    return response;
+  } catch (error) {
+    console.error("Errore nel caricamento dei pazienti:", error);
+    throw error;
+  }
+};
+
+// Funzione per caricare operazioni e radiografie
+export const loadOperationsAndRadiographs = async (patientId) => {
+  try {
+    const [operationsResponse, radiographsResponse, patientResponse] =
+      await Promise.all([
+        fetch(`/api/patients/${patientId}/operations`),
+        fetch(`/api/patients/${patientId}/radiographs`),
+        fetch(`/api/get_user/${patientId}`), // Nuova chiamata per recuperare i dettagli del paziente
+      ]);
+    return [operationsResponse, radiographsResponse, patientResponse];
+  } catch (error) {
+    console.error("Errore di connessione al server:", error);
+    throw error;
+  }
+};
+
+// Funzione per recuperare le notifiche
+export const getNotifications = async (userId) => {
+  try {
+    const response = await fetch(`/api/notifications?patientId=${userId}`);
+    return response;
+  } catch (error) {
+    console.error("Errore nel recupero delle notifiche:", error);
+    throw error;
+  }
+};
+
+// Funzione per segnare la notifiche come lette
+export const patchNotifications = async (notificationId, isRead) => {
+  try {
+    const response = await fetch(`/api/notifications/${notificationId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: isRead,
+    });
+    return response;
+  } catch (error) {
+    console.error("Errore nel recupero delle notifiche:", error);
     throw error;
   }
 };

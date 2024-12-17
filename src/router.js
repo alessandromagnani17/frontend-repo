@@ -8,7 +8,7 @@ import PatientDashboard from "./components/PatientDashboard.vue";
 import DashboardPage from "./components/DashboardPage.vue";
 import VerifyEmail from "./components/VerifyEmail.vue";
 import PredictRadiograph from "./components/PredictRadiograph.vue";
-import RadiographyDetail from "./components/RadiographyDetail.vue";
+import RadiographDetail from "./components/RadiographDetail.vue";
 import ResetPassword from "./components/ResetPassword.vue";
 import ProfilePage from "./views/ProfilePage.vue";
 import SettingsPage from "./views/SettingsPage.vue";
@@ -100,8 +100,8 @@ const routes = [
   },
   {
     path: "/radiography-detail",
-    name: "RadiographyDetail",
-    component: RadiographyDetail,
+    name: "RadiographDetail",
+    component: RadiographDetail,
     meta: { requiresAuth: true },
   },
   {
