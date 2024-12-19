@@ -87,6 +87,22 @@ export const getRadiographyInformation = async (uid, idx) => {
     return response.data;
   } catch (error) {
     console.error("Errore nel recupero delle radiografie:", error);
+    throw error;
+  }
+};
+
+// Funzione per verificare l'email
+export const verifyEmail = async (uid) => {
+  try {
+    const response = await axios.get(
+      `http://127.0.0.1:5000/verify-email/${uid}`
+    );
+    return response;
+  } catch (error) {
+    console.error(
+      error.response?.data?.error || "Errore durante la verifica dell'email."
+    );
+    throw error;
   }
 };
 

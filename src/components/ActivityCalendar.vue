@@ -149,9 +149,12 @@ export default {
   mounted() {
     this.checkUserRole(); // Verifica il ruolo dell'utente
     if (this.isDoctor) {
+      console.log("ARRIVOOOOOOO1");
       this.loadPatients(); // Carica i pazienti del dottore
     }
+    console.log("ARRIVOOOOOOO2");
     if (this.isPatient) {
+      console.log("ARRIVOOOOOOO3");
       const userData = JSON.parse(localStorage.getItem("userData")); // Decodifica il JSON
       if (userData && userData.userId) {
         const userId = userData.userId; // Recupera lo userId
@@ -363,7 +366,7 @@ export default {
         description: this.description,
         createdAt: new Date().toISOString(), // Timestamp di creazione
       });
-      const response = saveOperations(data);
+      const response = await saveOperations(data);
 
       await response.json();
       alert("Operazione pianificata con successo!");
@@ -402,7 +405,7 @@ export default {
         time: notificationTime,
         sentAt, // Aggiunge l'attributo sentAt alla richiesta
       });
-      fetchNotifications(data);
+      await fetchNotifications(data);
       alert("Notifica inviata al paziente.");
     },
 
@@ -454,10 +457,15 @@ export default {
     // Modifica per caricare i pazienti (solo per i medici)
     async loadPatients() {
       const doctorId = localStorage.getItem("doctorId");
+      console.log("ARRIVOOOOOOOp1");
       if (doctorId) {
-        const response = loadPatientsData(doctorId);
+        console.log("ARRIVOOOOOOOp2");
+        const response = await loadPatientsData(doctorId);
+        console.log("ARRIVOOOOOOOp3 " + response);
         const data = await response.json();
+        console.log("ARRIVOOOOOOO--> " + data);
         this.patients = data;
+        console.log("ARRIVOOOOOOOp4");
 
         // Carica i dati di tutti i pazienti in batch
         await this.loadAllPatientData();
@@ -493,7 +501,7 @@ export default {
       // Carica le operazioni e le radiografie in parallelo
       console.log("PAATIENTINDU: ", patientId);
       const [operationsResponse, radiographsResponse, patientResponse] =
-        loadOperationsAndRadiographs(patientId);
+        await loadOperationsAndRadiographs(patientId);
 
       // Controlla se tutte le risposte sono valide
       if (operationsResponse.ok) {

@@ -77,7 +77,7 @@ export default {
       const userData = JSON.parse(localStorage.getItem("userData"));
       const userId = userData.userId;
 
-      const response = getNotifications(userId);
+      const response = await getNotifications(userId);
 
       const data = await response.json();
       if (Array.isArray(data.notifications)) {
@@ -122,7 +122,10 @@ export default {
       }
 
       try {
-        patchNotifications(notificationId, JSON.stringify({ isRead: true }));
+        await patchNotifications(
+          notificationId,
+          JSON.stringify({ isRead: true })
+        );
 
         // Aggiorna lo stato dopo aver segnato come letta
         this.notifications = this.notifications.map((notification) =>

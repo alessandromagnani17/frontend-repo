@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import { verifyEmail } from "@/services/api-service";
 
 export default {
   name: "VerifyEmail",
@@ -26,25 +26,17 @@ export default {
   },
   async mounted() {
     const uid = this.$route.params.uid; // Assicurati che l'UID sia presente nell'URL
-    try {
-      const response = await axios.get(
-        `http://127.0.0.1:5000/verify-email/${uid}`
-      );
+    const response = await verifyEmail(uid);
 
-      // Imposta il messaggio di verifica basato sulla risposta del server
-      if (response.data.message === "Email già verificata!") {
-        this.verificationMessage = "La tua email è già stata verificata!";
-      } else if (response.data.message === "Email verificata con successo!") {
-        this.verificationMessage = "Email verificata con successo!";
-      }
-
-      console.log("Risposta server --> " + response.data.message);
-    } catch (error) {
-      this.errorMessage =
-        error.response?.data?.error || "Errore durante la verifica dell'email.";
-    } finally {
-      this.isLoading = false;
+    // Imposta il messaggio di verifica basato sulla risposta del server
+    if (response.data.message === "Email già verificata!") {
+      this.verificationMessage = "La tua email è già stata verificata!";
+    } else if (response.data.message === "Email verificata con successo!") {
+      this.verificationMessage = "Email verificata con successo!";
     }
+
+    console.log("Risposta server --> " + response.data.message);
+    this.isLoading = false;
   },
   methods: {
     goToLogin() {
