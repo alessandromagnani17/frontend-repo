@@ -213,7 +213,7 @@ export const fetchPatients = async () => {
 // Funzione per inviare una notifica
 export const fetchNotifications = async (data) => {
   try {
-    const response = await fetch("/api/notifications", {
+    const response = await fetch(`${API_URL}/api/notifications`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -231,7 +231,7 @@ export const fetchNotifications = async (data) => {
 // Funzione per salvare un'operazione
 export const saveOperations = async (data) => {
   try {
-    const response = await fetch("/api/operations", {
+    const response = await fetch(`${API_URL}/api/operations`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -249,7 +249,7 @@ export const saveOperations = async (data) => {
 // Funzione per caricare tutti i dati dei pazienti
 export const loadPatientsData = async (doctorId) => {
   try {
-    const response = await fetch(`/api/${doctorId}/patients`);
+    const response = await fetch(`${API_URL}/api/${doctorId}/patients`);
     return response;
   } catch (error) {
     console.error("Errore nel caricamento dei pazienti:", error);
@@ -262,9 +262,9 @@ export const loadOperationsAndRadiographs = async (patientId) => {
   try {
     const [operationsResponse, radiographsResponse, patientResponse] =
       await Promise.all([
-        fetch(`/api/patients/${patientId}/operations`),
-        fetch(`/api/patients/${patientId}/radiographs`),
-        fetch(`/api/get_user/${patientId}`), // Nuova chiamata per recuperare i dettagli del paziente
+        fetch(`${API_URL}/api/patients/${patientId}/operations`),
+        fetch(`${API_URL}/api/patients/${patientId}/radiographs`),
+        fetch(`${API_URL}/api/get_user/${patientId}`), // Nuova chiamata per recuperare i dettagli del paziente
       ]);
     return [operationsResponse, radiographsResponse, patientResponse];
   } catch (error) {
@@ -276,7 +276,9 @@ export const loadOperationsAndRadiographs = async (patientId) => {
 // Funzione per recuperare le notifiche
 export const getNotifications = async (userId) => {
   try {
-    const response = await fetch(`/api/notifications?patientId=${userId}`);
+    const response = await fetch(
+      `${API_URL}/api/notifications?patientId=${userId}`
+    );
     return response;
   } catch (error) {
     console.error("Errore nel recupero delle notifiche:", error);
@@ -287,13 +289,16 @@ export const getNotifications = async (userId) => {
 // Funzione per segnare la notifiche come lette
 export const patchNotifications = async (notificationId, isRead) => {
   try {
-    const response = await fetch(`/api/notifications/${notificationId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: isRead,
-    });
+    const response = await fetch(
+      `${API_URL}/api/notifications/${notificationId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: isRead,
+      }
+    );
     return response;
   } catch (error) {
     console.error("Errore nel recupero delle notifiche:", error);
