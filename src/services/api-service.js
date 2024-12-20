@@ -94,9 +94,7 @@ export const getRadiographyInformation = async (uid, idx) => {
 // Funzione per verificare l'email
 export const verifyEmail = async (uid) => {
   try {
-    const response = await axios.get(
-      `http://127.0.0.1:5000/verify-email/${uid}`
-    );
+    const response = await axios.get(`${API_URL}/verify-email/${uid}`);
     return response;
   } catch (error) {
     console.error(
@@ -109,7 +107,7 @@ export const verifyEmail = async (uid) => {
 // Funzione per controllare se l'email è stata verificata
 export const checkEmailVerification = async (email) => {
   try {
-    await axios.post("http://127.0.0.1:5000/check-email-verification", {
+    await axios.post(`${API_URL}/check-email-verification`, {
       email: email,
     });
     return "";
@@ -164,27 +162,27 @@ export const signInUser = async (auth, user, psw) => {
 
 // Funzione per il login con token
 export const login = async (token) => {
-  const response = await axios.post("http://127.0.0.1:5000/login", {
+  const response = await axios.post(`${API_URL}/login`, {
     idToken: token,
   });
   return response;
 };
 
 export const getAttemptsLeft = async (email) => {
-  const response = await axios.post("http://127.0.0.1:5000/get-attempts-left", {
+  const response = await axios.post(`${API_URL}/get-attempts-left`, {
     email: email,
   });
   return response.data.loginAttemptsLeft;
 };
 
 export const sendPasswordResetEmail = async (email) => {
-  await axios.post("http://127.0.0.1:5000/send-reset-email", {
+  await axios.post(`${API_URL}/send-reset-email`, {
     email: email,
   });
 };
 
 export const resetPassword = async (uid, password) => {
-  await axios.post("http://127.0.0.1:5000/reset-password", {
+  await axios.post(`${API_URL}/reset-password`, {
     uid: uid,
     password: password,
   });
