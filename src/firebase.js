@@ -5,12 +5,12 @@ import { getFirestore } from "firebase/firestore"; // Importa il modulo Firestor
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDAq_qPlErbns4jjLmCBrcuJLwnWmDxvrY",
-  authDomain: "osteoarthritis-project.firebaseapp.com",
-  projectId: "osteoarthritis-project",
-  storageBucket: "osteoarthritis-project.firebasestorage.app",
-  messagingSenderId: "632479646844",
-  appId: "1:632479646844:web:87cdabce1909352bb135f9",
+  apiKey: "AIzaSyA_MQy_185bQyKR2-SOJ_nupGIbGyNhP7U",
+  authDomain: "osteoarthritis-portal.firebaseapp.com",
+  projectId: "osteoarthritis-portal",
+  storageBucket: "osteoarthritis-portal.firebasestorage.app",
+  messagingSenderId: "621576607313",
+  appId: "1:621576607313:web:671b842e688f1b23954a70",
 };
 
 // Initialize Firebase

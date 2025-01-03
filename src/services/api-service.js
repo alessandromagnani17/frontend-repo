@@ -2,7 +2,7 @@ import axios from "axios";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 const API_URL = "http://127.0.0.1:5000"; // URL backend locale
-//const API_URL = "http://34.122.99.160:5000";
+//const API_URL = "http://34.121.167.35:5000";
 
 // Funzione per il login
 export const loginUser = async (loginData) => {
