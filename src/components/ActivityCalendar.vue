@@ -149,12 +149,9 @@ export default {
   mounted() {
     this.checkUserRole(); // Verifica il ruolo dell'utente
     if (this.isDoctor) {
-      console.log("ARRIVOOOOOOO1");
       this.loadPatients(); // Carica i pazienti del dottore
     }
-    console.log("ARRIVOOOOOOO2");
     if (this.isPatient) {
-      console.log("ARRIVOOOOOOO3");
       const userData = JSON.parse(localStorage.getItem("userData")); // Decodifica il JSON
       if (userData && userData.userId) {
         const userId = userData.userId; // Recupera lo userId
@@ -457,15 +454,10 @@ export default {
     // Modifica per caricare i pazienti (solo per i medici)
     async loadPatients() {
       const doctorId = localStorage.getItem("doctorId");
-      console.log("ARRIVOOOOOOOp1");
       if (doctorId) {
-        console.log("ARRIVOOOOOOOp2");
         const response = await loadPatientsData(doctorId);
-        console.log("ARRIVOOOOOOOp3 " + response);
         const data = await response.json();
-        console.log("ARRIVOOOOOOO--> " + data);
         this.patients = data;
-        console.log("ARRIVOOOOOOOp4");
 
         // Carica i dati di tutti i pazienti in batch
         await this.loadAllPatientData();
@@ -499,7 +491,7 @@ export default {
     // Funzione generica per caricare le operazioni e le radiografie
     async loadPatientData(patientId) {
       // Carica le operazioni e le radiografie in parallelo
-      console.log("PAATIENTINDU: ", patientId);
+      console.log("Id paziente: ", patientId);
       const [operationsResponse, radiographsResponse, patientResponse] =
         await loadOperationsAndRadiographs(patientId);
 
@@ -512,6 +504,7 @@ export default {
           const patientData = await patientResponse.json();
           operationsData.forEach((operation) => {
             operation.patientName = `${patientData.name} ${patientData.family_name}`;
+            console.log("Dati utente: ", patientData);
           });
         }
 

@@ -69,6 +69,7 @@ export default {
       try {
         const data = await getUserData(userId);
         this.userData = data;
+        console.log(data);
         this.resetEditableValues();
       } catch (error) {
         console.error("Errore durante il caricamento dei dati utente:", error);
