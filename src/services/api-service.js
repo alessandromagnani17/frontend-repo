@@ -4,41 +4,6 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 const API_URL = "http://127.0.0.1:5000"; // URL backend locale
 //const API_URL = "http://34.121.167.35:5000";
 
-// Funzione per il login
-export const loginUser = async (loginData) => {
-  try {
-    const response = await axios.post(`${API_URL}/login`, loginData);
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response ? error.response.data.error : error.message);
-  }
-};
-
-// Funzione per caricare una radiografia
-export const uploadRadiograph = async (patientId, file) => {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("patientId", patientId); // Aggiunto l'ID paziente ai formData
-  console.log("PatientID: " + patientId);
-
-  try {
-    const response = await axios.post(
-      `${API_URL}/api/patients/${patientId}/radiographs`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    // Aggiungi maggiori dettagli all'errore
-    console.error("Errore durante il caricamento:", error);
-    throw new Error(error.response ? error.response.data.error : error.message);
-  }
-};
-
 // Funzione per ottenere i pazienti associati a un dottore specifico
 export const getPatientsFromDoctor = async (doctorId) => {
   try {
