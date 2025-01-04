@@ -457,7 +457,13 @@ export default {
       if (doctorId) {
         const response = await loadPatientsData(doctorId);
         const data = await response.json();
-        this.patients = data;
+
+        // Assicurati che sia un array prima di assegnarlo
+        if (Array.isArray(data)) {
+          this.patients = data;
+        } else {
+          this.patients = []; // Imposta un array vuoto per evitare errori
+        }
 
         // Carica i dati di tutti i pazienti in batch
         await this.loadAllPatientData();
