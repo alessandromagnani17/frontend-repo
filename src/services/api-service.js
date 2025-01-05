@@ -44,7 +44,7 @@ export const loadRadiographiesForPatient = async (patientId) => {
 };
 
 // Funzione per ottenere le informazioni della radiografia da un file info.txt
-export const getRadiographyInformation = async (uid, idx) => {
+export const getRadiographInformation = async (uid, idx) => {
   try {
     const response = await axios.get(
       `${API_URL}/get_radiographs_info/${uid}/${idx}`
@@ -313,7 +313,7 @@ export async function uploadToDataset(formData) {
 // Funzione per ottenere i dati dell'utente
 export const getUserData = async (userId) => {
   try {
-    const response = await axios.get(`${API_URL}/get_user/${userId}`);
+    const response = await axios.get(`${API_URL}/api/get_user/${userId}`);
     return response.data;
   } catch (error) {
     console.error("Errore nel recupero dei dati utente:", error);
