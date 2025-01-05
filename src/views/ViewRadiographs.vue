@@ -66,7 +66,7 @@
           >
             <div
               v-for="(radiograph, index) in userRadiographs"
-              :key="radiograph.radiography_id"
+              :key="radiograph.radiograph_id"
               @click="
                 goToRadiographDetail(
                   index,
