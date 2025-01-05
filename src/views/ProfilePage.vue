@@ -63,18 +63,29 @@ export default {
       const userId = userData?.userId;
       if (!userId) {
         console.error("ID utente non definito");
+        alert("Errore: ID utente non trovato nel localStorage");
         return;
       }
 
       try {
+        console.log("Richiesta dati per userId:", userId);
         const data = await getUserData(userId);
+        if (!data) {
+          alert("Nessun dato utente ricevuto dal server");
+          return;
+        }
         this.userData = data;
-        console.log(data);
+        console.log("Dati utente ricevuti:", data);
         this.resetEditableValues();
       } catch (error) {
-        console.error("Errore durante il caricamento dei dati utente:", error);
+        console.error(
+          "Errore dettagliato:",
+          error.response?.data || error.message
+        );
         alert(
-          "Si è verificato un errore durante il caricamento dei dati utente."
+          `Errore durante il caricamento dei dati utente: ${
+            error.response?.data?.error || error.message
+          }`
         );
       }
     },
