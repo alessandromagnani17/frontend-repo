@@ -99,7 +99,7 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: "/radiography-detail",
+    path: "/radiograph-detail",
     name: "RadiographDetail",
     component: RadiographDetail,
     meta: { requiresAuth: true },
