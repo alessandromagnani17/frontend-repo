@@ -15,35 +15,35 @@
           <tbody>
             <tr>
               <th>Uid paziente</th>
-              <td>{{ radiographyInfo.userId }}</td>
+              <td>{{ radiographInfo.userId }}</td>
             </tr>
             <tr>
               <th>Nome</th>
-              <td>{{ radiographyInfo.name }}</td>
+              <td>{{ radiographInfo.name }}</td>
             </tr>
             <tr>
               <th>Cognome</th>
-              <td>{{ radiographyInfo.surname }}</td>
+              <td>{{ radiographInfo.surname }}</td>
             </tr>
             <tr>
               <th>Genere</th>
-              <td>{{ radiographyInfo.gender }}</td>
+              <td>{{ radiographInfo.gender }}</td>
             </tr>
             <tr>
               <th>Data di Nascita</th>
-              <td>{{ radiographyInfo.birthdate }}</td>
+              <td>{{ radiographInfo.birthdate }}</td>
             </tr>
             <tr>
               <th>Codice Fiscale</th>
-              <td>{{ radiographyInfo.tax_code }}</td>
+              <td>{{ radiographInfo.tax_code }}</td>
             </tr>
             <tr>
               <th>Indirizzo</th>
-              <td>{{ radiographyInfo.address }}</td>
+              <td>{{ radiographInfo.address }}</td>
             </tr>
             <tr>
               <th>CAP</th>
-              <td>{{ radiographyInfo.cap_code }}</td>
+              <td>{{ radiographInfo.cap_code }}</td>
             </tr>
           </tbody>
         </table>
@@ -76,10 +76,8 @@
         <div class="card prediction-card mb-3">
           <div class="card-body">
             <h5 class="card-title">
-              {{ radiographyInfo.prediction }} ({{
-                radiographyInfo.side
-                  ? "Ginocchio destro"
-                  : "Ginocchio sinistro"
+              {{ radiographInfo.prediction }} ({{
+                radiographInfo.side ? "Ginocchio destro" : "Ginocchio sinistro"
               }})
             </h5>
           </div>
@@ -90,15 +88,15 @@
             <tbody>
               <tr>
                 <th>Dottore</th>
-                <td>{{ radiographyInfo.doctorLoaded }}</td>
+                <td>{{ radiographInfo.doctorLoaded }}</td>
               </tr>
               <tr>
                 <th>Uid dottore</th>
-                <td>{{ radiographyInfo.doctorUid }}</td>
+                <td>{{ radiographInfo.doctorUid }}</td>
               </tr>
               <tr>
                 <th>ID dottore</th>
-                <td>{{ radiographyInfo.doctorID }}</td>
+                <td>{{ radiographInfo.doctorID }}</td>
               </tr>
             </tbody>
           </table>
@@ -109,7 +107,7 @@
 </template>
 
 <script>
-import { getRadiographyInformation } from "@/services/api-service";
+import { getRadiographInformation } from "@/services/api-service";
 
 export default {
   data() {
@@ -120,7 +118,7 @@ export default {
       original_image_url: "",
       gradcam_image_url: "",
       isLoading: true,
-      radiographyInfo: {
+      radiographInfo: {
         name: "",
         surname: "",
         birthdate: "",
@@ -129,7 +127,7 @@ export default {
         cap_code: "",
         gender: "",
         userId: "",
-        radiography_id: "",
+        radiograph_id: "",
         date: "",
         prediction: "",
         side: "",
@@ -144,11 +142,11 @@ export default {
     this.isLoading = true;
     this.patient_id = this.$route.query.patient_id;
     this.index = this.$route.query.index;
-    const radiographyInfoJson = await getRadiographyInformation(
+    const radiographInfoJson = await getRadiographInformation(
       this.patient_id,
       this.index
     );
-    this.radiographyInfo = radiographyInfoJson;
+    this.radiographInfo = radiographInfoJson;
     this.original_image_url = localStorage.getItem("selected_original_img");
     this.gradcam_image_url = localStorage.getItem("selected_gradcam_img");
     const userData = JSON.parse(localStorage.getItem("userData"));
@@ -157,17 +155,17 @@ export default {
   },
   methods: {
     goBack() {
-      localStorage.setItem("selectedPatientName", this.radiographyInfo.name);
+      localStorage.setItem("selectedPatientName", this.radiographInfo.name);
       localStorage.setItem(
         "selectedPatientSurname",
-        this.radiographyInfo.surname
+        this.radiographInfo.surname
       );
       localStorage.setItem("selected_original_img", "");
       localStorage.setItem("selected_gradcam_img", "");
       this.$router.push({
         name: "ViewRadiographs",
         query: {
-          patient_id: this.radiographyInfo.userId,
+          patient_id: this.radiographInfo.userId,
         },
       });
     },
