@@ -11,7 +11,6 @@ import PredictRadiograph from "./components/PredictRadiograph.vue";
 import RadiographDetail from "./components/RadiographDetail.vue";
 import ResetPassword from "./components/ResetPassword.vue";
 import ProfilePage from "./views/ProfilePage.vue";
-import SettingsPage from "./views/SettingsPage.vue";
 import ViewRadiographs from "./views/ViewRadiographs.vue";
 import ActivityCalendar from "@/components/ActivityCalendar.vue";
 import UserNotifications from "@/views/UserNotifications.vue";
@@ -56,12 +55,6 @@ const routes = [
     path: "/profile",
     name: "ProfilePage",
     component: ProfilePage,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/settings",
-    name: "SettingsPage",
-    component: SettingsPage,
     meta: { requiresAuth: true },
   },
   {
