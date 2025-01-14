@@ -114,12 +114,6 @@
                     @click="toggleDropdown"
                     >Profilo</router-link
                   >
-                  <router-link
-                    class="dropdown-item"
-                    to="/settings"
-                    @click="toggleDropdown"
-                    >Impostazioni</router-link
-                  >
                   <a class="dropdown-item" href="#" @click.prevent="logout"
                     >Logout</a
                   >
