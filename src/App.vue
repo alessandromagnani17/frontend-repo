@@ -137,7 +137,7 @@
 </template>
 
 <script>
-import EventBus from "./eventBus";
+import EventBus from "./utils/eventBus";
 
 export default {
   name: "App",
